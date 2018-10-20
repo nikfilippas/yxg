@@ -16,8 +16,9 @@ def Arnaud_ratio(x, M, z):
     return r
 
 
-x = np.logspace(-3, np.log10(2), 1000)  # R/R_Delta
+savedir = "images/"  # output directory
 
+x = np.logspace(-3, np.log10(2), 1000)  # R/R_Delta
 
 M_array = np.logspace(np.log10(6.0e13), np.log10(1.3e15), 8)
 M_dep = [Arnaud_ratio(x, M=M, z=0) for M in M_array]
@@ -38,5 +39,5 @@ for i, _ in enumerate(M_array):
 
 ax.margins(x=0)
 ax.legend(loc="lower right", ncol=2, fontsize=10)
-fig.savefig("arnaud_ratio.pdf", bbox_inches="tight")
+fig.savefig(savedir+"arnaud_ratio.pdf", bbox_inches="tight")
 plt.close()
