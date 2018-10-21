@@ -10,7 +10,9 @@ from profiles import Arnaud
 
 
 def Arnaud_ratio(x, M, z):
-    """
+    """Computes the ratio of two Arnaud profiles of a given mass and at a given
+    redshift. The profiles are identical, except one uses the full Arnaud profile
+    including a radial mass dependence.
     """
     r = Arnaud(x, M, z, aPP=False) / Arnaud(x, M, z, aPP=True)
     return r

@@ -1,5 +1,5 @@
 """
-This script contains definitions of 3-dimensional profiles
+This script contains definitions of 3-dimensional profiles.
 """
 
 from scipy import constants as const
@@ -10,7 +10,11 @@ from cosmotools import h, rho_cr_SI, R_Delta
 
 
 def Arnaud(x, M500=3e14, z=0, aPP=True):
-    """
+    """Returns the Arnaud pressure profile of a halo of a given mass,
+    ``M500``, and at a given redshift, ``z``. Units are ``keV/cm^3``.
+
+    - Note: User should input the ``M500`` mass in solar masses.
+    - Note: Units of x are ``R500``.
     """
     h70 = cosmo.H(0).value/0.7  # TODO: check if correct
 
@@ -21,12 +25,12 @@ def Arnaud(x, M500=3e14, z=0, aPP=True):
     P0 = 8.310*h70**(-3/2)  # reference pressure
 
     # Arnaud et al. best fit
-    C500 = 1.156
+    c500 = 1.156
     alpha = 1.0620
     beta = 5.4807
     gama = 0.3292
 
-    p = P0 / ((C500*x)*gama*(1+C500*x*alpha)**((beta-gama)/alpha))
+    p = P0 / ((c500*x)*gama*(1+c500*x*alpha)**((beta-gama)/alpha))
     P1 = 1.65e-3*h(z)**(8/3) * p*h70**2
     P2 = (M500/(3e14/h70))**(2/3+alpha_P+alpha_PP)
     P = P1*P2  # universal pressure profile  [keV/cm^3]
@@ -35,7 +39,11 @@ def Arnaud(x, M500=3e14, z=0, aPP=True):
 
 
 def Battaglia(x, M200=1e14, z=0):
-    """
+    """Returns the Battaglia pressure profile of a halo of a given mass,
+    ``M200``, and at a given redshift, ``z``. Units are ``keV/cm^3``.
+
+    - Note: User should input the ``M200`` mass in solar masses.
+    - Units of x are ``R200``.
     """
     # [J/m^3] >> [keV/cm^3]
     eV = const.value("electron volt")
@@ -44,7 +52,8 @@ def Battaglia(x, M200=1e14, z=0):
     power_law = lambda A0, am, az: A0 * (M200/1e14)**am * (1+z)**az  # power law
 
     def P_Delta(M200, z):
-        """
+        """Computes the self-similar amplitude for pressure.
+        (Kaiser 1986; Voit 2005)
         """
         M = M200*M_sun.value  # mass in SI
         rho_cr = rho_cr_SI(z)  # rho_crit at z

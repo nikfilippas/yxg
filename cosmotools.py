@@ -1,6 +1,6 @@
 """
 This script contains definitions of useful cosmological functions for quick
-retrival and data analysis.
+retrieval and data analysis.
 """
 
 import numpy as np
@@ -13,7 +13,9 @@ rho_cr_SI = lambda z: 1e3*cosmo.critical_density(z).value  # rho_cr at z (SI)
 
 
 def R_Delta(Delta, M, z):
-    """
+    """Computes the radius at which the enclosed halo mass equals ``Delta``
+    times the critical density of the Universe at a given redshift ``z``.
+    Mass should be given in ``SI`` units.
     """
     rho_cr = rho_cr_SI(z)  # rho_crit at z
 
