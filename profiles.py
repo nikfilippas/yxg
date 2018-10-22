@@ -22,18 +22,18 @@ def Arnaud(x, M500=3e14, z=0, aPP=True):
     alpha_P = 0.12  # P
     alpha_PP = 0.10 - (alpha_P+0.10) * (x/0.5)**3 / (1+x/0.5)**3  # P-primed
     if not aPP: alpha_PP = 0
-    P0 = 8.310*h70**(-3/2)  # reference pressure
+    P0 = 6.41  # reference pressure
 
     # Arnaud et al. best fit
-    c500 = 1.156
-    alpha = 1.0620
-    beta = 5.4807
-    gama = 0.3292
+    c500 = 1.81
+    alpha = 1.33
+    beta = 4.13
+    gama = 0.31
 
     p = P0 / ((c500*x)*gama*(1+c500*x*alpha)**((beta-gama)/alpha))
-    P1 = 1.65e-3*h(z)**(8/3) * p*h70**2
+    P1 = 1.65*h(z)**(8/3) * p*h70**2
     P2 = (M500/(3e14/h70))**(2/3+alpha_P+alpha_PP)
-    P = P1*P2  # universal pressure profile  [keV/cm^3]
+    P = P1*P2  # universal pressure profile  [eV/cm^3]
 
     return P
 
@@ -47,7 +47,7 @@ def Battaglia(x, M200=1e14, z=0):
     """
     # [J/m^3] >> [keV/cm^3]
     eV = const.value("electron volt")
-    u = (1/eV)/(1e2)**3 / 1e3
+    u = (1/eV)/(1e2)**3
 
     power_law = lambda A0, am, az: A0 * (M200/1e14)**am * (1+z)**az  # power law
 
@@ -72,6 +72,6 @@ def Battaglia(x, M200=1e14, z=0):
     beta = power_law(4.35, 0.0393, 0.415)
 
     P = P0 * (x/xc)**gama * (1+(x/xc)**alpha)**-beta  # P/P_Delta
-    P = P*P_Delta(M200, z)*u  # convert to [keV/cm^3]
+    P = P*P_Delta(M200, z)*u  # convert to [eV/cm^3]
 
     return P
