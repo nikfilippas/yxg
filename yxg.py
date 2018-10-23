@@ -26,7 +26,7 @@ class Profile(object):
         self.dict = {"arnaud": Arnaud(), "battaglia": Battaglia()}
 
         try:
-            self.profile = self.dict[profile.lower()]
+            self.profile = self.dict[profile.lower()]  # case-insensitive keys
         except KeyError:
             print("Profile does not exist or has not been implemented.")
 
