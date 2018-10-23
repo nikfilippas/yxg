@@ -16,7 +16,7 @@ def Arnaud(x, M500=3e14, z=0, aPP=True):
     - Note: User should input the ``M500`` mass in solar masses.
     - Note: Units of x are ``R500``.
     """
-    h70 = cosmo.H(0).value/0.7  # TODO: check if correct
+    h70 = cosmo.H(0).value/0.7
 
     # Parameters
     alpha_P = 0.12  # P
