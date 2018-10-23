@@ -1,12 +1,4 @@
 """
-#TODO: Replace function descriptions with ones from workstation..............OK
-#TODO: Check workstation imports.............................................OK
-
-#TODO: Write up Battaglia....................................................OK
-#TODO: Plot Arnaud(aP+aPP)/Arnaud(aPP) for different masses (loglog).........OK
-
-#TODO: Class with profiles and power spectra.................................OK
-#TODO: Separate variables in Arnaud..........................................OK
 #TODO: NFW profile
 """
 
@@ -31,10 +23,13 @@ class Profile(object):
     - Note: User should input the ``M500`` mass in solar masses.
     """
     def __init__(self, profile=None):
-        self.dict = {"Arnaud": Arnaud(), "Battaglia": Battaglia()}
-        self.profile = self.dict[profile]
+        self.dict = {"arnaud": Arnaud(), "battaglia": Battaglia()}
 
-        self.Delta = self.profile.Delta
+        try:
+            self.profile = self.dict[profile.lower()]
+        except KeyError:
+            print("Profile does not exist or has not been implemented.")
+
         self.fourier_interp = self.integ_interp()
 
 
@@ -46,7 +41,7 @@ class Profile(object):
             I = self.form_factor(x)*x**2*np.sinc(q*x)
             return I
 
-        q_array = np.logspace(-3, 3, 100)
+        q_array = np.logspace(-3, 3, 1000)
         f_array = [quad(integrand, 0, np.inf, args=q)[0] for q in q_array]
 
         F = interp1d(q_array, np.array(f_array), fill_value=0)
@@ -68,8 +63,8 @@ class Profile(object):
     def fourier_profile(self, k, M, z):
         """Computes the Fourier transform of the full profile.
         """
-        self.R = R_Delta(self.Delta, M, z)
-        F = self.norm(M, z) * self.fourier_interp(k*self.R) * self.R**3
+        R = R_Delta(self.profile.Delta, M, z)
+        F = self.norm(M, z) * self.fourier_interp(k*R) * self.R**3
         return F
 
 
