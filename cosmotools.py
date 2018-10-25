@@ -13,6 +13,7 @@ Msol = u.M_sun.to(u.kg)  # [Msol/kg] conversion
 Mpc = 1e6*u.parsec.to(u.m)  # [Mpc/m] conversion
 h = lambda z: cosmo.H(z).value/cosmo.H0.value  # reduced Hubble's constant
 rho_cr_SI = lambda z: 1e3*cosmo.critical_density(z).value  # rho_cr at z (SI)
+scale_factor = lambda z: 1/(1+z)  # scale factor
 
 
 def R_Delta(Delta, M, z):
