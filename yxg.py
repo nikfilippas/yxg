@@ -1,6 +1,6 @@
 """
-#TODO: NFW profile
 """
+
 
 import numpy as np
 from scipy.integrate import quad
@@ -41,10 +41,14 @@ class Profile(object):
             I = self.form_factor(x)*x**2*np.sinc(q*x)
             return I
 
-        q_array = np.logspace(-3, 3, 1000)
-        f_array = [quad(integrand, 0, np.inf, args=q)[0] for q in q_array]
+        # Integration Boundaries
+        qmin, qmax = -3, 3
+        npoints = 1e2
 
-        F = interp1d(q_array, np.array(f_array), fill_value=0)
+        q_arr = np.logspace(qmin, qmax, npoints)
+        f_arr = [quad(integrand, 0, np.inf, args=q, limit=100)[0] for q in q_arr]
+
+        F = interp1d(q_arr, np.array(f_arr), fill_value=0)
         return F
 
 
@@ -64,7 +68,7 @@ class Profile(object):
         """Computes the Fourier transform of the full profile.
         """
         R = R_Delta(self.profile.Delta, M, z)
-        F = self.norm(M, z) * self.fourier_interp(k*R) * self.R**3
+        F = self.norm(M, z) * self.fourier_interp(k*R) * R**3
         return F
 
 
