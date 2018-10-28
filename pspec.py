@@ -3,10 +3,10 @@
 
 
 import numpy as np
-from scipy.integrate import quad
+from scipy.integrate import quad, simps
 from scipy.interpolate import interp1d
-from astropy.cosmology import Planck15 as cosmo
-from cosmotools import h, R_Delta
+
+from cosmotools import h, R_Delta, scale_factor  # TODO: replace with CCL
 
 
 
@@ -22,14 +22,17 @@ class Profile(object):
 
     - Note: User should input the ``M500`` mass in solar masses.
     """
-    def __init__(self, profile=None):
-        self.dict = {"arnaud": Arnaud(), "battaglia": Battaglia()}
+    def __init__(self, cosmo, profile=None):
+        # Input handling
+        self.dic = {"arnaud": Arnaud(),
+                    "battaglia": Battaglia()}
 
         try:
-            self.profile = self.dict[profile.lower()]  # case-insensitive keys
+            self.profile = self.dic[profile.lower()]  # case-insensitive keys
         except KeyError:
             print("Profile does not exist or has not been implemented.")
 
+        self.cosmo = cosmo  # TODO: implement in subclass
         self.fourier_interp = self.integ_interp()
 
 
@@ -48,7 +51,7 @@ class Profile(object):
         q_arr = np.logspace(qmin, qmax, npoints)
         f_arr = [quad(integrand, 0, np.inf, args=q, limit=100)[0] for q in q_arr]
 
-        F = interp1d(q_arr, np.array(f_arr), fill_value=0)
+        F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)
         return F
 
 
@@ -83,11 +86,12 @@ class Arnaud(Profile):
         """Yields the normalisation factor of the Arnaud profile.
         """
         aP = 0.12  # Arnaud et al.
-        h70 = cosmo.H(0).value/0.7
+#        h70 = self.cosmo["h"].value/0.7
+        h70 = h(0)/0.7  # FIXME: replace with CCL (see above)
         P0 = 6.41 # reference pressure
 
-        K = 1.65*h70**2*P0 / (3e14/h70)**(2/3+aP)  # prefactor
-        Pz = h(z)**(8/3)  # redshift dependence
+        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
+        Pz = h(z)**(8/3)  # redshift dependence  # FIXME: replace with CCL
         PM = M**(2/3+aP)  # mass dependence
         P = K*Pz*PM
         return P
@@ -114,3 +118,31 @@ class Battaglia(Profile):
         self.Delta = 200  # reference overdensity (Battaglia et al.)
 
     #TODO: Separate variables and write-up sub-class.
+
+
+###############################################################################
+
+def power_spectrum(cosmo, k_arr, z, prof1=None, prof2=None):
+    """
+    """
+    # Set up Profile object
+    p1 = Profile(cosmo, prof1)
+    p2 = Profile(cosmo, prof2)
+
+    # Set up integration bounds
+    logMmin, logMmax = 10, 16  # log of min and max halo mass [Msol]
+    mpoints = 10  # number of integration points
+
+    M_arr = np.logspace(logMmin, logMmax, mpoints)
+    I = np.zeros((len(k_arr), len(M_arr)))  # initialize
+    for m, M in enumerate(M_arr):
+        U = p1.fourier_profile(k_arr, M, z)
+        V = p2.fourier_profile(k_arr, M, z)
+#        mfunc = ccl.massfunc(cosmo, M, scale_factor(z), p1.Delta)
+        mfunc = 1e-4  # FIXME: replace with CCL (see above)
+
+        I[:, m] = mfunc*U*V
+
+    f_arr = simps(I, x=M_arr)
+    return f_arr
+
