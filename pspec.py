@@ -45,10 +45,11 @@ class Profile(object):
             return I
 
         # Integration Boundaries
-        qmin, qmax = -3, 3
-        npoints = 1e2
+        rmin, rmax = 1e-4, 1e3  # physical distance [R_Delta]
+        qmin, qmax = 1/rmax, 1/rmin  # fourier space distance [1/R_Delta]
+        qpoints = 1e2
 
-        q_arr = np.logspace(qmin, qmax, npoints)
+        q_arr = np.logspace(np.log10(qmin), np.log10(qmax), qpoints)
         f_arr = [quad(integrand, 0, np.inf, args=q, limit=100)[0] for q in q_arr]
 
         F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)
@@ -120,10 +121,13 @@ class Battaglia(Profile):
     #TODO: Separate variables and write-up sub-class.
 
 
-###############################################################################
 
 def power_spectrum(cosmo, k_arr, z, prof1=None, prof2=None):
-    """
+    """Uses the halo model prescription for the 3D power spectrum to compute
+    the cross power spectrum of two profiles, ``prof1`` and ``prof2``.
+
+    - User has to input the names of the profiles as strings, and the algorithm
+    will take care of the rest.
     """
     # Set up Profile object
     p1 = Profile(cosmo, prof1)
@@ -145,4 +149,3 @@ def power_spectrum(cosmo, k_arr, z, prof1=None, prof2=None):
 
     f_arr = simps(I, x=M_arr)
     return f_arr
-
