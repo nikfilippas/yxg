@@ -52,7 +52,7 @@ class Profile(object):
         q_arr = np.logspace(np.log10(qmin), np.log10(qmax), qpoints)
         f_arr = [quad(integrand, 0, np.inf, args=q, limit=100)[0] for q in q_arr]
 
-        F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)
+        F = interp1d(np.log(q_arr), np.array(f_arr), kind="cubic", fill_value=0)
         return F
 
 
@@ -72,7 +72,7 @@ class Profile(object):
         """Computes the Fourier transform of the full profile.
         """
         R = R_Delta(self.profile.Delta, M, z)
-        F = self.norm(M, z) * self.fourier_interp(k*R) * R**3
+        F = self.norm(M, z) * self.fourier_interp(np.exp(k*R)) * R**3
         return F
 
 
