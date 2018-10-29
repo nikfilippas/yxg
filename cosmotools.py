@@ -3,28 +3,30 @@ This script contains definitions of useful cosmological functions for quick
 retrieval and data analysis.
 """
 
-import numpy as np
-from astropy import units as u
-from astropy.cosmology import Planck15 as cosmo
+from pyccl.massfunction import massfunc_m2r
 
 
 
-Msol = u.M_sun.to(u.kg)  # [Msol/kg] conversion
-Mpc = 1e6*u.parsec.to(u.m)  # [Mpc/m] conversion
-h = lambda z: cosmo.H(z).value/cosmo.H0.value  # reduced Hubble's constant
-rho_cr_SI = lambda z: 1e3*cosmo.critical_density(z).value  # rho_cr at z (SI)
-scale_factor = lambda z: 1/(1+z)  # scale factor
-
-
-def R_Delta(Delta, M, z):
-    """Computes the radius at which the enclosed halo mass equals ``Delta``
-    times the critical density of the Universe at a given redshift ``z``.
-    Mass should be given in solar masses.
-
-    - Output units in ``Mpc``.
+def R_Delta(cosmo, halo_mass, Delta=200):
     """
-    M *= Msol  # convert to solar masses
-    rho_cr = rho_cr_SI(z)  # rho_crit at z
+    Calculate the reference radius of a halo.
 
-    R = (3*M / (4*np.pi*Delta*rho_cr))**(1/3)
-    return R/Mpc
+    .. note:: this is R=(3M/(4*π*ρ_c))^(1/3), where ρ_c is the critical matter
+              density
+
+    Arguments
+    ---------
+    cosmo : ``pyccl.Cosmology`` object
+        Cosmological parameters.
+    halo_mass : float or array_like
+        Halo mass [Msun].
+    Delta : float
+        Overdensity parameter.
+
+    Returns
+    -------
+    float or array_like : The halo reference radius.
+    """
+    Rnorm = (cosmo["Omega_m"] / Delta)**(1/3)
+    R = Rnorm * massfunc_m2r(cosmo, halo_mass)
+    return R
