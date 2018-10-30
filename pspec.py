@@ -1,13 +1,13 @@
 """
+# TODO: unset env PYTHONPATH pointing to virtual and see if CCL import problem is fixed
+# TODO: clear PYTHONPATH and re-set it if that doesn't work either
 """
 
 
 import numpy as np
 from scipy.integrate import quad, simps
 from scipy.interpolate import interp1d
-from pyccl.massfunction import massfunc, massfunc_m2r, halo_bias
-from pyccl.power import linear_matter_power as P_lin
-from pyccl.background import h_over_h0 as h
+import pyccl as ccl
 
 from cosmotools import R_Delta
 
@@ -82,7 +82,7 @@ class Profile(object):
         q_arr = np.logspace(np.log10(qmin), np.log10(qmax), qpoints)
         f_arr = [quad(integrand, 0, np.inf, args=q, limit=100)[0] for q in q_arr]
 
-        F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)  # FIXME: log(q_arr) --> exp() afterwards
+        F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)  # TODO: log(q_arr) --> exp() afterwards
         return F
 
 
@@ -111,14 +111,18 @@ class Arnaud(Profile):
 
 
     def norm(self, cosmo, M, a):
-        """Computes the normalisation factor of the Arnaud profile. [eV/cm^2]"""
+        """Computes the normalisation factor of the Arnaud profile.
+
+        .. note:: Normalisation factor is given in units of ``eV/cm^2``. \
+        (Arnaud et al., 2009)
+        """
         aP = 0.12  # Arnaud et al.
         h70 = cosmo["h"]/0.7
         P0 = 6.41 # reference pressure
 
         K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
 
-        Pz = h(cosmo, a)**(8/3)  # scale factor (redshift) dependence
+        Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
         PM = M**(2/3+aP)  # mass dependence
         P = K*Pz*PM
         return P
@@ -150,10 +154,11 @@ class Battaglia(Profile):
 def power_spectrum(cosmo, k_arr, a, prof1=None, prof2=None):
     """Computes the cross power spectrum of two halo profiles.
 
-    Uses the halo model prescription fro the 3D power spectrum.
+    Uses the halo model prescription for the 3D power spectrum to compute
+    the cross power spectrum of two profiles.
 
     For example, for the 1-halo term contribution,
-    P1h = \int(dM*dn/dM*U(k|M)*V(k|M)),
+    P1h = int(dM*dn/dM*U(k|M)*V(k|M)),
     it creates a 3-dimensional space with vectors (M, k, integrand) and
     uses `scipy.integrate.simps` to quench over the M-axis.
 
@@ -194,15 +199,24 @@ def power_spectrum(cosmo, k_arr, a, prof1=None, prof2=None):
     # Set up integration bounds
     logMmin, logMmax = 10, 16  # log of min and max halo mass [Msol]
     mpoints = 1e2  # number of integration points
+    # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
+    M_arr = np.linspace(logMmin, logMmax, mpoints)  # log10(M)
+    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear power spectrum
 
-    M_arr = np.logspace(logMmin, logMmax, mpoints)
-    I = np.zeros((len(k_arr), len(M_arr)))  # initialize
+    # initialise integrands
+    I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
         U = p1.fourier_profile(k_arr, M, a)
         V = p2.fourier_profile(k_arr, M, a)
-        mfunc = massfunc(cosmo, M, a, p1.Delta)  # mass function
+        mfunc = ccl.massfunc(cosmo, M, a, p1.Delta)  # mass function
+        bh = ccl.halo_bias(cosmo, M, a, p1.Delta)  # halo bias
 
-        I[:, m] = mfunc*U*V
+        I1h[:, m] = mfunc*U*V
+        I2h_1[:, m] = bh*mfunc*U
+        I2h_2[:, m] = bh*mfunc*V
 
-    f_arr = simps(I, x=M_arr)
-    return f_arr
+
+    P1h = simps(I1h, x=M_arr)
+    P2h = Pl*(simps(I2h_1, x=M_arr)*simps(I2h_2, x=M_arr))
+    F = P1h + P2h
+    return F
