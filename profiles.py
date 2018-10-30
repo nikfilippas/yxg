@@ -2,10 +2,15 @@
 This script contains definitions of 3-dimensional profiles.
 """
 
+
 from scipy import constants as const
 from astropy.constants import M_sun, G
 from astropy.cosmology import Planck15 as cosmo
-from cosmotools import h, rho_cr_SI, R_Delta
+from pyccl.background import h_over_h0 as h
+
+from cosmotools import R_Delta
+
+from cosmotools import rho_cr_SI  # FIXME: replace with CCL
 
 
 
@@ -56,7 +61,7 @@ def Battaglia(x, M200=1e14, z=0):
         (Kaiser 1986; Voit 2005)
         """
         M = M200*M_sun.value  # mass in SI
-        rho_cr = rho_cr_SI(z)  # rho_crit at z
+        rho_cr = rho_cr_SI(z)  # rho_crit at z  # FIXME: replace with CCL
         fb = cosmo.Om(z) / cosmo.Om0  # baryon fraction
 
         P = G.value*M*rho_cr*fb / (2*R_Delta(200, M, z))  # P_200
