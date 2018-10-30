@@ -3,7 +3,8 @@ This script contains definitions of useful cosmological functions for quick
 retrieval and data analysis.
 """
 
-from pyccl.massfunction import massfunc_m2r
+
+import pyccl as ccl
 
 
 
@@ -28,5 +29,5 @@ def R_Delta(cosmo, halo_mass, Delta=200):
     float or array_like : The halo reference radius.
     """
     Rnorm = (cosmo["Omega_m"] / Delta)**(1/3)
-    R = Rnorm * massfunc_m2r(cosmo, halo_mass)
+    R = Rnorm * ccl.massfunc_m2r(cosmo, halo_mass)
     return R
