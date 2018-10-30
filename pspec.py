@@ -34,8 +34,8 @@ class Profile(object):
     --------
     >>> import numpy as np
     >>> import pyccl as ccl
-    >>> cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2.1e-9,
-                              n_s=0.96)
+    >>> cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045,
+                              h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> p1 = Profile(cosmo, profile="arnaud")
     >>> x = np.linspace(1e-3, 2, 100)  # R/R_Δ
     >>> # radial profile is the product of the normalisation and the form factor
@@ -54,11 +54,6 @@ class Profile(object):
 
         self.cosmo = cosmo
         self._fourier_interp = self._integ_interp()
-
-
-    def cosmo(self):  # FIXME: maybe delete this?
-        """Workaround to call the Cosmology object from subclasses."""
-        return self.cosmo
 
 
     def _integ_interp(self):
@@ -90,7 +85,7 @@ class Profile(object):
     def norm(self, M, a):
         """Computes the normalisation factor of the profile.
         """
-        return self.profile.P0(M, a)
+        return self.profile.norm(self.cosmo, M, a)
 
 
     def fourier_profile(self, k, M, a):
@@ -105,20 +100,19 @@ class Profile(object):
 class Arnaud(Profile):
 
     def __init__(self):
-#        super.cosmo  # FIXME: implement this
         self.Delta = 500  # reference overdensity (Arnaud et al.)
 
 
-    def P0(self, M, a):
+    def norm(self, cosmo, M, a):
         """Yields the normalisation factor of the Arnaud profile.
         """
         aP = 0.12  # Arnaud et al.
-        h70 = super.cosmo()["h"].value/0.7
+        h70 = cosmo["h"]/0.7
         P0 = 6.41 # reference pressure
 
         K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
 
-        Pz = h(self.cosmo, a)**(8/3)  # scale factor (redshift) dependence
+        Pz = h(cosmo, a)**(8/3)  # scale factor (redshift) dependence
         PM = M**(2/3+aP)  # mass dependence
         P = K*Pz*PM
         return P
