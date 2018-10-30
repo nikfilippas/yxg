@@ -6,7 +6,7 @@ Sections/Tests are separated by description in triple quotations.
 Uncomment trailing code to run test.
 """
 
-## ARNAUD RATIO ##
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cm import viridis as cmap
