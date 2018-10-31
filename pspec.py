@@ -1,6 +1,5 @@
 """
-# TODO: unset env PYTHONPATH pointing to virtual and see if CCL import problem is fixed
-# TODO: clear PYTHONPATH and re-set it if that doesn't work either
+# TODO: everything in logspace
 """
 
 
@@ -20,8 +19,6 @@ class Profile(object):
 
     Parameters
     ----------
-    cosmo : `pyccl.Cosmology` object
-        Cosmological parameters.
     profile : str
         Specifies the profile to use. Implemented profiles are 'arnaud',
         'battaglia'.
@@ -33,10 +30,10 @@ class Profile(object):
     >>> import pyccl as ccl
     >>> cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045,
                               h=0.67, A_s=2.1e-9, n_s=0.96)
-    >>> p1 = Profile(cosmo, profile="arnaud")
+    >>> p1 = Profile(profile="arnaud")
     >>> # radial profile is the product of the normalisation and the form factor
     >>> x = np.linspace(1e-3, 2, 100)  # R/R_Δ
-    >>> radial_profile = p1.norm(M=1e+14, a=0.7) * p1.form_factor(x)
+    >>> radial_profile = p1.norm(cosmo, M=1e+14, a=0.7) * p1.form_factor(x)
     >>> plt.loglog(x, radial_profile)  # plot profile as a function of radius
 
     >>> import numpy as np
@@ -44,13 +41,13 @@ class Profile(object):
     >>> import pyccl as ccl
     >>> cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045,
                               h=0.67, A_s=2.1e-9, n_s=0.96)
-    >>> p2 = Profile(cosmo, profile="arnaud")
+    >>> p2 = Profile(profile="arnaud")
     >>> # plot the profile in fourier space
     >>> k = np.logspace(-1, 1, 100)  # wavenumber
-    >>> U = p2.fourier_profile(k, M=1e+14, a=0.6)
+    >>> U = p2.fourier_profile(cosmo, k, M=1e+14, a=0.6)
     >>> plt.loglog(k, U)  # plot profile in fourier space
     """
-    def __init__(self, cosmo, profile=None):
+    def __init__(self, profile=None):
         # Input handling
         self.dic = {"arnaud": Arnaud(),
                     "battaglia": Battaglia()}
@@ -60,9 +57,7 @@ class Profile(object):
         except KeyError:
             print("Profile does not exist or has not been implemented.")
 
-        self.cosmo = cosmo  # Cosmology
         self.Delta = self.profile.Delta  # overdensity parameter
-
         self._fourier_interp = self._integ_interp()
 
 
@@ -75,12 +70,12 @@ class Profile(object):
             return I
 
         # Integration Boundaries
-        rmin, rmax = 1e-4, 1e3  # physical distance [R_Delta]
-        qmin, qmax = 1/rmax, 1/rmin  # fourier space distance [1/R_Delta]
-        qpoints = 1e2
+        rmin, rmax = 1e-4, 5  # physical distance [R_Delta]
+        qmin, qmax = 2*np.pi/np.array([rmax, rmin])  # fourier space parameter
+        qpoints = int(1e2)
 
         q_arr = np.logspace(np.log10(qmin), np.log10(qmax), qpoints)
-        f_arr = [quad(integrand, 0, np.inf, args=q, limit=100)[0] for q in q_arr]
+        f_arr = [quad(integrand, 0, np.inf, args=q)[0] for q in q_arr]
 
         F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)  # TODO: log(q_arr) --> exp() afterwards
         return F
@@ -91,15 +86,15 @@ class Profile(object):
         return self.profile.form_factor(x)
 
 
-    def norm(self, M, a):
+    def norm(self, cosmo, M, a):
         """Yields the normalisation factor of the profile."""
-        return self.profile.norm(self.cosmo, M, a)
+        return self.profile.norm(cosmo, M, a)
 
 
-    def fourier_profile(self, k, M, a):
+    def fourier_profile(self, cosmo, k, M, a):
         """Computes the Fourier transform of the full profile."""
-        R = R_Delta(self.cosmo, M, self.Delta)  # R_Δ [Mpc]
-        F = self.norm(M, a) * self._fourier_interp(np.exp(k*R)) * R**3
+        R = R_Delta(cosmo, M, self.Delta)  # R_Δ [Mpc]
+        F = self.norm(cosmo, M, a) * self._fourier_interp(k*R) * R**3
         return F
 
 
@@ -189,32 +184,35 @@ def power_spectrum(cosmo, k_arr, a, prof1=None, prof2=None):
                               h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> # plot wavenumber against Arnaud profile's autocorrelation
     >>> k_arr = np.logspace(-1, 1, 100)  # wavenumber
-    >>> P = power_spectrum(cosmo, k_arr, a=0.85, "arnaud", "arnaud")
+    >>> P = power_spectrum(cosmo, k_arr, a=0.85, prof1="arnaud", prof2="arnaud")
     >>> plt.loglog(k_arr, P)
     """
     # Set up Profile object
-    p1 = Profile(cosmo, prof1)
-    p2 = Profile(cosmo, prof2)
+    p1 = Profile(prof1)
+    p2 = Profile(prof2)
 
     # Set up integration bounds
-    logMmin, logMmax = 10, 16  # log of min and max halo mass [Msol]
-    mpoints = 1e2  # number of integration points
+    logMmin, logMmax = 10, 16  # log of min and max halo mass [Msun]
+    mpoints = int(1e2) # number of integration points
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
-    M_arr = np.linspace(logMmin, logMmax, mpoints)  # log10(M)
-    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear power spectrum
+    M_arr = np.logspace(logMmin, logMmax, mpoints)  # log10(M)
+    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        U = p1.fourier_profile(k_arr, M, a)
-        V = p2.fourier_profile(k_arr, M, a)
-        mfunc = ccl.massfunc(cosmo, M, a, p1.Delta)  # mass function
-        bh = ccl.halo_bias(cosmo, M, a, p1.Delta)  # halo bias
+        try:
+            U = p1.fourier_profile(cosmo, k_arr, M, a)
+            V = p2.fourier_profile(cosmo, k_arr, M, a)
+            mfunc = ccl.massfunc(cosmo, M, a, p1.Delta)  # mass function
+            bh = ccl.halo_bias(cosmo, M, a, p1.Delta)  # halo bias
 
-        I1h[:, m] = mfunc*U*V
-        I2h_1[:, m] = bh*mfunc*U
-        I2h_2[:, m] = bh*mfunc*V
-
+            I1h[:, m] = mfunc*U*V
+            I2h_1[:, m] = bh*mfunc*U
+            I2h_2[:, m] = bh*mfunc*V
+        except ValueError:
+            print(m, M)
+            break
 
     P1h = simps(I1h, x=M_arr)
     P2h = Pl*(simps(I2h_1, x=M_arr)*simps(I2h_2, x=M_arr))
