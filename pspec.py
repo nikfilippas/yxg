@@ -1,5 +1,6 @@
 """
-# TODO: everything in logspace
+#TODO: finish clyy
+#TODO: fix interpolation error
 """
 
 
@@ -67,19 +68,23 @@ class Profile(object):
         """Computes the integral of the power spectrum at different points and
         returns an interpolating function connecting these points.
         """
-        def integrand(x, q):
-            I = self.form_factor(x)*x**2*np.sinc(q*x)
+        def integrand(lgx):
+            I = self.form_factor(lgx)*lgx
             return I
 
-        # Integration Boundaries (work in log space)
+        # Integration Boundaries
         rmin, rmax = 1e-4, 5  # physical distance [R_Delta]
-        qmin, qmax = -np.log10(rmax), -np.log10(rmin)  # fourier space parameter
+        qmin, qmax = 1/rmax, 1/rmin  # fourier space parameter
         qpoints = int(1e2)
 
-        q_arr = np.linspace(qmin, qmax, qpoints)
-        f_arr = [quad(integrand, 0, np.inf, args=q)[0] for q in q_arr]
+        q_arr = np.logspace(np.log10(qmin), np.log10(qmax), qpoints)
+        f_arr = [quad(integrand,
+                      a=1e-4, b=np.inf,  # limits of integration
+                      weight="sin", wvar=q,  # fourier sinusoidal weight
+                      limit=200, limlst=100  # improve accuracy
+                      )[0] / q for q in q_arr]
 
-        F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)  # TODO: log(q_arr) --> exp() afterwards
+        F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)
         return F
 
 
@@ -193,13 +198,14 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
     mpoints = int(1e2) # number of integration points
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # log10(M)
-    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
+#    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
+    Pl = 1
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
         try:  # FIXME: fix this when done (crashes kernel if not properly input)
-            U = p1.fourier_profile(cosmo, k_arr, M, a)
+            U = p1.fourier_profile(cosmo, k_arr, M, a)  # FIXME: ValueError: A value in x_new is below the interpolation range.
             V = p2.fourier_profile(cosmo, k_arr, M, a)
             mfunc = ccl.massfunc(cosmo, M, a, p1.Delta)  # mass function
             bh = ccl.halo_bias(cosmo, M, a, p1.Delta)  # halo bias
@@ -238,39 +244,8 @@ def ang_power_spectrum(cosmo, l_arr, a, p1, p2):
         Puv = power_spectrum(cosmo, k_arr, a, p1, p2)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+"""
+### NOTES ###
+1e-4/Mpc < k < 10/Mpc
+z > 1e-3
+"""
