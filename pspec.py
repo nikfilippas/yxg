@@ -73,7 +73,7 @@ class Profile(object):
             return I
 
         # Integration Boundaries
-        rmin, rmax = 1e-4, 5  # physical distance [R_Delta]
+        rmin, rmax = 1e-4, 1e4  # physical distance [R_Delta]
         qmin, qmax = 1/rmax, 1/rmin  # fourier space parameter
         qpoints = int(1e2)
 
@@ -198,14 +198,13 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
     mpoints = int(1e2) # number of integration points
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # log10(M)
-#    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
-    Pl = 1
+    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
         try:  # FIXME: fix this when done (crashes kernel if not properly input)
-            U = p1.fourier_profile(cosmo, k_arr, M, a)  # FIXME: ValueError: A value in x_new is below the interpolation range.
+            U = p1.fourier_profile(cosmo, k_arr, M, a)
             V = p2.fourier_profile(cosmo, k_arr, M, a)
             mfunc = ccl.massfunc(cosmo, M, a, p1.Delta)  # mass function
             bh = ccl.halo_bias(cosmo, M, a, p1.Delta)  # halo bias
@@ -213,9 +212,9 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
             I1h[:, m] = mfunc*U*V
             I2h_1[:, m] = bh*mfunc*U
             I2h_2[:, m] = bh*mfunc*V
-        except ValueError:
-            print(m, M)
-            break
+        except ValueError as err:
+            print(str(err)+" Try to change the range of k_arr.")
+            continue
 
     P1h = simps(I1h, x=M_arr)
     P2h = Pl*(simps(I2h_1, x=M_arr)*simps(I2h_2, x=M_arr))
@@ -224,28 +223,36 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
 
 
 
-def ang_power_spectrum(cosmo, l_arr, a, p1, p2):
+def ang_power_spectrum(cosmo, l_arr, a, p1, p2, zmin=1e-3, zmax=2):
     """
     """
 
-    # yxy
+    # Thermal Sunyaev-Zel'dovich
     sigma = v("Thomson cross section")
     prefac = sigma/(u.m_e*u.c)
-
     Wy = lambda a: prefac*a  # tSZ window function
-    l2k = lambda l, chi: (l+1/2)/chi
 
-    zmax = 1.5
-    a_arr = np.linspace(1, 1/(1+zmax), 100)
+    # Integration boundaries
+    chimin = ccl.comoving_radial_distance(cosmo, 1/(1+zmin))
+    chimax = ccl.comoving_radial_distance(cosmo, 1/(1+zmax))
+    # Distance measures
+    chi_arr = np.linspace(chimin, chimax, 100)
+    a_arr = ccl.scale_factor_of_chi(cosmo, chi_arr)
 
-    chi
-    I = np.zeros((len( ), len( )))  # initialise integrand
-    for i, a in enumerate(a_arr):
-        Puv = power_spectrum(cosmo, k_arr, a, p1, p2)
+    I = np.zeros((len(chi_arr), len(l_arr)))  # initialise integrand
+    for j, chi in enumerate(chi_arr):
+        for i, l in enumerate(l_arr):
+            k = (l+1/2)/chi
+            Puv = power_spectrum(cosmo, k, a_arr[j], p1, p2)
+            W = Wy(a_arr[j])
+
+            I[j, i] = W**2/chi * Puv
+
+#    Cl = simps
+
 
 
 """
 ### NOTES ###
 1e-4/Mpc < k < 10/Mpc
-z > 1e-3
 """
