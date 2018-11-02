@@ -23,6 +23,12 @@ class Profile(object):
     profile : str
         Specifies the profile to use. Implemented profiles are 'arnaud',
         'battaglia'.
+    rrange : tuple
+        Deisred physical distance to probe (expressed in units of R_Δ).
+        Change only if necessary. For distances too much outside of the
+        default range the calculation might become unstable.
+    qpoints : int
+        Number of integration sampling points.
 
     Examples
     --------
@@ -48,7 +54,7 @@ class Profile(object):
     >>> U = p2.fourier_profile(cosmo, k, M=1e+14, a=0.6)
     >>> plt.loglog(k, U)  # plot profile in fourier space
     """
-    def __init__(self, profile=None):
+    def __init__(self, profile=None, rrange=(1e-4, 1e4), qpoints=1e2):
         # Input handling
         self.dic = {"arnaud": Arnaud(),
                     "battaglia": Battaglia()}
@@ -58,7 +64,10 @@ class Profile(object):
         except KeyError:
             print("Profile does not exist or has not been implemented.")
 
+        self.rrange = rrange  # range of probed distances [R_Δ]
+        self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = self.profile.Delta  # overdensity parameter
+
         self._fourier_interp = self._integ_interp()
 
 
@@ -66,23 +75,22 @@ class Profile(object):
         """Computes the integral of the power spectrum at different points and
         returns an interpolating function connecting these points.
         """
-        def integrand(lgx):
-            I = self.form_factor(lgx)*lgx
+        def integrand(x):
+            I = self.form_factor(x)*x
             return I
 
         # Integration Boundaries
-        rmin, rmax = 1e-4, 1e4  # physical distance [R_Delta]
+        rmin, rmax = self.rrange  # physical distance [R_Delta]
         qmin, qmax = 1/rmax, 1/rmin  # fourier space parameter
-        qpoints = int(1e2)
 
-        q_arr = np.logspace(np.log10(qmin), np.log10(qmax), qpoints)
+        q_arr = np.logspace(np.log10(qmin), np.log10(qmax), self.qpoints)
         f_arr = [quad(integrand,
                       a=1e-4, b=np.inf,  # limits of integration
                       weight="sin", wvar=q,  # fourier sinusoidal weight
                       limit=200, limlst=100  # improve accuracy
                       )[0] / q for q in q_arr]
 
-        F = interp1d(q_arr, np.array(f_arr), kind="cubic", fill_value=0)
+        F = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic", fill_value=0)
         return F
 
 
@@ -99,7 +107,7 @@ class Profile(object):
     def fourier_profile(self, cosmo, k, M, a):
         """Computes the Fourier transform of the full profile."""
         R = R_Delta(cosmo, M, self.Delta)  # R_Δ [Mpc]
-        F = self.norm(cosmo, M, a) * self._fourier_interp(k*R) * R**3
+        F = self.norm(cosmo, M, a) * self._fourier_interp(np.log10(k*R)) * R**3
         return F
 
 
@@ -151,13 +159,14 @@ class Battaglia(Profile):
 
 
 
-def power_spectrum(cosmo, k_arr, a, p1, p2):
-    """Computes the cross power spectrum of two halo profiles.
+def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=1e2):
+    """Computes the linear cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
-    the cross power spectrum of two profiles.
+    the linear cross power spectrum of two profiles.
 
-    For example, for the 1-halo term contribution,
+    For example, for the 1-halo term contribution, and for fourier space
+    profiles U(k) and V(k),
     P1h = int(dM*dn/dM*U(k|M)*V(k|M)),
     it creates a 3-dimensional space with vectors (M, k, integrand) and
     uses `scipy.integrate.simps` to quench over the M-axis.
@@ -171,8 +180,12 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
         The k-values of the cross power spectrum.
     a : float
         Scale factor.
-    prof1, prof2 : `pspec.Profile` objects
+    p1, p2 : `pspec.Profile` objects
         The profile isntances used in the computation.
+    logMrange : tuple
+        Logarithm (base-10) of the mass integration boundaries.
+    mpoints : int
+        Number or integration sampling points.
 
     Returns
     -------
@@ -191,7 +204,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
     >>> P = power_spectrum(cosmo, k_arr, a=0.85, p1, p2)
     >>> plt.loglog(k_arr, P)
     """
-    # Set up integration bounds
+    # Set up integration boundaries
     logMmin, logMmax = 10, 16  # log of min and max halo mass [Msun]
     mpoints = int(1e2) # number of integration points
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
@@ -201,7 +214,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        try:  # FIXME: fix this when done (crashes kernel if not properly input)
+        try:
             U = p1.fourier_profile(cosmo, k_arr, M, a)
             V = p2.fourier_profile(cosmo, k_arr, M, a)
             mfunc = ccl.massfunc(cosmo, M, a, p1.Delta)  # mass function
@@ -211,7 +224,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
             I2h_1[:, m] = bh*mfunc*U
             I2h_2[:, m] = bh*mfunc*V
         except ValueError as err:
-            print(str(err)+" Try changing the range of the input wavenumber.")
+            print(str(err)+"\nTry changing the range of the input wavenumber.")
             continue
 
     P1h = simps(I1h, x=M_arr)
@@ -221,20 +234,53 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
 
 
 
-def ang_power_spectrum(cosmo, l_arr, a, p1, p2, zmin=1e-3, zmax=2):
-    """
-    """
+def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,2), chipoints=5e2):
+    """Computes the angular cross power spectrum of two halo profiles.
 
+    Uses the halo model prescription for the 3D power spectrum to compute
+    the angular cross power spectrum of two profiles.
+
+    Parameters
+    ----------
+    cosmo : `pyccl.Cosmology` object
+        Cosmological parameters.
+    l_arr : float or array_like
+        The l-values (multiple number) of the cross power spectrum.
+    p1, p2 : `pspec.Profile` objects
+        The profile isntances used in the computation.
+    zrange : tuple
+        Minimum and maximum redshift probed.
+    chipoints : int
+        Number or integration sampling points.
+
+    Returns
+    -------
+    f_arr : float or array_like
+        Value of the cross power spectrum computed  at each element of ``k_arr``.
+
+    Example
+    -------
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> import pyccl as ccl
+    >>> cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045,
+                              h=0.67, A_s=2.1e-9, n_s=0.96)
+    >>> # plot multiple moment against Arnaud profile's autocorrelation
+    >>> l_arr = np.logspace(1, 4, 100)  # multipole moment
+    >>> Cl = ang_power_spectrum(cosmo, l_arr, p1, p2)
+    >>> plt.loglog(l_arr, Cl)
+    """
     # Thermal Sunyaev-Zel'dovich
     sigma = v("Thomson cross section")
     prefac = sigma/(u.m_e*u.c)
     Wy = lambda a: prefac*a  # tSZ window function
 
     # Integration boundaries
+    zmin, zmax = zrange
     chimin = ccl.comoving_radial_distance(cosmo, 1/(1+zmin))
     chimax = ccl.comoving_radial_distance(cosmo, 1/(1+zmax))
     # Distance measures
-    chi_arr = np.linspace(chimin, chimax, 100)
+    chi_arr = np.linspace(chimin, chimax, int(chipoints))
     a_arr = ccl.scale_factor_of_chi(cosmo, chi_arr)
 
     I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
@@ -243,13 +289,7 @@ def ang_power_spectrum(cosmo, l_arr, a, p1, p2, zmin=1e-3, zmax=2):
         Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
         W = Wy(a_arr[x])
 
-        I[:, x] = W**2/chi * Puv
+        I[:, x] = W*W/chi**2 * Puv
 
     Cl = simps(I, x=chi_arr)
     return Cl
-
-
-"""
-### NOTES ###
-1e-4/Mpc < k < 10/Mpc
-"""
