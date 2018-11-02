@@ -1,6 +1,4 @@
 """
-#TODO: finish clyy
-#TODO: fix interpolation error
 """
 
 
@@ -213,7 +211,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2):
             I2h_1[:, m] = bh*mfunc*U
             I2h_2[:, m] = bh*mfunc*V
         except ValueError as err:
-            print(str(err)+" Try to change the range of k_arr.")
+            print(str(err)+" Try changing the range of the input wavenumber.")
             continue
 
     P1h = simps(I1h, x=M_arr)
@@ -239,17 +237,16 @@ def ang_power_spectrum(cosmo, l_arr, a, p1, p2, zmin=1e-3, zmax=2):
     chi_arr = np.linspace(chimin, chimax, 100)
     a_arr = ccl.scale_factor_of_chi(cosmo, chi_arr)
 
-    I = np.zeros((len(chi_arr), len(l_arr)))  # initialise integrand
-    for j, chi in enumerate(chi_arr):
-        for i, l in enumerate(l_arr):
-            k = (l+1/2)/chi
-            Puv = power_spectrum(cosmo, k, a_arr[j], p1, p2)
-            W = Wy(a_arr[j])
+    I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
+    for x, chi in enumerate(chi_arr):
+        k_arr = (l_arr+1/2)/chi
+        Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
+        W = Wy(a_arr[x])
 
-            I[j, i] = W**2/chi * Puv
+        I[:, x] = W**2/chi * Puv
 
-#    Cl = simps
-
+    Cl = simps(I, x=chi_arr)
+    return Cl
 
 
 """
