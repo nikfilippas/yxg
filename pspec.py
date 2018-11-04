@@ -24,7 +24,7 @@ class Profile(object):
         Specifies the profile to use. Implemented profiles are 'arnaud',
         'battaglia'.
     rrange : tuple
-        Deisred physical distance to probe (expressed in units of R_Δ).
+        Desired physical distance to probe (expressed in units of R_Δ).
         Change only if necessary. For distances too much outside of the
         default range the calculation might become unstable.
     qpoints : int
@@ -105,7 +105,10 @@ class Profile(object):
 
 
     def fourier_profile(self, cosmo, k, M, a):
-        """Computes the Fourier transform of the full profile."""
+        """Computes the Fourier transform of the full profile.
+
+        .. note:: Output units are ``[norm]*Mpc^3``
+        """
         R = R_Delta(cosmo, M, self.Delta)  # R_Δ [Mpc]
         F = self.norm(cosmo, M, a) * self._fourier_interp(np.log10(k*R)) * R**3
         return F
@@ -121,7 +124,7 @@ class Arnaud(Profile):
     def norm(self, cosmo, M, a):
         """Computes the normalisation factor of the Arnaud profile.
 
-        .. note:: Normalisation factor is given in units of ``eV/cm^2``. \
+        .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
         (Arnaud et al., 2009)
         """
         aP = 0.12  # Arnaud et al.
@@ -159,7 +162,7 @@ class Battaglia(Profile):
 
 
 
-def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=1e2):
+def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=100):
     """Computes the linear cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -192,6 +195,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=1e2):
     f_arr : float or array_like
         Value of the cross power spectrum computed  at each element of ``k_arr``.
 
+    .. note:: Output units are ``([norm]^2 Mpc^3)``.
+
     Example
     -------
     >>> import numpy as np
@@ -205,8 +210,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=1e2):
     >>> plt.loglog(k_arr, P)
     """
     # Set up integration boundaries
-    logMmin, logMmax = 10, 16  # log of min and max halo mass [Msun]
-    mpoints = int(1e2) # number of integration points
+    logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
+    mpoints = int(mpoints) # number of integration points
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # log10(M)
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
@@ -234,7 +239,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=1e2):
 
 
 
-def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,2), chipoints=5e2):
+def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
+                       zrange=(1e-3,2), chipoints=500):
     """Computes the angular cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -248,6 +254,8 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,2), chipoints=5e2):
         The l-values (multiple number) of the cross power spectrum.
     p1, p2 : `pspec.Profile` objects
         The profile isntances used in the computation.
+    W1, W2 : `psepc.kernel.window_function` method
+        The correspoding window function kernels for the profiles.
     zrange : tuple
         Minimum and maximum redshift probed.
     chipoints : int
@@ -255,8 +263,8 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,2), chipoints=5e2):
 
     Returns
     -------
-    f_arr : float or array_like
-        Value of the cross power spectrum computed  at each element of ``k_arr``.
+    Cl : float or array_like
+        Value of the angular power spectrum computed at each element of ``l_arr``.
 
     Example
     -------
@@ -270,11 +278,6 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,2), chipoints=5e2):
     >>> Cl = ang_power_spectrum(cosmo, l_arr, p1, p2)
     >>> plt.loglog(l_arr, Cl)
     """
-    # Thermal Sunyaev-Zel'dovich
-    sigma = v("Thomson cross section")
-    prefac = sigma/(u.m_e*u.c)
-    Wy = lambda a: prefac*a  # tSZ window function
-
     # Integration boundaries
     zmin, zmax = zrange
     chimin = ccl.comoving_radial_distance(cosmo, 1/(1+zmin))
@@ -287,9 +290,23 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,2), chipoints=5e2):
     for x, chi in enumerate(chi_arr):
         k_arr = (l_arr+1/2)/chi
         Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
-        W = Wy(a_arr[x])
+        Wu = W1(a_arr[x])
+        Wv = W2(a_arr[x])
 
-        I[:, x] = W*W/chi**2 * Puv
+        I[:, x] = Wu*Wv/chi**2 * Puv
 
     Cl = simps(I, x=chi_arr)
     return Cl
+
+
+
+class kernel(object):
+
+    def tSZ(a):
+        sigma = v("Thomson cross section")
+        prefac = sigma/(u.m_e*u.c)
+        # normalisation
+        eV = v("electron volt")
+        Mpc = u.mega*u.parsec
+        unit_norm = 1e6*eV*Mpc
+        return prefac*a/unit_norm
