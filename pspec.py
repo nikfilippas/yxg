@@ -162,7 +162,8 @@ class Battaglia(Profile):
 
 
 
-def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=100):
+def power_spectrum(cosmo, k_arr, a, p1, p2,
+                   logMrange=(10, 16), mpoints=100, full_output=True):
     """Computes the linear cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -229,7 +230,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2, logMrange=(10, 16), mpoints=100):
             I2h_1[:, m] = bh*mfunc*U
             I2h_2[:, m] = bh*mfunc*V
         except ValueError as err:
-            print(str(err)+"\nTry changing the range of the input wavenumber.")
+            msg = str(err)+"\nTry changing the range of the input wavenumber."
+            if full_output: print(msg)
             continue
 
     P1h = simps(I1h, x=M_arr)
@@ -275,8 +277,10 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
                               h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> # plot multiple moment against Arnaud profile's autocorrelation
     >>> l_arr = np.logspace(1, 4, 100)  # multipole moment
-    >>> Cl = ang_power_spectrum(cosmo, l_arr, p1, p2)
+    >>> Cl = ang_power_spectrum(cosmo, l_arr, p1, p2, kernel.tSZ, kernel.tSZ)
     >>> plt.loglog(l_arr, Cl)
+    >>> Cl_scaled = 1e12*l_arr*(l_arr+1)*Cl/(2*np.pi)
+    >>> plt.loglog(l_arr, Cl_scaled)
     """
     # Integration boundaries
     zmin, zmax = zrange
@@ -306,7 +310,8 @@ class kernel(object):
         sigma = v("Thomson cross section")
         prefac = sigma/(u.m_e*u.c)
         # normalisation
-        eV = v("electron volt")
-        Mpc = u.mega*u.parsec
-        unit_norm = 1e6*eV*Mpc
-        return prefac*a/unit_norm
+        J_to_eV = 1/v("electron volt")
+        cm3_to_m3 = (u.centi)**3
+        m_to_Mpc = 1/(u.mega*u.parsec)
+        unit_norm = J_to_eV * cm3_to_m3 * m_to_Mpc
+        return prefac*a*unit_norm
