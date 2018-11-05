@@ -1,4 +1,5 @@
 """
+# FIXME: form factor right, now many orders of magnitude off
 """
 
 
@@ -54,10 +55,9 @@ class Profile(object):
     >>> U = p2.fourier_profile(cosmo, k, M=1e+14, a=0.6)
     >>> plt.loglog(k, U)  # plot profile in fourier space
     """
-    def __init__(self, profile=None, rrange=(1e-4, 1e5), qpoints=1e2):
+    def __init__(self, profile=None, rrange=(1e-4, 1e5), qpoints=1e3):
         # Input handling
-        self.dic = {"arnaud": Arnaud(),
-                    "battaglia": Battaglia()}
+        self.dic = {"arnaud": Arnaud()}
 
         try:
             self.profile = self.dic[profile.lower()]  # case-insensitive keys
@@ -153,17 +153,8 @@ class Arnaud(Profile):
 
 
 
-class Battaglia(Profile):
-
-    def __init__(self):
-        self.Delta = 200  # reference overdensity (Battaglia et al.)
-
-    #TODO: Separate variables and write-up sub-class.
-
-
-
 def power_spectrum(cosmo, k_arr, a, p1, p2,
-                   logMrange=(10, 16), mpoints=100, full_output=True):
+                   logMrange=(10, 17), mpoints=100, full_output=True):
     """Computes the linear cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -214,7 +205,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
     mpoints = int(mpoints) # number of integration points
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
-    M_arr = np.logspace(logMmin, logMmax, mpoints)  # log10(M)
+    M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses probed
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
     # Out-of-loop optimisations
     mfunc = ccl.massfunc(cosmo, M_arr, a, p1.Delta)  # mass function
@@ -236,8 +227,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
             if full_output: print(msg)
             continue
 
-    P1h = simps(I1h, x=M_arr)
-    P2h = Pl*(simps(I2h_1, x=M_arr)*simps(I2h_2, x=M_arr))
+    P1h = simps(I1h, x=np.log10(M_arr))
+    P2h = Pl*(simps(I2h_1, x=np.log10(M_arr))*simps(I2h_2, x=np.log10(M_arr)))
     F = P1h + P2h
     return F
 
@@ -308,10 +299,17 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
 
 
 class kernel(object):
+    """Window function definitions.
+
+    This class contains definitions for all used window functions (kernels)
+    for computation of the angular power spectrum. Multiplying the window
+    function with its corresponding profile normalisation factor yields units
+    of ``1/L``.
+    """
 
     def tSZ(a):
         sigma = v("Thomson cross section")
-        prefac = sigma/(u.m_e*u.c)
+        prefac = sigma/(u.m_e*u.c**2)
         # normalisation
         J2eV = 1/v("electron volt")
         cm2m = u.centi
