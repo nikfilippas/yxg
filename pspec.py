@@ -24,7 +24,7 @@ class Profile(object):
         Specifies the profile to use. Implemented profiles are 'arnaud',
         'battaglia'.
     rrange : tuple
-        Desired physical distance to probe (expressed in units of R_Δ).
+        Desired physical distance to probe (expressed in units of R_Delta).
         Change only if necessary. For distances too much outside of the
         default range the calculation might become unstable.
     qpoints : int
@@ -39,7 +39,7 @@ class Profile(object):
                               h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> p1 = Profile(profile="arnaud")
     >>> # radial profile is the product of the normalisation and the form factor
-    >>> x = np.linspace(1e-3, 2, 100)  # R/R_Δ
+    >>> x = np.linspace(1e-3, 2, 100)  # R/R_Delta
     >>> radial_profile = p1.norm(cosmo, M=1e+14, a=0.7) * p1.form_factor(x)
     >>> plt.loglog(x, radial_profile)  # plot profile as a function of radius
 
@@ -54,7 +54,7 @@ class Profile(object):
     >>> U = p2.fourier_profile(cosmo, k, M=1e+14, a=0.6)
     >>> plt.loglog(k, U)  # plot profile in fourier space
     """
-    def __init__(self, profile=None, rrange=(1e-4, 1e4), qpoints=1e2):
+    def __init__(self, profile=None, rrange=(1e-4, 1e5), qpoints=1e2):
         # Input handling
         self.dic = {"arnaud": Arnaud(),
                     "battaglia": Battaglia()}
@@ -64,7 +64,7 @@ class Profile(object):
         except KeyError:
             print("Profile does not exist or has not been implemented.")
 
-        self.rrange = rrange  # range of probed distances [R_Δ]
+        self.rrange = rrange  # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = self.profile.Delta  # overdensity parameter
 
@@ -107,9 +107,9 @@ class Profile(object):
     def fourier_profile(self, cosmo, k, M, a):
         """Computes the Fourier transform of the full profile.
 
-        .. note:: Output units are ``[norm]*Mpc^3``
+        .. note:: Output units are ``[norm] Mpc^3``
         """
-        R = R_Delta(cosmo, M, self.Delta)  # R_Δ [Mpc]
+        R = R_Delta(cosmo, M, self.Delta)  # R_Delta [Mpc]
         F = self.norm(cosmo, M, a) * self._fourier_interp(np.log10(k*R)) * R**3
         return F
 
@@ -180,7 +180,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     ----------
     cosmo : `pyccl.Cosmology` object
         Cosmological parameters.
-    k_arr : float or array_like
+    k_arr : array_like
         The k-values of the cross power spectrum.
     a : float
         Scale factor.
@@ -193,10 +193,10 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
 
     Returns
     -------
-    f_arr : float or array_like
+    f_arr : array_like
         Value of the cross power spectrum computed  at each element of ``k_arr``.
 
-    .. note:: Output units are ``([norm]^2 Mpc^3)``.
+    .. note:: Output units are ``([p1.norm]*[p2.norm] Mpc^3)``.
 
     Example
     -------
@@ -216,6 +216,9 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # log10(M)
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
+    # Out-of-loop optimisations
+    mfunc = ccl.massfunc(cosmo, M_arr, a, p1.Delta)  # mass function
+    bh = ccl.halo_bias(cosmo, M_arr, a, p1.Delta)  # halo bias
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
@@ -223,12 +226,11 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
         try:
             U = p1.fourier_profile(cosmo, k_arr, M, a)
             V = p2.fourier_profile(cosmo, k_arr, M, a)
-            mfunc = ccl.massfunc(cosmo, M, a, p1.Delta)  # mass function
-            bh = ccl.halo_bias(cosmo, M, a, p1.Delta)  # halo bias
 
-            I1h[:, m] = mfunc*U*V
-            I2h_1[:, m] = bh*mfunc*U
-            I2h_2[:, m] = bh*mfunc*V
+
+            I1h[:, m] = mfunc[m]*U*V
+            I2h_1[:, m] = bh[m]*mfunc[m]*U
+            I2h_2[:, m] = bh[m]*mfunc[m]*V
         except ValueError as err:
             msg = str(err)+"\nTry changing the range of the input wavenumber."
             if full_output: print(msg)
@@ -242,7 +244,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
 
 
 def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
-                       zrange=(1e-3,2), chipoints=500):
+                       zrange=(1e-3,6), chipoints=500):
     """Computes the angular cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -252,7 +254,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
     ----------
     cosmo : `pyccl.Cosmology` object
         Cosmological parameters.
-    l_arr : float or array_like
+    l_arr : array_like
         The l-values (multiple number) of the cross power spectrum.
     p1, p2 : `pspec.Profile` objects
         The profile isntances used in the computation.
@@ -265,7 +267,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
 
     Returns
     -------
-    Cl : float or array_like
+    Cl : array_like
         Value of the angular power spectrum computed at each element of ``l_arr``.
 
     Example
@@ -276,9 +278,8 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
     >>> cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045,
                               h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> # plot multiple moment against Arnaud profile's autocorrelation
-    >>> l_arr = np.logspace(1, 4, 100)  # multipole moment
+    >>> l_arr = np.logspace(1.2, 4, 100)  # multipole moment
     >>> Cl = ang_power_spectrum(cosmo, l_arr, p1, p2, kernel.tSZ, kernel.tSZ)
-    >>> plt.loglog(l_arr, Cl)
     >>> Cl_scaled = 1e12*l_arr*(l_arr+1)*Cl/(2*np.pi)
     >>> plt.loglog(l_arr, Cl_scaled)
     """
@@ -286,18 +287,20 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
     zmin, zmax = zrange
     chimin = ccl.comoving_radial_distance(cosmo, 1/(1+zmin))
     chimax = ccl.comoving_radial_distance(cosmo, 1/(1+zmax))
-    # Distance measures
+    # Distance measures & out-of-loop optimisations
     chi_arr = np.linspace(chimin, chimax, int(chipoints))
     a_arr = ccl.scale_factor_of_chi(cosmo, chi_arr)
+    # Window functions
+    Wu = W1(a_arr)
+    Wv = W2(a_arr)
+    N = Wu*Wv/chi_arr**2  # overall normalisation factor
 
     I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
     for x, chi in enumerate(chi_arr):
         k_arr = (l_arr+1/2)/chi
         Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
-        Wu = W1(a_arr[x])
-        Wv = W2(a_arr[x])
 
-        I[:, x] = Wu*Wv/chi**2 * Puv
+        I[:, x] = N[x] * Puv
 
     Cl = simps(I, x=chi_arr)
     return Cl
@@ -310,8 +313,8 @@ class kernel(object):
         sigma = v("Thomson cross section")
         prefac = sigma/(u.m_e*u.c)
         # normalisation
-        J_to_eV = 1/v("electron volt")
-        cm3_to_m3 = (u.centi)**3
-        m_to_Mpc = 1/(u.mega*u.parsec)
-        unit_norm = J_to_eV * cm3_to_m3 * m_to_Mpc
+        J2eV = 1/v("electron volt")
+        cm2m = u.centi
+        m2Mpc = 1/(u.mega*u.parsec)
+        unit_norm = J2eV * cm2m**3 * m2Mpc
         return prefac*a*unit_norm
