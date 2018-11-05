@@ -12,8 +12,8 @@ def R_Delta(cosmo, halo_mass, Delta=200):
     """
     Calculate the reference radius of a halo.
 
-    .. note:: this is R=(3M/(4*π*ρ_c))^(1/3), where ρ_c is the critical matter
-              density
+    .. note:: this is R=(3M/(4*pi*rho_c))^(1/3), where rho_c is the critical
+              matter density
 
     Arguments
     ---------
