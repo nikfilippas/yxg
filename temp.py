@@ -36,5 +36,5 @@ kmin, kmax = 2*np.pi/rmax, 2*np.pi/rmin
 # so, values of k probed, logarithmically span [kmin, kmax]
 k_arr = np.logspace(np.log10(kmin), np.log10(kmax), 100)
 
-p1 = pspec.Profile("arnaud")
-p2 = pspec.Profile("arnaud")
+p1 = pspec.pressure("arnaud")
+p2 = pspec.pressure("arnaud")
