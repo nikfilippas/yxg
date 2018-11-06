@@ -7,14 +7,13 @@ import numpy as np
 import pyccl as ccl
 
 from cosmotools import R_Delta
-import pspec
+import profile
 
 
 # Cosmology Definition
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2.1e-9, n_s=0.96)
 
 a = 1
-prof1 = prof2 = "arnaud"
 Delta = 500
 
 
@@ -36,5 +35,5 @@ kmin, kmax = 2*np.pi/rmax, 2*np.pi/rmin
 # so, values of k probed, logarithmically span [kmin, kmax]
 k_arr = np.logspace(np.log10(kmin), np.log10(kmax), 100)
 
-p1 = pspec.pressure("arnaud")
-p2 = pspec.pressure("arnaud")
+p1 = profile.Arnaud()
+p2 = profile.Arnaud()
