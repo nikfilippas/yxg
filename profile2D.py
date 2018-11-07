@@ -1,7 +1,7 @@
 """
 # FIXME: NFW kernel call does not work
 """
-
+import antigravity
 import numpy as np
 from scipy.special import sici
 from scipy.integrate import quad
