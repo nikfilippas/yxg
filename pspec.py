@@ -31,7 +31,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
         The k-values of the cross power spectrum.
     a : float
         Scale factor.
-    p1, p2 : `profile._profile_` objects
+    p1, p2 : `profile2D._profile_` objects
         The profile isntances used in the computation.
     logMrange : tuple
         Logarithm (base-10) of the mass integration boundaries.
@@ -89,8 +89,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
 
 
 
-def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
-                       zrange=(1e-3,6), chipoints=500):
+def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,6), chipoints=500):
     """Computes the angular cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -102,10 +101,8 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
         Cosmological parameters.
     l_arr : array_like
         The l-values (multiple number) of the cross power spectrum.
-    p1, p2 : `pspec.pressure` objects
+    p1, p2 : `profile2D._profile_` objects
         The profile isntances used in the computation.
-    W1, W2 : `psepc.kernel.window_function` method
-        The correspoding window function kernels for the profiles.
     zrange : tuple
         Minimum and maximum redshift probed.
     chipoints : int
@@ -121,11 +118,14 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import pyccl as ccl
+    >>> import profile2D
     >>> cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045,
                               h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> # plot multiple moment against Arnaud profile's autocorrelation
     >>> l_arr = np.logspace(1.2, 4, 100)  # multipole moment
-    >>> Cl = ang_power_spectrum(cosmo, l_arr, p1, p2, kernel.y, kernel.y)
+    >>> p1 = profile2D.Arnaud()
+    >>> p2 = profile2D.NFW()
+    >>> Cl = ang_power_spectrum(cosmo, l_arr, p1, p2)
     >>> Cl_scaled = 1e12*l_arr*(l_arr+1)*Cl/(2*np.pi)
     >>> plt.loglog(l_arr, Cl_scaled)
     """
@@ -137,8 +137,8 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, W1, W2,
     chi_arr = np.linspace(chimin, chimax, int(chipoints))
     a_arr = ccl.scale_factor_of_chi(cosmo, chi_arr)
     # Window functions
-    Wu = W1(cosmo, a_arr)
-    Wv = W2(cosmo, a_arr)
+    Wu = p1.kernel(cosmo, a_arr)
+    Wv = p2.kernel(cosmo, a_arr)
     N = Wu*Wv/chi_arr**2  # overall normalisation factor
 
     I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
