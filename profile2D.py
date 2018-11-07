@@ -1,7 +1,9 @@
 """
+# FIXME: NFW kernel call does not work
 """
 
 import numpy as np
+from scipy.special import sici
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
 import scipy.constants as u
@@ -14,7 +16,7 @@ from cosmotools import R_Delta
 
 class Arnaud(object):
     """
-    Calculate a profile quantity of a halo and its fourier transform.
+    Calculate an Arnaud profile quantity of a halo and its Fourier transform.
 
 
     Parameters
@@ -55,11 +57,12 @@ class Arnaud(object):
         self.rrange = rrange  # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = 500  # reference overdensity (Arnaud et al.)
+        self.kernel = kernel.y  # associated window function
 
         self._fourier_interp = self._integ_interp()
 
 
-    def norm(self, cosmo, M, a):
+    def norm(self, cosmo, M, a, b=0.7):
         """Computes the normalisation factor of the Arnaud profile.
 
         .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
@@ -72,7 +75,7 @@ class Arnaud(object):
         K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
 
         Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
-        PM = M**(2/3+aP)  # mass dependence
+        PM = (M*(1-b))**(2/3+aP)  # mass dependence
         P = K*Pz*PM
         return P
 
@@ -113,29 +116,53 @@ class Arnaud(object):
         return F
 
 
-    def fourier_profile(self, cosmo, k, M, a):
-        """Computes the Fourier transform of the full profile.
+    def fourier_profile(self, cosmo, k, M, a, b=0.7):
+        """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
         """
+        M *= (1-b)  # weight by observational bias
         R = R_Delta(cosmo, M, self.Delta)  # R_Delta [Mpc]
         F = self.norm(cosmo, M, a) * self._fourier_interp(np.log10(k*R)) * R**3
         return F
 
 
 
-#class NFW():
-#
-#    def norm():
-#        return 1
-#
-#
-#    def form_factor():
+class NFW(object):
+    """Calculate a Navarro-Frenk-White profile quantity of a halo and its
+    Fourier transform.
+    """
+    def __init__(self):
+        self.kernel = kernel.g  # associated window function
 
 
+    def norm(self, cosmo, M, a, b=0.7):
+        """Computes the normalisation factor of the Navarro-Frenk-White profile.
+        """
+        N = 1
+        return N
 
 
+    def form_factor(self):
+        """Computes the form factor of the Navarro-Frenk-White profile."""
+        pass
 
+
+    def fourier_profile(self, cosmo, k, M, a, b=0.7, Delta=500):
+        """Computes the Fourier transform of the Navarro-Frenk-White profile."""
+        M *= (1-b)
+        c = ccl.halo_concentration(cosmo, M, a, Delta)
+        x = k*R_Delta(cosmo, M, Delta)/c
+
+        Si1, Ci1 = sici((1+c)*x)
+        Si2, Ci2 = sici(x)
+
+        P1 = (np.log(1+c) - c/(1+c))**-1
+        P2 = np.sin(x)*(Si1-Si2) + np.cos(x)*(Ci1-Ci2)
+        P3 = np.sin(c*x)/((1+c)*x)
+
+        F = P1*(P2-P3)
+        return F
 
 
 
@@ -147,8 +174,11 @@ class kernel(object):
     function with its corresponding profile normalisation factor yields units
     of ``1/L``.
     """
+    def __init__(self):
+        pass
 
-    def y(cosmo, a):
+
+    def y(self, cosmo, a):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
         sigma = v("Thomson cross section")
         prefac = sigma/(u.m_e*u.c**2)
@@ -160,7 +190,7 @@ class kernel(object):
         return prefac*a*unit_norm
 
 
-    def g(cosmo, a):
+    def g(self, cosmo, a):
         """The galaxy number overdensity window function."""
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]
         z = 1/a - 1
