@@ -1,7 +1,7 @@
 """
-# FIXME: NFW kernel call does not work
+# TODO: Delta not matching in NFW and Arnaud, pyccl does not accept Delta!=200
 """
-import antigravity
+
 import numpy as np
 from scipy.special import sici
 from scipy.integrate import quad
@@ -62,7 +62,7 @@ class Arnaud(object):
         self._fourier_interp = self._integ_interp()
 
 
-    def norm(self, cosmo, M, a, b=0.7):
+    def norm(self, cosmo, M, a, b=0.4):
         """Computes the normalisation factor of the Arnaud profile.
 
         .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
@@ -116,7 +116,7 @@ class Arnaud(object):
         return F
 
 
-    def fourier_profile(self, cosmo, k, M, a, b=0.7):
+    def fourier_profile(self, cosmo, k, M, a, b=0.4):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
@@ -136,19 +136,24 @@ class NFW(object):
         self.kernel = kernel.g  # associated window function
 
 
-    def norm(self, cosmo, M, a, b=0.7):
+    def norm(self):
         """Computes the normalisation factor of the Navarro-Frenk-White profile.
         """
-        N = 1
-        return N
+        return 1
 
 
-    def form_factor(self):
+    def form_factor(self, cosmo, x, M, a, b=0.4, Delta=200):
         """Computes the form factor of the Navarro-Frenk-White profile."""
-        pass
+        M *= (1-b)  # observational bias
+        rho = ccl.rho_x(cosmo, a, "matter")
+        c = ccl.halo_concentration(cosmo, M, a, Delta)
+
+        P1 = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))  # normalisation
+        P2 = x*c*(1+x*c)**2  # radial dependence
+        return P1/P2
 
 
-    def fourier_profile(self, cosmo, k, M, a, b=0.7, Delta=500):
+    def fourier_profile(self, cosmo, k, M, a, b=0.4, Delta=200):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         M *= (1-b)
         c = ccl.halo_concentration(cosmo, M, a, Delta)
@@ -174,11 +179,7 @@ class kernel(object):
     function with its corresponding profile normalisation factor yields units
     of ``1/L``.
     """
-    def __init__(self):
-        pass
-
-
-    def y(self, cosmo, a):
+    def y(cosmo, a):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
         sigma = v("Thomson cross section")
         prefac = sigma/(u.m_e*u.c**2)
@@ -190,7 +191,7 @@ class kernel(object):
         return prefac*a*unit_norm
 
 
-    def g(self, cosmo, a):
+    def g(cosmo, a):
         """The galaxy number overdensity window function."""
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]
         z = 1/a - 1

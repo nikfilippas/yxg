@@ -1,5 +1,4 @@
 """
-# FIXME: form factor right, now many orders of magnitude off
 """
 
 
@@ -9,8 +8,8 @@ import pyccl as ccl
 
 
 
-def power_spectrum(cosmo, k_arr, a, p1, p2,
-                   logMrange=(10, 17), mpoints=100, full_output=True):
+def lin_power_spectrum(cosmo, k_arr, a, p1, p2,
+                   logMrange=(10, 17), mpoints=100):
     """Computes the linear cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -54,7 +53,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
                               h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> # plot wavenumber against Arnaud profile's autocorrelation
     >>> k_arr = np.logspace(-1, 1, 100)  # wavenumber
-    >>> P = power_spectrum(cosmo, k_arr, 0.85, p1, p2)
+    >>> P = lin_power_spectrum(cosmo, k_arr, 0.85, p1, p2)
     >>> plt.loglog(k_arr, P)
     """
     # Set up integration boundaries
@@ -68,18 +67,21 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
+    e1, e2 = False, False  # interpolation watchdogs
     for m, M in enumerate(M_arr):
         try:
             U = p1.fourier_profile(cosmo, k_arr, M, a)
             V = p2.fourier_profile(cosmo, k_arr, M, a)
 
-
             I1h[:, m] = mfunc[m]*U*V
             I2h_1[:, m] = bh[m]*mfunc[m]*U
             I2h_2[:, m] = bh[m]*mfunc[m]*V
         except ValueError as err:
-            msg = str(err)+"\nTry changing the range of the input wavenumber."
-            if full_output: print(msg)
+            if ("below" in str(err)) and (not e1):  # interp low warning
+                print(str(err)); e1 = True
+            elif ("above" in str(err)) and (not e2):  # interp high warning
+                print(str(err)); e2 = True
+            else: print(err); exit(1)  # other error
             continue
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     P1h = simps(I1h, x=np.log10(M_arr))
@@ -144,7 +146,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,6), chipoints=500):
     I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
     for x, chi in enumerate(chi_arr):
         k_arr = (l_arr+1/2)/chi
-        Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
+        Puv = lin_power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
 
         I[:, x] = N[x] * Puv
 
