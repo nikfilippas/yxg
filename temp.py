@@ -7,7 +7,7 @@ import numpy as np
 import pyccl as ccl
 
 from cosmotools import R_Delta
-import profile
+import profile2D
 
 
 # Cosmology Definition
@@ -35,5 +35,5 @@ kmin, kmax = 2*np.pi/rmax, 2*np.pi/rmin
 # so, values of k probed, logarithmically span [kmin, kmax]
 k_arr = np.logspace(np.log10(kmin), np.log10(kmax), 100)
 
-p1 = profile.Arnaud()
-p2 = profile.Arnaud()
+p1 = profile2D.Arnaud()
+p2 = profile2D.NFW()
