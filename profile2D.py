@@ -1,5 +1,6 @@
 """
 # TODO: Delta not matching in NFW and Arnaud, pyccl does not accept Delta!=200
+- implemented observational dNdz data
 """
 
 import numpy as np
@@ -107,7 +108,7 @@ class Arnaud(object):
 
         q_arr = np.logspace(np.log10(qmin), np.log10(qmax), self.qpoints)
         f_arr = [quad(integrand,
-                      a=1e-4, b=np.inf,  # limits of integration
+                      a=1e-4, b=np.inf,  # limits of integration # TODO: try using rrange
                       weight="sin", wvar=q,  # fourier sinusoidal weight
                       limit=200, limlst=100  # improve accuracy
                       )[0] / q for q in q_arr]
@@ -194,6 +195,12 @@ class kernel(object):
     def g(cosmo, a):
         """The galaxy number overdensity window function."""
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]
-        z = 1/a - 1
-        dNdz = np.exp(-(z-0.1)**2 / (2*0.03**2))  # TODO: replace with data
+        # model data
+        abins = 1/(1+np.linspace(0, 1, 1001))  # scale factor bins
+        data = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt", skiprows=3, usecols=1)
+        data = np.append(data, [0,0])  # right-most bin
+
+        dNdz = data[np.digitize(a, abins, right=True)]
+
+#        dNdz = np.exp(-((1/a-1)-0.1)**2 / (2*0.03**2))  # TODO: replace with data
         return Hz*dNdz
