@@ -1,6 +1,5 @@
 """
 # TODO: Delta not matching in NFW and Arnaud, pyccl does not accept Delta!=200
-- implemented observational dNdz data
 """
 
 import numpy as np
@@ -53,7 +52,7 @@ class Arnaud(object):
     >>> U = p2.fourier_profile(cosmo, k, M=1e+14, a=0.6)
     >>> plt.loglog(k, U)  # plot profile in fourier space
     """
-    def __init__(self, rrange=(1e-4, 1e5), qpoints=1e3):
+    def __init__(self, rrange=(1e-5, 1e6), qpoints=1e3):
 
         self.rrange = rrange  # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
@@ -73,10 +72,10 @@ class Arnaud(object):
         h70 = cosmo["h"]/0.7
         P0 = 6.41 # reference pressure
 
-        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
+        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3.+aP)  # prefactor
 
-        Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
-        PM = (M*(1-b))**(2/3+aP)  # mass dependence
+        Pz = ccl.h_over_h0(cosmo, a)**(8/3.)  # scale factor (z) dependence
+        PM = (M*(1-b))**(2/3.+aP)  # mass dependence
         P = K*Pz*PM
         return P
 
@@ -108,23 +107,21 @@ class Arnaud(object):
 
         q_arr = np.logspace(np.log10(qmin), np.log10(qmax), self.qpoints)
         f_arr = [quad(integrand,
-                      a=1e-4, b=np.inf,  # limits of integration # TODO: try using rrange
+                      a=1e-15, b=np.inf,  # limits of integration
                       weight="sin", wvar=q,  # fourier sinusoidal weight
-                      limit=200, limlst=100  # improve accuracy
                       )[0] / q for q in q_arr]
 
         F = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic", fill_value=0)
         return F
 
 
-    def fourier_profile(self, cosmo, k, M, a, b=0.4):
+    def fourier_profile(self, cosmo, k, M, a, b=0.34):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
         """
-        M *= (1-b)  # weight by observational bias
         R = R_Delta(cosmo, M, self.Delta)  # R_Delta [Mpc]
-        F = self.norm(cosmo, M, a) * self._fourier_interp(np.log10(k*R)) * R**3
+        F = self.norm(cosmo, M, a, b=b) * self._fourier_interp(np.log10(k*R)) * R**3
         return F
 
 
@@ -143,9 +140,8 @@ class NFW(object):
         return 1
 
 
-    def form_factor(self, cosmo, x, M, a, b=0.4, Delta=200):
+    def form_factor(self, cosmo, x, M, a, Delta=200):
         """Computes the form factor of the Navarro-Frenk-White profile."""
-        M *= (1-b)  # observational bias
         rho = ccl.rho_x(cosmo, a, "matter")
         c = ccl.halo_concentration(cosmo, M, a, Delta)
 
@@ -154,9 +150,8 @@ class NFW(object):
         return P1/P2
 
 
-    def fourier_profile(self, cosmo, k, M, a, b=0.4, Delta=200):
+    def fourier_profile(self, cosmo, k, M, a, Delta=200):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
-        M *= (1-b)
         c = ccl.halo_concentration(cosmo, M, a, Delta)
         x = k*R_Delta(cosmo, M, Delta)/c
 
@@ -189,7 +184,7 @@ class kernel(object):
         cm2m = u.centi
         m2Mpc = 1/(u.mega*u.parsec)
         unit_norm = J2eV * cm2m**3 * m2Mpc
-        return prefac*a*unit_norm
+        return prefac*a/unit_norm
 
 
     def g(cosmo, a):
@@ -201,6 +196,4 @@ class kernel(object):
         data = np.append(data, [0,0])  # right-most bin
 
         dNdz = data[np.digitize(a, abins, right=True)]
-
-#        dNdz = np.exp(-((1/a-1)-0.1)**2 / (2*0.03**2))  # TODO: replace with data
         return Hz*dNdz
