@@ -1,4 +1,5 @@
 """
+- error handling
 """
 
 
@@ -81,6 +82,7 @@ def lin_power_spectrum(cosmo, k_arr, a, p1, p2,
                 print(str(err)); e1 = True
             elif ("above" in str(err)) and (not e2):  # interp high warning
                 print(str(err)); e2 = True
+            elif e1 or e2: continue  # error already displayed
             else: print(err); exit(1)  # other error
             continue
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
