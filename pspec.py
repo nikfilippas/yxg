@@ -1,5 +1,4 @@
 """
-- error handling
 """
 
 
@@ -9,9 +8,9 @@ import pyccl as ccl
 
 
 
-def lin_power_spectrum(cosmo, k_arr, a, p1, p2,
-                   logMrange=(10, 17), mpoints=100):
-    """Computes the linear cross power spectrum of two halo profiles.
+def power_spectrum(cosmo, k_arr, a, p1, p2,
+                   logMrange=(6, 17), mpoints=1e2):
+    """Computes the cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
     the linear cross power spectrum of two profiles.
@@ -54,7 +53,7 @@ def lin_power_spectrum(cosmo, k_arr, a, p1, p2,
                               h=0.67, A_s=2.1e-9, n_s=0.96)
     >>> # plot wavenumber against Arnaud profile's autocorrelation
     >>> k_arr = np.logspace(-1, 1, 100)  # wavenumber
-    >>> P = lin_power_spectrum(cosmo, k_arr, 0.85, p1, p2)
+    >>> P = power_spectrum(cosmo, k_arr, 0.85, p1, p2)
     >>> plt.loglog(k_arr, P)
     """
     # Set up integration boundaries
@@ -93,7 +92,7 @@ def lin_power_spectrum(cosmo, k_arr, a, p1, p2,
 
 
 
-def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,6), chipoints=500):
+def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,10), chipoints=1e3):
     """Computes the angular cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -148,7 +147,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2, zrange=(1e-3,6), chipoints=500):
     I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
     for x, chi in enumerate(chi_arr):
         k_arr = (l_arr+1/2)/chi
-        Puv = lin_power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
+        Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2)
 
         I[:, x] = N[x] * Puv
 
