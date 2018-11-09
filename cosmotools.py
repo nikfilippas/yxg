@@ -26,7 +26,7 @@ def R_Delta(cosmo, halo_mass, Delta=200):
 
     Returns
     -------
-    float or array_like : The halo reference radius.
+    float or array_like : The halo reference radius in `Mpc`.
     """
     Rnorm = (cosmo["Omega_m"] / Delta)**(1/3)
     R = Rnorm * ccl.massfunc_m2r(cosmo, halo_mass)
