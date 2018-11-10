@@ -1,5 +1,8 @@
 """
 # TODO: Delta not matching in NFW and Arnaud, pyccl does not accept Delta!=200
+# TODO: propagate Arnaud profile backward and forward
+# TODO: NFW Fourier profile inconsistency between papers (?)
+# TODO: dN/dz units?
 """
 
 import numpy as np
@@ -72,10 +75,10 @@ class Arnaud(object):
         h70 = cosmo["h"]/0.7
         P0 = 6.41 # reference pressure
 
-        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3.+aP)  # prefactor
+        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
 
-        Pz = ccl.h_over_h0(cosmo, a)**(8/3.)  # scale factor (z) dependence
-        PM = (M*(1-b))**(2/3.+aP)  # mass dependence
+        Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
+        PM = (M*(1-b))**(2/3+aP)  # mass dependence
         P = K*Pz*PM
         return P
 
@@ -121,7 +124,7 @@ class Arnaud(object):
         .. note:: Output units are ``[norm] Mpc^3``
         """
         R = R_Delta(cosmo, M, self.Delta)  # R_Delta [Mpc]
-        F = self.norm(cosmo, M, a, b=b) * self._fourier_interp(np.log10(k*R)) * R**3
+        F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R)) * R**3
         return F
 
 
@@ -134,26 +137,29 @@ class NFW(object):
         self.kernel = kernel.g  # associated window function
 
 
-    def norm(self):
+    def norm(self, cosmo, M, a, Delta=200):
         """Computes the normalisation factor of the Navarro-Frenk-White profile.
+
+        .. note:: Normalisation factor is given in units of ``M_sun/Mpc^3``.
         """
-        return 1
+        rho = ccl.rho_x(cosmo, a, "matter")
+        c = ccl.halo_concentration(cosmo, M, a, Delta)
+
+        P = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
+        return P
 
 
     def form_factor(self, cosmo, x, M, a, Delta=200):
         """Computes the form factor of the Navarro-Frenk-White profile."""
-        rho = ccl.rho_x(cosmo, a, "matter")
         c = ccl.halo_concentration(cosmo, M, a, Delta)
-
-        P1 = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))  # normalisation
-        P2 = x*c*(1+x*c)**2  # radial dependence
-        return P1/P2
+        P = 1/(x*c*(1+x*c)**2)
+        return P
 
 
     def fourier_profile(self, cosmo, k, M, a, Delta=200):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         c = ccl.halo_concentration(cosmo, M, a, Delta)
-        x = k*R_Delta(cosmo, M, Delta)/c
+        x = k*R_Delta(cosmo, M, Delta)/c  # FIXME: drop c?
 
         Si1, Ci1 = sici((1+c)*x)
         Si2, Ci2 = sici(x)
