@@ -2,9 +2,9 @@
 - corrected Wg units
 - Wg now interpolates
 - fixed fourier profile factors
+- extrapolated Arnaud
 
-# TODO: Delta not matching in NFW and Arnaud, pyccl does not accept Delta!=200
-# TODO: propagate Arnaud profile backward and forward
+# TODO: concentration function with Delta=500
 """
 
 import numpy as np
@@ -107,11 +107,12 @@ class Arnaud(object):
             I = self.form_factor(x)*x
             return I
 
-        # Integration Boundaries
+        ## Integration Boundaries ##
         rmin, rmax = self.rrange  # physical distance [R_Delta]
         qmin, qmax = 1/rmax, 1/rmin  # fourier space parameter
+        lgqmin, lgqmax = np.log10(qmin), np.log10(qmax)  # log10 bounds
 
-        q_arr = np.logspace(np.log10(qmin), np.log10(qmax), self.qpoints)
+        q_arr = np.logspace(lgqmin, lgqmax, self.qpoints)
         f_arr = np.array([quad(integrand,
                                a=1e-4, b=np.inf,  # limits of integration
                                weight="sin", wvar=q  # fourier sine weight
@@ -119,25 +120,23 @@ class Arnaud(object):
 
         F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic")
 
-        # Extrapolation
-        # backward extrapolation
-        q1 = np.logspace(-5, np.log10(qmin))
+        ## Extrapolation ##
+        # Backward Extrapolation
         F1 = lambda x: f_arr[0]*np.ones_like(x)  # constant value
 
-        # forward extrapolation
-        q3 = np.logspace(np.log10(qmax), +5)
+        # Forward Extrapolation
+        # linear fitting
         Q = np.log10(q_arr[q_arr > 1e2])
         F = np.log10(f_arr[q_arr > 1e2])
         A = np.vstack([Q, np.ones(len(Q))]).T
         m, c = lstsq(A, F, rcond=None)[0]
-        F3 = lambda x: np.log10(x)**m + 10**c  # logarithmic drop
 
-        q_dom = np.hstack((q1, q_arr, q3))  # global domain
+        F3 = lambda x: (10**x)**m * 10**c  # logarithmic drop
 
         F = lambda x: np.piecewise(x,
-                                   [x < qmin,
-                                    (qmin <= x)*(x <= qmax),
-                                    qmax < q_dom],
+                                   [x < lgqmin,  # backward extrapolation
+                                    (lgqmin <= x)*(x <= lgqmax),  # common range
+                                    lgqmax < x],  # forward extrapolation
                                     [F1, F2, F3])
         return F
 
