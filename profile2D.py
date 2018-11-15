@@ -1,11 +1,14 @@
 """
+- corrected Wg units
+- Wg now interpolates
+- fixed fourier profile factors
+
 # TODO: Delta not matching in NFW and Arnaud, pyccl does not accept Delta!=200
 # TODO: propagate Arnaud profile backward and forward
-# TODO: NFW Fourier profile inconsistency between papers (?)
-# TODO: dN/dz units?
 """
 
 import numpy as np
+from numpy.linalg import lstsq
 from scipy.special import sici
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
@@ -55,7 +58,7 @@ class Arnaud(object):
     >>> U = p2.fourier_profile(cosmo, k, M=1e+14, a=0.6)
     >>> plt.loglog(k, U)  # plot profile in fourier space
     """
-    def __init__(self, rrange=(1e-5, 1e6), qpoints=1e3):
+    def __init__(self, rrange=(1e-3, 10), qpoints=1e2):
 
         self.rrange = rrange  # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
@@ -109,12 +112,33 @@ class Arnaud(object):
         qmin, qmax = 1/rmax, 1/rmin  # fourier space parameter
 
         q_arr = np.logspace(np.log10(qmin), np.log10(qmax), self.qpoints)
-        f_arr = [quad(integrand,
-                      a=1e-15, b=np.inf,  # limits of integration
-                      weight="sin", wvar=q,  # fourier sinusoidal weight
-                      )[0] / q for q in q_arr]
+        f_arr = np.array([quad(integrand,
+                               a=1e-4, b=np.inf,  # limits of integration
+                               weight="sin", wvar=q  # fourier sine weight
+                               )[0] / q for q in q_arr])
 
-        F = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic", fill_value=0)
+        F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic")
+
+        # Extrapolation
+        # backward extrapolation
+        q1 = np.logspace(-5, np.log10(qmin))
+        F1 = lambda x: f_arr[0]*np.ones_like(x)  # constant value
+
+        # forward extrapolation
+        q3 = np.logspace(np.log10(qmax), +5)
+        Q = np.log10(q_arr[q_arr > 1e2])
+        F = np.log10(f_arr[q_arr > 1e2])
+        A = np.vstack([Q, np.ones(len(Q))]).T
+        m, c = lstsq(A, F, rcond=None)[0]
+        F3 = lambda x: np.log10(x)**m + 10**c  # logarithmic drop
+
+        q_dom = np.hstack((q1, q_arr, q3))  # global domain
+
+        F = lambda x: np.piecewise(x,
+                                   [x < qmin,
+                                    (qmin <= x)*(x <= qmax),
+                                    qmax < q_dom],
+                                    [F1, F2, F3])
         return F
 
 
@@ -123,9 +147,9 @@ class Arnaud(object):
 
         .. note:: Output units are ``[norm] Mpc^3``
         """
-        R = R_Delta(cosmo, M, self.Delta)  # R_Delta [Mpc]
-        F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R)) * R**3
-        return F
+        R = R_Delta(cosmo, M, self.Delta) / a  # R_Delta*(1+z) [Mpc]
+        F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R))
+        return 4*np.pi * R**3 * F
 
 
 
@@ -159,7 +183,7 @@ class NFW(object):
     def fourier_profile(self, cosmo, k, M, a, Delta=200):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         c = ccl.halo_concentration(cosmo, M, a, Delta)
-        x = k*R_Delta(cosmo, M, Delta)/c  # FIXME: drop c?
+        x = k*R_Delta(cosmo, M, Delta)/c
 
         Si1, Ci1 = sici((1+c)*x)
         Si2, Ci2 = sici(x)
@@ -193,13 +217,16 @@ class kernel(object):
         return prefac*a/unit_norm
 
 
+
     def g(cosmo, a):
         """The galaxy number overdensity window function."""
-        Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]
+        unit_norm = 1/(u.c/u.kilo)  # [s/km]
+        Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]  # km/(s Mpc)
         # model data
-        abins = 1/(1+np.linspace(0, 1, 1001))  # scale factor bins
-        data = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt", skiprows=3, usecols=1)
-        data = np.append(data, [0,0])  # right-most bin
+        z_arr, dNdz_arr = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt",
+                                     skiprows=3).T
+        a_arr = 1/(1+z_arr)
+        dNdz = interp1d(a_arr, dNdz_arr, kind="cubic",
+                        bounds_error=False, fill_value=0)
 
-        dNdz = data[np.digitize(a, abins, right=True)]
-        return Hz*dNdz
+        return Hz*unit_norm * dNdz(a)
