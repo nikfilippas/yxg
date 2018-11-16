@@ -1,9 +1,4 @@
 """
-- corrected Wg units
-- Wg now interpolates
-- fixed fourier profile factors
-- extrapolated Arnaud
-
 # TODO: concentration function with Delta=500
 """
 
