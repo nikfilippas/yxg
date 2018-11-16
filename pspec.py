@@ -62,8 +62,9 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
     # Out-of-loop optimisations
-    mfunc = ccl.massfunc(cosmo, M_arr, a, p1.Delta)  # mass function
-    bh = ccl.halo_bias(cosmo, M_arr, a, p1.Delta)  # halo bias
+    Om = ccl.omega_x(cosmo, a, "matter")
+    mfunc = ccl.massfunc(cosmo, M_arr*Om, a, p1.Delta)  # mass function
+    bh = ccl.halo_bias(cosmo, M_arr*Om, a, p1.Delta)  # halo bias
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
