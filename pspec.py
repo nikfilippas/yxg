@@ -64,13 +64,13 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
     # Out-of-loop optimisations
     Om = ccl.omega_x(cosmo, a, "matter")
-    mfunc = ccl.massfunc(cosmo, M_arr*Om, a, p1.Delta)  # mass function
-    bh = ccl.halo_bias(cosmo, M_arr*Om, a, p1.Delta)  # halo bias
+    mfunc = ccl.massfunc(cosmo, M_arr, a, p1.Delta*Om)  # mass function
+    bh = ccl.halo_bias(cosmo, M_arr, a, p1.Delta*Om)  # halo bias
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        U = p1.fourier_profile(cosmo, k_arr, M, a, b=1)
+        U = p1.fourier_profile(cosmo, k_arr, M, a, b=0.4)
         V = p2.fourier_profile(cosmo, k_arr, M, a)
 
         I1h[:, m] = mfunc[m]*U*V

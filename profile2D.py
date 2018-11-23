@@ -1,6 +1,4 @@
 """
-- concentration with (Delta = 200) or (Delta = 500)
-- Tinker mass function uses rho_m, rather than rho_c
 """
 
 import numpy as np
