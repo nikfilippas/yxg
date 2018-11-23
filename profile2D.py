@@ -1,5 +1,6 @@
 """
-# TODO: concentration function with Delta=500
+- concentration with (Delta = 200) or (Delta = 500)
+- Tinker mass function uses rho_m, rather than rho_c
 """
 
 import numpy as np
@@ -11,7 +12,7 @@ import scipy.constants as u
 from scipy.constants import value as v
 import pyccl as ccl
 
-from cosmotools import R_Delta
+from cosmotools import R_Delta, dNdz
 
 
 
@@ -162,6 +163,10 @@ class NFW(object):
         """
         rho = ccl.rho_x(cosmo, a, "matter")
         c = ccl.halo_concentration(cosmo, M, a, Delta)
+        if Delta == 500: c /= 2  # (Komatsu & Seljak, 2018)
+        elif Delta != (200 and 500):
+            print("Concentration not defined for Delta=%d." % Delta)
+            exit(1)
 
         P = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
         return P
@@ -215,12 +220,6 @@ class kernel(object):
     def g(cosmo, a):
         """The galaxy number overdensity window function."""
         unit_norm = 1/(u.c/u.kilo)  # [s/km]
-        Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]  # km/(s Mpc)
-        # model data
-        z_arr, dNdz_arr = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt",
-                                     skiprows=3).T
-        a_arr = 1/(1+z_arr)
-        dNdz = interp1d(a_arr, dNdz_arr, kind="cubic",
-                        bounds_error=False, fill_value=0)
+        Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]  # [km/(s Mpc)]
 
         return Hz*unit_norm * dNdz(a)

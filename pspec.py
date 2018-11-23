@@ -1,4 +1,5 @@
 """
+#FIXME: kernel crashes in ccl.massfunc(cosmo, M, a) for M < 1e6
 """
 
 
@@ -9,7 +10,7 @@ import pyccl as ccl
 
 
 def power_spectrum(cosmo, k_arr, a, p1, p2,
-                   logMrange=(6, 17), mpoints=1e2):
+                   logMrange=(7, 17), mpoints=1e2):
     """Computes the cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -69,7 +70,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        U = p1.fourier_profile(cosmo, k_arr, M, a)
+        U = p1.fourier_profile(cosmo, k_arr, M, a, b=1)
         V = p2.fourier_profile(cosmo, k_arr, M, a)
 
         I1h[:, m] = mfunc[m]*U*V

@@ -6,7 +6,6 @@ temp file for calcs and unstable test code
 import numpy as np
 import pyccl as ccl
 
-from cosmotools import R_Delta
 import profile2D
 
 

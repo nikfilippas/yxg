@@ -4,6 +4,8 @@ retrieval and data analysis.
 """
 
 
+import numpy as np
+from scipy.interpolate import interp1d
 import pyccl as ccl
 
 
@@ -31,3 +33,13 @@ def R_Delta(cosmo, halo_mass, Delta=200):
     Rnorm = (cosmo["Omega_m"] / Delta)**(1/3)
     R = Rnorm * ccl.massfunc_m2r(cosmo, halo_mass)
     return R
+
+
+def dNdz():
+    """Calculate the number density of halos per unit redsfhit."""
+    z_arr, dNdz_arr = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt",
+                                 skiprows=3).T
+    a_arr = 1/(1+z_arr)
+    F = interp1d(a_arr, dNdz_arr, kind="cubic",
+                    bounds_error=False, fill_value=0)
+    return F
