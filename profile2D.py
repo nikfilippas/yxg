@@ -54,9 +54,10 @@ class Arnaud(object):
     """
     def __init__(self, rrange=(1e-3, 10), qpoints=1e2):
 
+        self.is_delta_critical=True
         self.rrange = rrange  # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
-        self.Delta = 500  # reference overdensity (Arnaud et al.)
+        self.Delta = 500.  # reference overdensity (Arnaud et al.)
         self.kernel = kernel.y  # associated window function
 
         self._fourier_interp = self._integ_interp()
@@ -72,10 +73,10 @@ class Arnaud(object):
         h70 = cosmo["h"]/0.7
         P0 = 6.41 # reference pressure
 
-        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
+        K = 1.65*h70**2*P0 * (h70/3e14)**(2./3.+aP)  # prefactor
 
-        Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
-        PM = (M*(1-b))**(2/3+aP)  # mass dependence
+        Pz = ccl.h_over_h0(cosmo, a)**(8./3.)  # scale factor (z) dependence
+        PM = (M*(1-b))**(2./3.+aP)  # mass dependence
         P = K*Pz*PM
         return P
 
@@ -88,7 +89,7 @@ class Arnaud(object):
         beta = 4.13
         gama = 0.31
 
-        f1 = (c500*x)**-gama
+        f1 = (c500*x)**(-gama)
         f2 = (1+(c500*x)**alpha)**(-(beta-gama)/alpha)
         return f1*f2
 
@@ -112,7 +113,7 @@ class Arnaud(object):
                                weight="sin", wvar=q  # fourier sine weight
                                )[0] / q for q in q_arr])
 
-        F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic")
+        F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="linear")
 
         ## Extrapolation ##
         # Backward Extrapolation
@@ -125,22 +126,22 @@ class Arnaud(object):
         A = np.vstack([Q, np.ones(len(Q))]).T
         m, c = lstsq(A, F, rcond=None)[0]
 
-        F3 = lambda x: (10**x)**m * 10**c  # logarithmic drop
+        F3 = lambda x: 10**(m*x+c) # logarithmic drop
 
         F = lambda x: np.piecewise(x,
                                    [x < lgqmin,  # backward extrapolation
                                     (lgqmin <= x)*(x <= lgqmax),  # common range
                                     lgqmax < x],  # forward extrapolation
                                     [F1, F2, F3])
+
         return F
 
-
-    def fourier_profile(self, cosmo, k, M, a, b=0.34):
+    def fourier_profile(self, cosmo, k, M, a, b=0.4):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
         """
-        R = R_Delta(cosmo, M, self.Delta) / a  # R_Delta*(1+z) [Mpc]
+        R = R_Delta(cosmo, M, a, self.Delta) / a  # R_Delta*(1+z) [Mpc]
         F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R))
         return 4*np.pi * R**3 * F
 
@@ -204,14 +205,16 @@ class kernel(object):
     """
     def y(cosmo, a):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
-        sigma = v("Thomson cross section")
-        prefac = sigma/(u.m_e*u.c**2)
-        # normalisation
-        J2eV = 1/v("electron volt")
-        cm2m = u.centi
-        m2Mpc = 1/(u.mega*u.parsec)
-        unit_norm = J2eV * cm2m**3 * m2Mpc
-        return prefac*a/unit_norm
+        prefac=4.017100792437957e-06 #Just to avoid recomputing every time
+        #sigma = v("Thomson cross section")
+        #prefac = sigma/(u.m_e*u.c**2)
+        ## normalisation
+        #J2eV = 1/v("electron volt")
+        #cm2m = u.centi
+        #m2Mpc = 1/(u.mega*u.parsec)
+        #unit_norm = J2eV * cm2m**3 * m2Mpc
+        #prefac*=unit_norm
+        return prefac*a
 
 
 
