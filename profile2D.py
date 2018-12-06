@@ -54,11 +54,11 @@ class Arnaud(object):
     """
     def __init__(self, rrange=(1e-3, 10), qpoints=1e2):
 
-        self.is_delta_critical=True
-        self.rrange = rrange  # range of probed distances [R_Delta]
+        self.is_delta_critical = True
+        self.rrange = rrange         # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
-        self.Delta = 500.  # reference overdensity (Arnaud et al.)
-        self.kernel = kernel.y  # associated window function
+        self.Delta = 500             # reference overdensity (Arnaud et al.)
+        self.kernel = kernel.y       # associated window function
 
         self._fourier_interp = self._integ_interp()
 
@@ -76,7 +76,7 @@ class Arnaud(object):
         K = 1.65*h70**2*P0 * (h70/3e14)**(2./3.+aP)  # prefactor
 
         Pz = ccl.h_over_h0(cosmo, a)**(8./3.)  # scale factor (z) dependence
-        PM = (M*(1-b))**(2./3.+aP)  # mass dependence
+        PM = (M*(1-b))**(2./3.+aP)             # mass dependence
         P = K*Pz*PM
         return P
 
@@ -98,22 +98,19 @@ class Arnaud(object):
         """Computes the integral of the power spectrum at different points and
         returns an interpolating function connecting these points.
         """
-        def integrand(x):
-            I = self.form_factor(x)*x
-            return I
+        integrand = lambda x: self.form_factor(x)*x
 
         ## Integration Boundaries ##
         rmin, rmax = self.rrange  # physical distance [R_Delta]
-        qmin, qmax = 1/rmax, 1/rmin  # fourier space parameter
-        lgqmin, lgqmax = np.log10(qmin), np.log10(qmax)  # log10 bounds
+        lgqmin, lgqmax = np.log10(1/rmax), np.log10(1/rmin)  # log10 bounds
 
         q_arr = np.logspace(lgqmin, lgqmax, self.qpoints)
         f_arr = np.array([quad(integrand,
-                               a=1e-4, b=np.inf,  # limits of integration
+                               a=1e-4, b=np.inf,     # limits of integration
                                weight="sin", wvar=q  # fourier sine weight
                                )[0] / q for q in q_arr])
 
-        F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="linear")
+        F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic")
 
         ## Extrapolation ##
         # Backward Extrapolation
@@ -129,12 +126,13 @@ class Arnaud(object):
         F3 = lambda x: 10**(m*x+c) # logarithmic drop
 
         F = lambda x: np.piecewise(x,
-                                   [x < lgqmin,  # backward extrapolation
+                                   [x < lgqmin,        # backward extrapolation
                                     (lgqmin <= x)*(x <= lgqmax),  # common range
-                                    lgqmax < x],  # forward extrapolation
+                                    lgqmax < x],       # forward extrapolation
                                     [F1, F2, F3])
 
         return F
+
 
     def fourier_profile(self, cosmo, k, M, a, b=0.4):
         """Computes the Fourier transform of the Arnaud profile.
@@ -152,6 +150,7 @@ class NFW(object):
     Fourier transform.
     """
     def __init__(self):
+        self.is_delta_critical = False
         self.kernel = kernel.g  # associated window function
 
 
@@ -161,11 +160,12 @@ class NFW(object):
         .. note:: Normalisation factor is given in units of ``M_sun/Mpc^3``.
         """
         rho = ccl.rho_x(cosmo, a, "matter")
-        c = ccl.halo_concentration(cosmo, M, a, Delta)
+
+        # Halo Concentration Handling
+        c = ccl.halo_concentration(cosmo, M, a, 200)  # force Delta=200
         if Delta == 500: c /= 2  # (Komatsu & Seljak, 2018)
-        elif Delta != (200 and 500):
-            print("Concentration not defined for Delta=%d." % Delta)
-            exit(1)
+        elif (Delta != 200) and (Delta != 500):
+            raise ValueError("Concentration not defined for Delta=%d." % Delta)
 
         P = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
         return P
@@ -181,7 +181,7 @@ class NFW(object):
     def fourier_profile(self, cosmo, k, M, a, Delta=200):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         c = ccl.halo_concentration(cosmo, M, a, Delta)
-        x = k*R_Delta(cosmo, M, Delta)/c
+        x = k*R_Delta(cosmo, M, a, Delta)/c
 
         Si1, Ci1 = sici((1+c)*x)
         Si2, Ci2 = sici(x)
@@ -205,17 +205,16 @@ class kernel(object):
     """
     def y(cosmo, a):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
-        prefac=4.017100792437957e-06 #Just to avoid recomputing every time
-        #sigma = v("Thomson cross section")
-        #prefac = sigma/(u.m_e*u.c**2)
-        ## normalisation
-        #J2eV = 1/v("electron volt")
-        #cm2m = u.centi
-        #m2Mpc = 1/(u.mega*u.parsec)
-        #unit_norm = J2eV * cm2m**3 * m2Mpc
-        #prefac*=unit_norm
+#        sigma = v("Thomson cross section")
+#        prefac = sigma/(u.m_e*u.c**2)
+#        # normalisation
+#        J2eV = 1/v("electron volt")
+#        cm2m = u.centi
+#        m2Mpc = 1/(u.mega*u.parsec)
+#        unit_norm = J2eV * cm2m**3 * m2Mpc
+#        prefac/=unit_norm
+        prefac = 4.017100792437957e-06 # avoid recomputing every time
         return prefac*a
-
 
 
     def g(cosmo, a):

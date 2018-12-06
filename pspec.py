@@ -10,8 +10,8 @@ import pyccl as ccl
 
 
 def power_spectrum(cosmo, k_arr, a, p1, p2,
-                   logMrange=(6, 17), mpoints=1e2,
-                   include_1h=True,include_2h=True) :
+                   logMrange=(6, 17), mpoints=256,
+                   include_1h=True, include_2h=True):
     """Computes the cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -39,9 +39,9 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     mpoints : int
         Number or integration sampling points.
     include_1h : boolean
-        If True, will include the 1-halo contribution
+        If True, includes the 1-halo contribution
     include_2h : boolean
-        If True, will include the 2-halo contribution
+        If True, includes the 2-halo contribution
 
     Returns
     -------
@@ -67,17 +67,17 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     mpoints = int(mpoints) # number of integration points
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
-    #Correct from Delta_c to Delta_M if needed
-    if p1.is_delta_critical or p2.is_delta_critical :
-        delta_matter=p1.Delta/ccl.omega_x(cosmo,a,'matter')
-    else :
-        delta_matter=p1.Delta
-        
+
+    # Correct from Delta_c to Delta_M if needed
+    delta_matter = p1.Delta
+    if p1.is_delta_critical or p2.is_delta_critical:
+        delta_matter /= ccl.omega_x(cosmo, a, "matter")
+
     # Out-of-loop optimisations
     mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)  # mass function
-    bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)  # halo bias
+    bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)    # halo bias
 
-    
+
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
@@ -93,26 +93,29 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     b2h_1 = simps(I2h_1, x=np.log10(M_arr))
     b2h_2 = simps(I2h_2, x=np.log10(M_arr))
 
-    # Add normalization from small masses
-    rhoM=ccl.rho_x(cosmo,a,'matter',is_comoving=True)
-    dlM=(logMmax-logMmin)/(mpoints-1.)
-    n0_1h=(rhoM-np.sum(mfunc*M_arr)*dlM)/M_arr[0]
-    n0_2h=(rhoM-np.sum(mfunc*bh*M_arr)*dlM)/M_arr[0]
-    prof1_0=p1.fourier_profile(cosmo,k_arr,M_arr[0],a)
-    prof2_0=p2.fourier_profile(cosmo,k_arr,M_arr[0],a)
-    P1h+=n0_1h*prof1_0*prof2_0
-    b2h_1+=n0_2h*prof1_0
-    b2h_2+=n0_2h*prof2_0
-    
+    # Normalization from small masses
+    rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
+    dlM = (logMmax-logMmin) / (mpoints-1)
+
+    n0_1h = (rhoM - np.sum(mfunc*M_arr) * dlM) / M_arr[0]
+    n0_2h = (rhoM - np.sum(mfunc*bh*M_arr) * dlM) / M_arr[0]
+
+    prof1_0 = p1.fourier_profile(cosmo, k_arr, M_arr[0], a)
+    prof2_0 = p2.fourier_profile(cosmo, k_arr, M_arr[0], a)
+
+    b2h_1 += n0_2h*prof1_0
+    b2h_2 += n0_2h*prof2_0
+    P1h += n0_1h*prof1_0*prof2_0
+
     F = include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)
     return F
 
 
 
 def ang_power_spectrum(cosmo, l_arr, p1, p2,
-                       zrange=(1e-6,6.), zpoints=128, ztype='log',
-                       logMrange=(6,17), mpoints=256,
-                       include_1h=True,include_2h=True):
+                       zrange=(1e-6, 6), zpoints=128,
+                       logMrange=(6, 17), mpoints=256,
+                       include_1h=True, include_2h=True):
     """Computes the angular cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -130,16 +133,14 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
         Minimum and maximum redshift probed.
     zpoints : int
         Number or integration sampling points in redshift.
-    ztype : string
-        If 'log', will use log(z) as the integration variable
     logMrange : tuple
         Logarithm (base-10) of the mass integration boundaries.
     mpoints : int
         Number or integration sampling points.
     include_1h : boolean
-        If True, will include the 1-halo contribution
+        If True, includes the 1-halo contribution
     include_2h : boolean
-        If True, will include the 2-halo contribution
+        If True, includes the 2-halo contribution
 
     Returns
     -------
@@ -165,18 +166,13 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     # Integration boundaries
     zmin, zmax = zrange
     # Distance measures & out-of-loop optimisations
-    if ztype=='log' :
-        z_arr=np.exp(np.linspace(np.log(zmin),np.log(zmax),zpoints))
-        x_int=np.log(z_arr)
-    else :
-        z_arr=np.linspace(zmin,zmax,int(zpoints))
-        x_int=z_arr
-    a_arr=1./(1+z_arr)
-    chi_arr=ccl.comoving_radial_distance(cosmo,a_arr)
-    invh_arr=2997.92458/(ccl.h_over_h0(cosmo,a_arr)*cosmo['h']) #c/H(z)
-    if ztype=='log' :
-        invh_arr*=z_arr
-        
+    z_arr = np.exp(np.linspace(np.log(zmin), np.log(zmax), zpoints))
+    a_arr = 1/(1+z_arr)
+    chi_arr = ccl.comoving_radial_distance(cosmo, 1/(1+z_arr))
+
+    c1 = ccl.h_over_h0(cosmo,a_arr)*cosmo["h"]
+    invh_arr=2997.92458 * z_arr/c1 # c*z/H(z)
+
     # Window functions
     Wu = p1.kernel(cosmo, a_arr)
     Wv = p2.kernel(cosmo, a_arr)
@@ -186,9 +182,9 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     for x, chi in enumerate(chi_arr):
         k_arr = (l_arr+1/2)/chi
         Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2,
-                             logMrange=logMrange,mpoints=mpoints,
-                             include_1h=include_1h,include_2h=include_2h)
+                             logMrange=logMrange, mpoints=mpoints,
+                             include_1h=include_1h, include_2h=include_2h)
 
         I[:, x] = N[x] * Puv
-    Cl = simps(I, x=x_int)
+    Cl = simps(I, x=np.log(z_arr))
     return Cl

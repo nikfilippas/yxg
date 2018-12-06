@@ -10,11 +10,11 @@ import profile2D
 
 
 # Cosmology Definition
-cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2.1e-9, n_s=0.96)
+cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.66, sigma8=0.79, n_s=0.81)
 
 a = 1
 Delta = 500
-#"""
+
 rmin, rmax = 1e-4, 5  # [R_Delta]
 kmin, kmax = 2*np.pi/rmax, 2*np.pi/rmin
 # so, values of k probed, logarithmically span [kmin, kmax]

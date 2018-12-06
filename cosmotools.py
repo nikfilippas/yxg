@@ -26,22 +26,29 @@ def R_Delta(cosmo, halo_mass, a, Delta=200, is_matter=False) :
         Scale factor
     Delta : float
         Overdensity parameter.
+    is_matter : boolean
+        True when R_Delta is calculated using the average matter density.
+        False when R_Delta is calculated using the critical density.
 
     Returns
     -------
     float or array_like : The halo reference radius in `Mpc`.
     """
-    omega_factor=1.
-    if is_matter :
-        omega_factor=ccl.omega_x(cosmo,a,'matter')
-    prefac=Delta*omega_factor*1.16217766E12*(cosmo['h']*ccl.h_over_h0(cosmo,a))**2
-    return (halo_mass/prefac)**(1./3.)
+    if is_matter: omega_factor = ccl.omega_x(cosmo, a, "matter")
+    else: omega_factor = 1
 
-def dNdz():
+    c1 = (cosmo["h"] * ccl.h_over_h0(cosmo, a))**2
+    prefac = 1.16217766e12 * Delta * omega_factor * c1
+
+    return (halo_mass/prefac)**(1/3)
+
+
+
+def dNdz(a):
     """Calculate the number density of halos per unit redsfhit."""
     z_arr, dNdz_arr = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt",
                                  skiprows=3).T
     a_arr = 1/(1+z_arr)
     F = interp1d(a_arr, dNdz_arr, kind="cubic",
                     bounds_error=False, fill_value=0)
-    return F
+    return F(a)
