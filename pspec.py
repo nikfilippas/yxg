@@ -2,7 +2,6 @@
 #FIXME: kernel crashes in ccl.massfunc(cosmo, M, a) for M < 1e6
 
 Questions:
-    1. critical/non-critical Delta (86-88)
     2. (73-78) is it a power of 10?
     3. HOD only for pressure
     4. U before HOD: 5e-15. U after HOD: 0.2.
@@ -87,9 +86,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
 
     # Correct from Delta_c to Delta_M if needed
-    delta_matter = p1.Delta
-    if p1.is_delta_critical or p2.is_delta_critical:
-        delta_matter /= ccl.omega_x(cosmo, a, "matter")
+    delta_matter = p1.Delta/ccl.omega_x(cosmo, a, "matter")
 
     # Out-of-loop optimisations
     mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)  # mass function
