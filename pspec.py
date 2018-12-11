@@ -1,11 +1,21 @@
 """
 #FIXME: kernel crashes in ccl.massfunc(cosmo, M, a) for M < 1e6
+
+Questions:
+    1. critical/non-critical Delta (86-88)
+    2. (73-78) is it a power of 10?
+    3. HOD only for pressure
+    4. U before HOD: 5e-15. U after HOD: 0.2.
+
 """
 
 
 import numpy as np
 from scipy.integrate import simps
+from scipy.special import erf
 import pyccl as ccl
+
+import cosmotools as ct
 
 
 
@@ -62,6 +72,14 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     >>> P = power_spectrum(cosmo, k_arr, 0.85, p1, p2)
     >>> plt.loglog(k_arr, P)
     """
+    # HOD model (Krause & Eifler, 2014)
+    Mmin = 10**12.1
+    M1 = 10**13.65
+    M0 = 10**12.2
+    sigma_lnM = 10**0.4
+    alpha_sat = 1.0
+    fc = 0.25
+
     # Set up integration boundaries
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
     mpoints = int(mpoints) # number of integration points
@@ -77,12 +95,18 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)  # mass function
     bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)    # halo bias
 
-
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
         U = p1.fourier_profile(cosmo, k_arr, M, a)
         V = p2.fourier_profile(cosmo, k_arr, M, a)
+
+        # HOD Model
+        Nc = 0.5 * (1 + erf((np.log10(M)-np.log10(Mmin))/sigma_lnM))
+        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha_sat
+        # treat pressure profile with HOD
+        if p1.is_pressure: U = ct.HOD(U, fc, Nc, Ns)
+        if p2.is_pressure: V = ct.HOD(V, fc, Nc, Ns)
 
         I1h[:, m] = mfunc[m]*U*V
         I2h_1[:, m] = bh[m]*mfunc[m]*U
@@ -93,7 +117,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     b2h_1 = simps(I2h_1, x=np.log10(M_arr))
     b2h_2 = simps(I2h_2, x=np.log10(M_arr))
 
-    # Normalization from small masses
+    # Contribution from small masses (added in the beginning)
     rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
     dlM = (logMmax-logMmin) / (mpoints-1)
 
@@ -171,7 +195,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     chi_arr = ccl.comoving_radial_distance(cosmo, 1/(1+z_arr))
 
     c1 = ccl.h_over_h0(cosmo,a_arr)*cosmo["h"]
-    invh_arr=2997.92458 * z_arr/c1 # c*z/H(z)
+    invh_arr = 2997.92458 * z_arr/c1 # c*z/H(z)
 
     # Window functions
     Wu = p1.kernel(cosmo, a_arr)

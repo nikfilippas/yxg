@@ -10,7 +10,7 @@ import scipy.constants as u
 from scipy.constants import value as v
 import pyccl as ccl
 
-from cosmotools import R_Delta, dNdz
+import cosmotools as ct
 
 
 
@@ -55,6 +55,7 @@ class Arnaud(object):
     def __init__(self, rrange=(1e-3, 10), qpoints=1e2):
 
         self.is_delta_critical = True
+        self.is_pressure = True
         self.rrange = rrange         # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = 500             # reference overdensity (Arnaud et al.)
@@ -139,7 +140,7 @@ class Arnaud(object):
 
         .. note:: Output units are ``[norm] Mpc^3``
         """
-        R = R_Delta(cosmo, M, a, self.Delta) / a  # R_Delta*(1+z) [Mpc]
+        R = ct.R_Delta(cosmo, M, a, self.Delta) / a  # R_Delta*(1+z) [Mpc]
         F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R))
         return 4*np.pi * R**3 * F
 
@@ -150,11 +151,13 @@ class NFW(object):
     Fourier transform.
     """
     def __init__(self):
+
         self.is_delta_critical = False
+        self.is_pressure = False
         self.kernel = kernel.g  # associated window function
 
 
-    def norm(self, cosmo, M, a, Delta=200):
+    def norm(self, cosmo, M, a, Delta=500):
         """Computes the normalisation factor of the Navarro-Frenk-White profile.
 
         .. note:: Normalisation factor is given in units of ``M_sun/Mpc^3``.
@@ -162,26 +165,29 @@ class NFW(object):
         rho = ccl.rho_x(cosmo, a, "matter")
 
         # Halo Concentration Handling
-        c = ccl.halo_concentration(cosmo, M, a, 200)  # force Delta=200
-        if Delta == 500: c /= 2  # (Komatsu & Seljak, 2018)
-        elif (Delta != 200) and (Delta != 500):
-            raise ValueError("Concentration not defined for Delta=%d." % Delta)
+        c = ct.concentration_duffy(M, a, is_D500=(Delta==500))
+        if (Delta != 200) and (Delta != 500):
+            raise ValueError("Concentration not implemented for Delta=%d." % Delta)
 
         P = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
         return P
 
 
-    def form_factor(self, cosmo, x, M, a, Delta=200):
+    def form_factor(self, cosmo, x, M, a, Delta=500):
         """Computes the form factor of the Navarro-Frenk-White profile."""
         c = ccl.halo_concentration(cosmo, M, a, Delta)
         P = 1/(x*c*(1+x*c)**2)
         return P
 
 
-    def fourier_profile(self, cosmo, k, M, a, Delta=200):
+    def fourier_profile(self, cosmo, k, M, a, Delta=500):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
-        c = ccl.halo_concentration(cosmo, M, a, Delta)
-        x = k*R_Delta(cosmo, M, a, Delta)/c
+        # Halo Concentration Handling
+        c = ct.concentration_duffy(M, a, is_D500=(Delta==500))
+        if (Delta != 200) and (Delta != 500):
+            raise ValueError("Concentration not implemented for Delta=%d." % Delta)
+
+        x = k*ct.R_Delta(cosmo, M, a, Delta)/c
 
         Si1, Ci1 = sici((1+c)*x)
         Si2, Ci2 = sici(x)
@@ -222,4 +228,4 @@ class kernel(object):
         unit_norm = 1/(u.c/u.kilo)  # [s/km]
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]  # [km/(s Mpc)]
 
-        return Hz*unit_norm * dNdz(a)
+        return Hz*unit_norm * ct.dNdz(a)
