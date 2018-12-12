@@ -216,7 +216,7 @@ class HOD(object):
         fc = 0.25
 
         # HOD Model
-        Nc = 0.5 * (1 + erf((np.log10(M)-np.log10(Mmin))/sigma_lnM))
+        Nc = 0.5 * (1 + erf((np.log(M/Mmin))/sigma_lnM))
         Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha_sat
 
         H = NFW().fourier_profile(cosmo, k, M, a, Delta)
