@@ -2,19 +2,15 @@
 #FIXME: kernel crashes in ccl.massfunc(cosmo, M, a) for M < 1e6
 
 Questions:
+    5. HOD kernel == kernel.g?
     2. (73-78) is it a power of 10?
-    3. HOD only for pressure
     4. U before HOD: 5e-15. U after HOD: 0.2.
-
 """
 
 
 import numpy as np
 from scipy.integrate import simps
-from scipy.special import erf
 import pyccl as ccl
-
-import cosmotools as ct
 
 
 
@@ -71,14 +67,6 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     >>> P = power_spectrum(cosmo, k_arr, 0.85, p1, p2)
     >>> plt.loglog(k_arr, P)
     """
-    # HOD model (Krause & Eifler, 2014)
-    Mmin = 10**12.1
-    M1 = 10**13.65
-    M0 = 10**12.2
-    sigma_lnM = 10**0.4
-    alpha_sat = 1.0
-    fc = 0.25
-
     # Set up integration boundaries
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
     mpoints = int(mpoints) # number of integration points
@@ -97,13 +85,6 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     for m, M in enumerate(M_arr):
         U = p1.fourier_profile(cosmo, k_arr, M, a)
         V = p2.fourier_profile(cosmo, k_arr, M, a)
-
-        # HOD Model
-        Nc = 0.5 * (1 + erf((np.log10(M)-np.log10(Mmin))/sigma_lnM))
-        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha_sat
-        # treat pressure profile with HOD
-        if p1.is_pressure: U = ct.HOD(U, fc, Nc, Ns)
-        if p2.is_pressure: V = ct.HOD(V, fc, Nc, Ns)
 
         I1h[:, m] = mfunc[m]*U*V
         I2h_1[:, m] = bh[m]*mfunc[m]*U

@@ -4,6 +4,7 @@
 import numpy as np
 from numpy.linalg import lstsq
 from scipy.special import sici
+from scipy.special import erf
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
 import scipy.constants as u
@@ -54,8 +55,6 @@ class Arnaud(object):
     """
     def __init__(self, rrange=(1e-3, 10), qpoints=1e2):
 
-        self.is_delta_critical = True
-        self.is_pressure = True
         self.rrange = rrange         # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = 500             # reference overdensity (Arnaud et al.)
@@ -152,8 +151,6 @@ class NFW(object):
     """
     def __init__(self):
 
-        self.is_delta_critical = False
-        self.is_pressure = False
         self.kernel = kernel.g  # associated window function
 
 
@@ -198,6 +195,33 @@ class NFW(object):
 
         F = P1*(P2-P3)
         return F
+
+
+
+class HOD(object):
+    """Calculate a Halo Occupation Distribution profile quantity of a halo."""
+    def __init__(self):
+
+        self.kernel = kernel.g
+
+
+    def fourier_profile(self, cosmo, k, M, a, Delta=500):
+        """Computes the Fourier transform of the Halo Occupation Distribution."""
+        # HOD model (Krause & Eifler, 2014)
+        Mmin = 10**12.1
+        M1 = 10**13.65
+        M0 = 10**12.2
+        sigma_lnM = 10**0.4
+        alpha_sat = 1.0
+        fc = 0.25
+
+        # HOD Model
+        Nc = 0.5 * (1 + erf((np.log10(M)-np.log10(Mmin))/sigma_lnM))
+        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha_sat
+
+        H = NFW().fourier_profile(cosmo, k, M, a, Delta)
+
+        return Nc * (fc + Ns*H)
 
 
 

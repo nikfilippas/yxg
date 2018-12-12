@@ -12,10 +12,6 @@ import pyccl as ccl
 
 
 
-HOD = lambda U, fc, Nc, Ns: Nc * (fc + Ns*U)  # HOD model
-
-
-
 def concentration_duffy(halo_mass, a, is_D500=False):
     """
     Mass-Concentration relation from 0804.2486.

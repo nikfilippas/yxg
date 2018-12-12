@@ -22,4 +22,4 @@ k_arr = np.logspace(np.log10(kmin), np.log10(kmax), 100)
 
 p1 = profile2D.Arnaud()
 p2 = profile2D.Arnaud()
-p3 = profile2D.NFW()
+p3 = profile2D.HOD()
