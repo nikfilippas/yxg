@@ -1,4 +1,6 @@
 """
+- HOD parameters in function definition
+- optimised dNdz
 """
 
 import numpy as np
@@ -151,7 +153,7 @@ class NFW(object):
     """
     def __init__(self):
 
-        self.kernel = kernel.g  # associated window function
+        self.kernel = None  # associated window function
 
 
     def norm(self, cosmo, M, a, Delta=500):
@@ -205,19 +207,15 @@ class HOD(object):
         self.kernel = kernel.g
 
 
-    def fourier_profile(self, cosmo, k, M, a, Delta=500):
-        """Computes the Fourier transform of the Halo Occupation Distribution."""
-        # HOD model (Krause & Eifler, 2014)
-        Mmin = 10**12.1
-        M1 = 10**13.65
-        M0 = 10**12.2
-        sigma_lnM = 10**0.4
-        alpha_sat = 1.0
-        fc = 0.25
-
+    def fourier_profile(self, cosmo, k, M, a, Delta=500,
+                        Mmin=10**12.1, M1=10**13.65, M0=10**12.2,
+                        sigma_lnM=10**0.5, alpha_sat=1.0, fc=0.8):
+        """Computes the Fourier transform of the Halo Occupation Distribution.
+        Default parameter values from Krause & Eifler (2014).
+        """
         # HOD Model
-        Nc = 0.5 * (1 + erf((np.log(M/Mmin))/sigma_lnM))
-        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha_sat
+        Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))     # centrals
+        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha_sat  # satellites
 
         H = NFW().fourier_profile(cosmo, k, M, a, Delta)
 
@@ -252,4 +250,4 @@ class kernel(object):
         unit_norm = 1/(u.c/u.kilo)  # [s/km]
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]  # [km/(s Mpc)]
 
-        return Hz*unit_norm * ct.dNdz(a)
+        return Hz*unit_norm * ct.dNdz()(a)

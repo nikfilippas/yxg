@@ -1,10 +1,4 @@
 """
-#FIXME: kernel crashes in ccl.massfunc(cosmo, M, a) for M < 1e6
-
-Questions:
-    5. HOD kernel == kernel.g?
-    2. (73-78) is it a power of 10?
-    4. U before HOD: 5e-15. U after HOD: 0.2.
 """
 
 

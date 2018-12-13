@@ -1,8 +1,6 @@
 """
 This script contains definitions of useful cosmological functions for quick
 retrieval and data analysis.
-
-# TODO: return function instead of value in dNdz
 """
 
 
@@ -79,11 +77,76 @@ def R_Delta(cosmo, halo_mass, a, Delta=200, is_matter=False) :
 
 
 
-def dNdz(a):
+def dNdz():
     """Calculate the number density of halos per unit redsfhit."""
     z_arr, dNdz_arr = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt",
                                  skiprows=3).T
     a_arr = 1/(1+z_arr)
     F = interp1d(a_arr, dNdz_arr, kind="cubic",
                     bounds_error=False, fill_value=0)
-    return F(a)
+    return F
+
+
+
+
+
+# priors
+Mmin_arr = np.logspace(10, 15, 10)
+M1_arr = np.logspace(10, 15, 10)
+M0_arr = np.logspace(10, 15, 10)
+sigma_arr = np.logspace(0.1, 1, 10)
+alpha_arr = np.linspace(0.5, 1.5, 10)
+fc_arr = np.linspace(0.1, 1, 10)
+
+
+# grid
+points = (Mmin_arr, M1_arr, M0_arr, sigma_arr, alpha_arr, fc_arr)
+G = np.array(np.meshgrid(points)).T.reshape(-1, 6)
+# indices
+P = np.array(np.meshgrid(np.arange(10), np.arange(10), np.arange(10),
+                         np.arange(10), np.arange(10), np.arange(10)))
+P = P.T.reshape(-1, 6)
+
+
+# sampling points
+logMrange=(6, 17)
+mpoints=256
+
+logMmin, logMmax = logMrange
+mpoints = int(mpoints)
+M_arr = np.logspace(logMmin, logMmax, mpoints)
+
+data = np.zeros_like(points)
+
+
+
+ng = np.zeros_like(M_arr)
+for m, M in enumerate(M_arr):
+
+    mfunc = ccl.massfunc(cosmo, M, a, 500/ccl.omega_x(cosmo, a, "matter"))
+
+
+
+# interpolate
+from scipy.interpolate import interpn
+F = interpn(points, data, points)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
