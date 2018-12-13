@@ -135,6 +135,8 @@ class Arnaud(object):
 
         return F
 
+    def overall_normalization(self,cosmo,a) :
+        return 1.
 
     def fourier_profile(self, cosmo, k, M, a, b=0.4):
         """Computes the Fourier transform of the Arnaud profile.
@@ -155,6 +157,8 @@ class NFW(object):
 
         self.kernel = None  # associated window function
 
+    def overall_normalization(self,cosmo,a) :
+        return 1.
 
     def norm(self, cosmo, M, a, Delta=500):
         """Computes the normalisation factor of the Navarro-Frenk-White profile.
@@ -206,6 +210,8 @@ class HOD(object):
 
         self.kernel = kernel.g
 
+    def overall_normalization(self,cosmo,a) :
+        return 1.
 
     def fourier_profile(self, cosmo, k, M, a, Delta=500,
                         Mmin=10**12.1, M1=10**13.65, M0=10**12.2,

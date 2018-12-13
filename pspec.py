@@ -74,6 +74,9 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)  # mass function
     bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)    # halo bias
 
+    norm_U=p1.overall_normalization(cosmo)
+    norm_V=p2.overall_normalization(cosmo)
+    
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
@@ -103,7 +106,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     b2h_2 += n0_2h*prof2_0
     P1h += n0_1h*prof1_0*prof2_0
 
-    F = include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)
+    F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2))/(norm_U*norm_V)
     return F
 
 
