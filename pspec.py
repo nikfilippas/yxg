@@ -10,7 +10,7 @@ import pyccl as ccl
 
 def power_spectrum(cosmo, k_arr, a, p1, p2,
                    logMrange=(6, 17), mpoints=256,
-                   include_1h=True, include_2h=True):
+                   include_1h=True, include_2h=True, **kwargs):
     """Computes the cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -38,9 +38,11 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     mpoints : int
         Number or integration sampling points.
     include_1h : boolean
-        If True, includes the 1-halo contribution
+        If True, includes the 1-halo contribution.
     include_2h : boolean
-        If True, includes the 2-halo contribution
+        If True, includes the 2-halo contribution.
+    **kwargs : keyword arguments
+        Parametrisation of the profiles.
 
     Returns
     -------
@@ -63,25 +65,27 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     """
     # Set up integration boundaries
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
-    mpoints = int(mpoints) # number of integration points
+    mpoints = int(mpoints)        # number of integration points
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
     Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
 
     # Correct from Delta_c to Delta_M if needed
-    delta_matter = p1.Delta/ccl.omega_x(cosmo, a, "matter")
+    try: delta_matter = p1.Delta/ccl.omega_x(cosmo, a, "matter")
+    except AttributeError: delta_matter = 500/ccl.omega_x(cosmo, a, "matter")
+
+    # Profile normalisations
+    Unorm = p1.profnorm(cosmo, a, delta_matter, **kwargs)
+    Vnorm = p2.profnorm(cosmo, a, delta_matter, **kwargs)
 
     # Out-of-loop optimisations
     mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)  # mass function
     bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)    # halo bias
 
-    norm_U=p1.overall_normalization(cosmo)
-    norm_V=p2.overall_normalization(cosmo)
-    
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        U = p1.fourier_profile(cosmo, k_arr, M, a)
-        V = p2.fourier_profile(cosmo, k_arr, M, a)
+        U = p1.fourier_profile(cosmo, k_arr, M, a, delta_matter)
+        V = p2.fourier_profile(cosmo, k_arr, M, a, delta_matter)
 
         I1h[:, m] = mfunc[m]*U*V
         I2h_1[:, m] = bh[m]*mfunc[m]*U
@@ -99,14 +103,14 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     n0_1h = (rhoM - np.sum(mfunc*M_arr) * dlM) / M_arr[0]
     n0_2h = (rhoM - np.sum(mfunc*bh*M_arr) * dlM) / M_arr[0]
 
-    prof1_0 = p1.fourier_profile(cosmo, k_arr, M_arr[0], a)
-    prof2_0 = p2.fourier_profile(cosmo, k_arr, M_arr[0], a)
+    prof1_0 = p1.fourier_profile(cosmo, k_arr, M_arr[0], a, delta_matter)
+    prof2_0 = p2.fourier_profile(cosmo, k_arr, M_arr[0], a, delta_matter)
 
     b2h_1 += n0_2h*prof1_0
     b2h_2 += n0_2h*prof2_0
     P1h += n0_1h*prof1_0*prof2_0
 
-    F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2))/(norm_U*norm_V)
+    F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
     return F
 
 
@@ -114,7 +118,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
 def ang_power_spectrum(cosmo, l_arr, p1, p2,
                        zrange=(1e-6, 6), zpoints=128,
                        logMrange=(6, 17), mpoints=256,
-                       include_1h=True, include_2h=True):
+                       include_1h=True, include_2h=True, **kwargs):
     """Computes the angular cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -137,9 +141,11 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     mpoints : int
         Number or integration sampling points.
     include_1h : boolean
-        If True, includes the 1-halo contribution
+        If True, includes the 1-halo contribution.
     include_2h : boolean
-        If True, includes the 2-halo contribution
+        If True, includes the 2-halo contribution.
+    **kwargs : keyword arguments
+        Parametrisation of the profiles.
 
     Returns
     -------
@@ -182,7 +188,8 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
         k_arr = (l_arr+1/2)/chi
         Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2,
                              logMrange=logMrange, mpoints=mpoints,
-                             include_1h=include_1h, include_2h=include_2h)
+                             include_1h=include_1h, include_2h=include_2h,
+                             **kwargs)
 
         I[:, x] = N[x] * Puv
     Cl = simps(I, x=np.log(z_arr))

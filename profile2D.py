@@ -1,6 +1,4 @@
 """
-- HOD parameters in function definition
-- optimised dNdz
 """
 
 import numpy as np
@@ -8,6 +6,7 @@ from numpy.linalg import lstsq
 from scipy.special import sici
 from scipy.special import erf
 from scipy.integrate import quad
+from scipy.integrate import simps
 from scipy.interpolate import interp1d
 import scipy.constants as u
 from scipy.constants import value as v
@@ -63,6 +62,12 @@ class Arnaud(object):
         self.kernel = kernel.y       # associated window function
 
         self._fourier_interp = self._integ_interp()
+
+
+    def profnorm(self, cosmo, a, Delta, *args):
+        """Computes the overall profile normalisation for the angular cross-
+        correlation calculation."""
+        return 1
 
 
     def norm(self, cosmo, M, a, b=0.4):
@@ -135,10 +140,8 @@ class Arnaud(object):
 
         return F
 
-    def overall_normalization(self,cosmo,a) :
-        return 1.
 
-    def fourier_profile(self, cosmo, k, M, a, b=0.4):
+    def fourier_profile(self, cosmo, k, M, a, Delta, b=0.4):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
@@ -157,10 +160,14 @@ class NFW(object):
 
         self.kernel = None  # associated window function
 
-    def overall_normalization(self,cosmo,a) :
-        return 1.
 
-    def norm(self, cosmo, M, a, Delta=500):
+    def profnorm(self, cosmo, a, Delta, **kwargs):
+        """Computes the overall profile normalisation for the angular
+        cross-correlation calculation."""
+        return 1
+
+
+    def norm(self, cosmo, M, a, Delta):
         """Computes the normalisation factor of the Navarro-Frenk-White profile.
 
         .. note:: Normalisation factor is given in units of ``M_sun/Mpc^3``.
@@ -168,26 +175,30 @@ class NFW(object):
         rho = ccl.rho_x(cosmo, a, "matter")
 
         # Halo Concentration Handling
-        c = ct.concentration_duffy(M, a, is_D500=(Delta==500))
-        if (Delta != 200) and (Delta != 500):
+        c = ct.concentration_duffy(M, a, is_D500=True)
+        Om = ccl.omega_x(cosmo, a, "matter")
+        Deltas = [200, 500, 200/Om, 500/Om]  # Delta (200, 500)*(critical, matter)
+        if Delta not in Deltas :
             raise ValueError("Concentration not implemented for Delta=%d." % Delta)
 
         P = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
         return P
 
 
-    def form_factor(self, cosmo, x, M, a, Delta=500):
+    def form_factor(self, cosmo, x, M, a, Delta):
         """Computes the form factor of the Navarro-Frenk-White profile."""
         c = ccl.halo_concentration(cosmo, M, a, Delta)
         P = 1/(x*c*(1+x*c)**2)
         return P
 
 
-    def fourier_profile(self, cosmo, k, M, a, Delta=500):
+    def fourier_profile(self, cosmo, k, M, a, Delta):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         # Halo Concentration Handling
-        c = ct.concentration_duffy(M, a, is_D500=(Delta==500))
-        if (Delta != 200) and (Delta != 500):
+        c = ct.concentration_duffy(M, a, is_D500=True)
+        Om = ccl.omega_x(cosmo, a, "matter")
+        Deltas = [200, 500, 200/Om, 500/Om]  # Delta (200, 500)*(critical, matter)
+        if Delta not in Deltas :
             raise ValueError("Concentration not implemented for Delta=%d." % Delta)
 
         x = k*ct.R_Delta(cosmo, M, a, Delta)/c
@@ -210,18 +221,47 @@ class HOD(object):
 
         self.kernel = kernel.g
 
-    def overall_normalization(self,cosmo,a) :
-        return 1.
 
-    def fourier_profile(self, cosmo, k, M, a, Delta=500,
-                        Mmin=10**12.1, M1=10**13.65, M0=10**12.2,
-                        sigma_lnM=10**0.5, alpha_sat=1.0, fc=0.8):
+    def profnorm(self, cosmo, a, Delta, **kwargs):
+        """Computes the overall profile normalisation for the angular cross-
+        correlation calculation."""
+        # extract parameters
+        Mmin = kwargs["Mmin"]
+        M0 = kwargs["M0"]
+        M1 = kwargs["M1"]
+        sigma_lnM = kwargs["sigma_lnM"]
+        alpha = kwargs["alpha"]
+        fc = kwargs["fc"]
+
+        logMmin, logMmax = (6, 17) # log of min and max halo mass [Msun]
+        mpoints = int(256)         # number of integration points
+        M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
+
+        mfunc = ccl.massfunc(cosmo, M_arr, a, Delta)                # mass function
+        Nc = 0.5 * (1 + erf((np.log10(M_arr/Mmin))/sigma_lnM))      # centrals
+        Ns = np.heaviside(M_arr-M0, 0.5) * ((M_arr-M0)/M1)**alpha   # satellites
+
+        dng = mfunc*Nc*(fc+Ns)  # integrand
+
+        ng = simps(dng, x=np.log10(M_arr))
+        return ng
+
+
+    def fourier_profile(self, cosmo, k, M, a, Delta, **kwargs):
         """Computes the Fourier transform of the Halo Occupation Distribution.
         Default parameter values from Krause & Eifler (2014).
         """
+        # extract parameters
+        Mmin = kwargs["Mmin"]
+        M0 = kwargs["M0"]
+        M1 = kwargs["M1"]
+        sigma_lnM = kwargs["sigma_lnM"]
+        alpha = kwargs["alpha"]
+        fc = kwargs["fc"]
+
         # HOD Model
-        Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))     # centrals
-        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha_sat  # satellites
+        Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
+        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha   # satellites
 
         H = NFW().fourier_profile(cosmo, k, M, a, Delta)
 
