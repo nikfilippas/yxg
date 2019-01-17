@@ -141,7 +141,7 @@ class Arnaud(object):
         return F
 
 
-    def fourier_profile(self, cosmo, k, M, a, Delta, b=0.4):
+    def fourier_profile(self, cosmo, k, M, a, b=0.4):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
@@ -156,18 +156,19 @@ class NFW(object):
     """Calculate a Navarro-Frenk-White profile quantity of a halo and its
     Fourier transform.
     """
-    def __init__(self):
+    def __init__(self,):
 
+        self.Delta = 500             # reference overdensity (Arnaud et al.)
         self.kernel = None  # associated window function
 
 
-    def profnorm(self, cosmo, a, Delta, **kwargs):
+    def profnorm(self, cosmo, a, **kwargs):
         """Computes the overall profile normalisation for the angular
         cross-correlation calculation."""
         return 1
 
 
-    def norm(self, cosmo, M, a, Delta):
+    def norm(self, cosmo, M, a):
         """Computes the normalisation factor of the Navarro-Frenk-White profile.
 
         .. note:: Normalisation factor is given in units of ``M_sun/Mpc^3``.
@@ -177,31 +178,24 @@ class NFW(object):
         # Halo Concentration Handling
         c = ct.concentration_duffy(M, a, is_D500=True)
         Om = ccl.omega_x(cosmo, a, "matter")
-        Deltas = [200, 500, 200/Om, 500/Om]  # Delta (200, 500)*(critical, matter)
-        if Delta not in Deltas :
-            raise ValueError("Concentration not implemented for Delta=%d." % Delta)
 
-        P = Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
+        P = self.Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
         return P
 
 
-    def form_factor(self, cosmo, x, M, a, Delta):
+    def form_factor(self, cosmo, x, M, a):
         """Computes the form factor of the Navarro-Frenk-White profile."""
-        c = ccl.halo_concentration(cosmo, M, a, Delta)
+        c = ct.concentration_duffy(M,a,is_D500=True)
         P = 1/(x*c*(1+x*c)**2)
         return P
 
 
-    def fourier_profile(self, cosmo, k, M, a, Delta):
+    def fourier_profile(self, cosmo, k, M, a) :
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         # Halo Concentration Handling
         c = ct.concentration_duffy(M, a, is_D500=True)
-        Om = ccl.omega_x(cosmo, a, "matter")
-        Deltas = [200, 500, 200/Om, 500/Om]  # Delta (200, 500)*(critical, matter)
-        if Delta not in Deltas :
-            raise ValueError("Concentration not implemented for Delta=%d." % Delta)
 
-        x = k*ct.R_Delta(cosmo, M, a, Delta)/c
+        x = k*ct.R_Delta(cosmo, M, a, self.Delta, is_matter=False)/(c*a)
 
         Si1, Ci1 = sici((1+c)*x)
         Si2, Ci2 = sici(x)
@@ -213,16 +207,15 @@ class NFW(object):
         F = P1*(P2-P3)
         return F
 
-
-
 class HOD(object):
     """Calculate a Halo Occupation Distribution profile quantity of a halo."""
     def __init__(self):
 
+        self.Delta = 500             # reference overdensity (Arnaud et al.)
         self.kernel = kernel.g
 
 
-    def profnorm(self, cosmo, a, Delta, **kwargs):
+    def profnorm(self, cosmo, a, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         # extract parameters
@@ -237,7 +230,8 @@ class HOD(object):
         mpoints = int(256)         # number of integration points
         M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
 
-        mfunc = ccl.massfunc(cosmo, M_arr, a, Delta)                # mass function
+        delta_matter=self.Delta/ccl.omega_x(cosmo, a, "matter")
+        mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)                # mass function
         Nc = 0.5 * (1 + erf((np.log10(M_arr/Mmin))/sigma_lnM))      # centrals
         Ns = np.heaviside(M_arr-M0, 0.5) * ((M_arr-M0)/M1)**alpha   # satellites
 
@@ -247,7 +241,7 @@ class HOD(object):
         return ng
 
 
-    def fourier_profile(self, cosmo, k, M, a, Delta, **kwargs):
+    def fourier_profile(self, cosmo, k, M, a, **kwargs):
         """Computes the Fourier transform of the Halo Occupation Distribution.
         Default parameter values from Krause & Eifler (2014).
         """
@@ -263,7 +257,7 @@ class HOD(object):
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
         Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha   # satellites
 
-        H = NFW().fourier_profile(cosmo, k, M, a, Delta)
+        H = NFW().fourier_profile(cosmo, k, M, a)
 
         return Nc * (fc + Ns*H)
 

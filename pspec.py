@@ -74,8 +74,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     except AttributeError: delta_matter = 500/ccl.omega_x(cosmo, a, "matter")
 
     # Profile normalisations
-    Unorm = p1.profnorm(cosmo, a, delta_matter, **kwargs)
-    Vnorm = p2.profnorm(cosmo, a, delta_matter, **kwargs)
+    Unorm = p1.profnorm(cosmo, a, **kwargs)
+    Vnorm = p2.profnorm(cosmo, a, **kwargs)
 
     # Out-of-loop optimisations
     mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)  # mass function
@@ -84,8 +84,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        U = p1.fourier_profile(cosmo, k_arr, M, a, delta_matter)
-        V = p2.fourier_profile(cosmo, k_arr, M, a, delta_matter)
+        U = p1.fourier_profile(cosmo, k_arr, M, a)
+        V = p2.fourier_profile(cosmo, k_arr, M, a)
 
         I1h[:, m] = mfunc[m]*U*V
         I2h_1[:, m] = bh[m]*mfunc[m]*U
