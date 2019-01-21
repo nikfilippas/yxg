@@ -64,7 +64,7 @@ class Arnaud(object):
         self._fourier_interp = self._integ_interp()
 
 
-    def profnorm(self, cosmo, a, Delta, *args):
+    def profnorm(self, cosmo, a, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         return 1
@@ -80,10 +80,10 @@ class Arnaud(object):
         h70 = cosmo["h"]/0.7
         P0 = 6.41 # reference pressure
 
-        K = 1.65*h70**2*P0 * (h70/3e14)**(2./3.+aP)  # prefactor
+        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
 
-        Pz = ccl.h_over_h0(cosmo, a)**(8./3.)  # scale factor (z) dependence
-        PM = (M*(1-b))**(2./3.+aP)             # mass dependence
+        Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
+        PM = (M*(1-b))**(2/3+aP)             # mass dependence
         P = K*Pz*PM
         return P
 
@@ -156,9 +156,9 @@ class NFW(object):
     """Calculate a Navarro-Frenk-White profile quantity of a halo and its
     Fourier transform.
     """
-    def __init__(self,):
+    def __init__(self):
 
-        self.Delta = 500             # reference overdensity (Arnaud et al.)
+        self.Delta = 500    # reference overdensity (Arnaud et al.)
         self.kernel = None  # associated window function
 
 
@@ -177,7 +177,6 @@ class NFW(object):
 
         # Halo Concentration Handling
         c = ct.concentration_duffy(M, a, is_D500=True)
-        Om = ccl.omega_x(cosmo, a, "matter")
 
         P = self.Delta/3 * rho * c**3 / (np.log(1+c)-c/(1+c))
         return P
@@ -207,11 +206,13 @@ class NFW(object):
         F = P1*(P2-P3)
         return F
 
+
+
 class HOD(object):
     """Calculate a Halo Occupation Distribution profile quantity of a halo."""
     def __init__(self):
 
-        self.Delta = 500             # reference overdensity (Arnaud et al.)
+        self.Delta = 500  # reference overdensity (Arnaud et al.)
         self.kernel = kernel.g
 
 
@@ -230,10 +231,10 @@ class HOD(object):
         mpoints = int(256)         # number of integration points
         M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
 
-        delta_matter=self.Delta/ccl.omega_x(cosmo, a, "matter")
-        mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)                # mass function
-        Nc = 0.5 * (1 + erf((np.log10(M_arr/Mmin))/sigma_lnM))      # centrals
-        Ns = np.heaviside(M_arr-M0, 0.5) * ((M_arr-M0)/M1)**alpha   # satellites
+        delta_matter = self.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Dm
+        mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)        # mass function
+        Nc = 0.5 * (1 + erf((np.log10(M_arr/Mmin))/sigma_lnM))     # centrals
+        Ns = np.heaviside(M_arr-M0, 0.5) * ((M_arr-M0)/M1)**alpha  # satellites
 
         dng = mfunc*Nc*(fc+Ns)  # integrand
 
