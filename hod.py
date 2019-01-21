@@ -181,23 +181,3 @@ class HODProfile(object) :
             return p1h+p2h,p1h,p2h,np.ones_like(k)/ng,b_hod
         else :
             return p1h+p2h
-
-
-
-lmmin = lambda x: 12*np.ones_like(x)
-sigm = lambda x: 0.5*np.ones_like(x)
-FC = lambda x: 0.8*np.ones_like(x)
-m0 = lambda x: 10**12.2*np.ones_like(x)
-m1 = lambda x: 10**13.65*np.ones_like(x)
-a = lambda x: np.ones_like(x)
-delta_mass = 500
-
-
-Mmin = 1e12
-M0 = 10**12.2
-M1 = 10**13.65
-sigma_lnM = 0.5
-alpha = 1.0
-FC = 0.8
-
-p1 = HODProfile(lmmin, sigm, FC, m0, m1, a, delta_mass)
