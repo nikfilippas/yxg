@@ -146,11 +146,12 @@ class Arnaud(object):
         return F
 
 
-    def fourier_profile(self, cosmo, k, M, a, b=0.4):
+    def fourier_profile(self, cosmo, k, M, a, **kwargs):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
         """
+        b=kwargs["b_hydro"]
         R = ct.R_Delta(cosmo, M, a, self.Delta) / a  # R_Delta*(1+z) [Mpc]
         F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R))
         return 4*np.pi * R**3 * F
@@ -194,7 +195,7 @@ class NFW(object):
         return P
 
 
-    def fourier_profile(self, cosmo, k, M, a) :
+    def fourier_profile(self, cosmo, k, M, a, **kwargs) :
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         # Halo Concentration Handling
         c = ct.concentration_duffy(M, a, is_D500=True)
