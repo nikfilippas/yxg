@@ -74,14 +74,3 @@ def R_Delta(cosmo, halo_mass, a, Delta=200, is_matter=False) :
     prefac = 1.16217766e12 * Delta * omega_factor * c1
 
     return (halo_mass/prefac)**(1/3)
-
-
-
-def dNdz():
-    """Calculate the number density of halos per unit redsfhit."""
-    z_arr, dNdz_arr = np.loadtxt("data/2MPZ_histog_Lorentz_2.txt",
-                                 skiprows=3).T
-    a_arr = 1/(1+z_arr)
-    F = interp1d(a_arr, dNdz_arr, kind="cubic",
-                    bounds_error=False, fill_value=0)
-    return F

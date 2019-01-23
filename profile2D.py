@@ -59,11 +59,16 @@ class Arnaud(object):
         self.rrange = rrange         # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = 500             # reference overdensity (Arnaud et al.)
-        self.kernel = kernel.y       # associated window function
 
         self._fourier_interp = self._integ_interp()
 
+        
+    def kernel(self,cosmo,a, **kwargs):
+        """The thermal Sunyaev-Zel'dovich anisotropy window function."""
+        prefac = 4.017100792437957e-06 # avoid recomputing every time
+        return prefac*a
 
+    
     def profnorm(self, cosmo, a, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
@@ -141,11 +146,12 @@ class Arnaud(object):
         return F
 
 
-    def fourier_profile(self, cosmo, k, M, a, b=0.4):
+    def fourier_profile(self, cosmo, k, M, a, **kwargs):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
         """
+        b=kwargs["b_hydro"]
         R = ct.R_Delta(cosmo, M, a, self.Delta) / a  # R_Delta*(1+z) [Mpc]
         F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R))
         return 4*np.pi * R**3 * F
@@ -156,12 +162,12 @@ class NFW(object):
     """Calculate a Navarro-Frenk-White profile quantity of a halo and its
     Fourier transform.
     """
-    def __init__(self):
+    def __init__(self,kernel=None):
 
         self.Delta = 500    # reference overdensity (Arnaud et al.)
-        self.kernel = None  # associated window function
+        self.kernel = kernel  # associated window function
 
-
+        
     def profnorm(self, cosmo, a, **kwargs):
         """Computes the overall profile normalisation for the angular
         cross-correlation calculation."""
@@ -189,7 +195,7 @@ class NFW(object):
         return P
 
 
-    def fourier_profile(self, cosmo, k, M, a) :
+    def fourier_profile(self, cosmo, k, M, a, **kwargs) :
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         # Halo Concentration Handling
         c = ct.concentration_duffy(M, a, is_D500=True)
@@ -210,12 +216,20 @@ class NFW(object):
 
 class HOD(object):
     """Calculate a Halo Occupation Distribution profile quantity of a halo."""
-    def __init__(self):
-
+    def __init__(self,nz_file=None):
+        from scipy.interpolate import interp1d
         self.Delta = 500  # reference overdensity (Arnaud et al.)
-        self.kernel = kernel.g
+        z,nz=np.loadtxt(nz_file,unpack=True)
+        self.nzf=interp1d(z,nz,bounds_error=False,fill_value=0)
 
+        
+    def kernel(self,cosmo,a) :
+        """The galaxy number overdensity window function."""
+        unit_norm=3.3356409519815205e-04 #1/c
+        Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
+        return Hz*unit_norm * self.nzf(1./a-1)
 
+    
     def profnorm(self, cosmo, a, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
@@ -261,34 +275,3 @@ class HOD(object):
         H = NFW().fourier_profile(cosmo, k, M, a)
 
         return Nc * (fc + Ns*H)
-
-
-
-class kernel(object):
-    """Window function definitions.
-
-    This class contains definitions for all used window functions (kernels)
-    for computation of the angular power spectrum. Multiplying the window
-    function with its corresponding profile normalisation factor yields units
-    of ``1/L``.
-    """
-    def y(cosmo, a):
-        """The thermal Sunyaev-Zel'dovich anisotropy window function."""
-#        sigma = v("Thomson cross section")
-#        prefac = sigma/(u.m_e*u.c**2)
-#        # normalisation
-#        J2eV = 1/v("electron volt")
-#        cm2m = u.centi
-#        m2Mpc = 1/(u.mega*u.parsec)
-#        unit_norm = J2eV * cm2m**3 * m2Mpc
-#        prefac/=unit_norm
-        prefac = 4.017100792437957e-06 # avoid recomputing every time
-        return prefac*a
-
-
-    def g(cosmo, a):
-        """The galaxy number overdensity window function."""
-        unit_norm = 1/(u.c/u.kilo)  # [s/km]
-        Hz = ccl.h_over_h0(cosmo, a)*cosmo["H0"]  # [km/(s Mpc)]
-
-        return Hz*unit_norm * ct.dNdz()(a)
