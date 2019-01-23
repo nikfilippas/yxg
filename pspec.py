@@ -129,7 +129,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     zmin, zmax = zrange
     # Distance measures & out-of-loop optimisations
     if is_zlog:
-        z_arr = np.exp(np.linspace(np.log(zmin), np.log(zmax), zpoints))
+        z_arr = np.geomspace(zmin, zmax, zpoints)
         jacob = z_arr
         x_arr= np.log(z_arr)
     else:
