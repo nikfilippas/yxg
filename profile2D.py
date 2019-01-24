@@ -190,7 +190,7 @@ class HOD(object):
 
         self.Delta = 500  # reference overdensity (Arnaud et al.)
         z, nz = np.loadtxt(nz_file, unpack=True)
-        self.nzf=interp1d(z, nz, bounds_error=False, fill_value=0)
+        self.nzf = interp1d(z, nz, bounds_error=False, fill_value=0)
 
 
     def kernel(self, cosmo, a):
