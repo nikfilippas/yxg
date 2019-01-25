@@ -1,8 +1,9 @@
 # Directories
 __pycache__/
 
-# temp script
-#temp.py
+# Unused data files
+analysis/out_ns512_linlog/*.dat
+analysis/out_ns512_linlog/*.npz
 
 # covars
 images/clgg.pdf
