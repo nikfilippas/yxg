@@ -126,17 +126,17 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     # Distance measures & out-of-loop optimisations
     if is_zlog:
         z_arr = np.geomspace(zmin, zmax, zpoints)
-        jacob = z_arr
+        jac = z_arr
         x_arr= np.log(z_arr)
     else:
         z_arr = np.linspace(zmin, zmax, zpoints)
-        jacob = 1
+        jac = 1
         x_arr = z_arr
     a_arr = 1/(1+z_arr)
     chi_arr = ccl.comoving_radial_distance(cosmo, 1/(1+z_arr))
 
     c1 = ccl.h_over_h0(cosmo,a_arr)*cosmo["h"]
-    invh_arr = 2997.92458 * jacob/c1 # c*z/H(z)
+    invh_arr = 2997.92458 * jac/c1 # c*z/H(z)
 
     # Window functions
     Wu = p1.kernel(cosmo, a_arr)

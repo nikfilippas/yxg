@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import minimize
 import emcee
 import pyccl as ccl
 
@@ -40,7 +41,7 @@ cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 nz = "data/2MPZ_histog_Lorentz_2.txt"
 prof = profile2D.HOD(nz_file=nz)
 
-kwargs = {"Mmin"      : 1e12,
+kwargs = {"Mmin"      : 10**12,
           "M0"        : 10**12.2,
           "M1"        : 10**13.65,
           "sigma_lnM" : 0.5,
@@ -52,6 +53,17 @@ Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
 plt.loglog(ells, Cl)
 
 
+I = np.linalg.inv(covar)  # inverse covariance
 
-chi2 = np.sum((cells - Cl)**2/np.diag(covar))
-lnprob = -0.5 * chi2
+def func(*args):
+    """The function to be minimised."""
+    params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc"]
+    kwargs = dict(zip(params, args))
+
+    Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
+    chi2 = np.dot(cells-Cl, np.dot(I, cells-Cl))
+    lnprob = -0.5 * chi2
+    return -lnprob
+
+p0 = [10**12, 10**12.2, 10**13.65, 0.5, 1.0, 0.8]
+minimize(func, p0, args=p0, method="Powell")
