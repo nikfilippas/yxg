@@ -31,7 +31,7 @@ predir_out+="_ns%d"%nside_use
 if use_linlog :
     predir_out+='_linlog'
 else :
-    predir_out='_nb%d'%nlb_use
+    predir_out+='_nb%d'%nlb_use
 os.system("mkdir -p "+predir_out)
     
 def read_map(name,fname,nside_out,field=0) :

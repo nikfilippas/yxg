@@ -4,6 +4,8 @@ __pycache__/
 # Unused data files
 analysis/out_ns512_linlog/*.dat
 analysis/out_ns512_linlog/*.npz
+analysis/out_ns512_nb20/*.dat
+analysis/out_ns512_nb20/*.npz
 
 # covars
 images/clgg.pdf
