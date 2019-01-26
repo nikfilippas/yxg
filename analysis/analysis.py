@@ -18,6 +18,8 @@ parser.add_option("--linlog_binning",dest='use_linlog',default=False,action='sto
                   help="Use hybrid lin-log binning for bandpowers")
 parser.add_option("--nlb",dest='nlb',default=20,type=int,
                   help="If using linear bandpowers, this is the bandpowers width")
+parser.add_option("--sz-mask",dest='sz_mask',default="data/maps/mask_planck60.fits",type=str,
+                  help="Path to file containing the mask that should be used for the SZ maps.")
 (o, args) = parser.parse_args()
 
 #TODO: y beam
@@ -25,6 +27,7 @@ nside_use=o.nside
 recreate=o.recreate
 use_linlog=o.use_linlog
 nlb_use=o.nlb
+fname_sz_mask=o.sz_mask
 
 predir_out='out'
 predir_out+="_ns%d"%nside_use
@@ -32,7 +35,7 @@ if use_linlog :
     predir_out+='_linlog'
 else :
     predir_out+='_nb%d'%nlb_use
-os.system("mkdir -p "+predir_out)
+os.system("mkdir -p "+predir_out+'/plots')
     
 def read_map(name,fname,nside_out,field=0) :
     print("  Reading "+name)
@@ -156,7 +159,7 @@ l_eff=bb.get_effective_ells()
 print("Reading masks")
 mask_lowz=read_map('mask_lowz','data/maps/mask_v3.fits',nside_use)
 mask_sdss=read_map('mask_sdss','data/maps/BOSS_dr12_mask256_v2.fits',nside_use)
-mask_y=read_map('mask_y','data/maps/mask_planck60.fits',nside_use)
+mask_y=read_map('mask_y',fname_sz_mask,nside_use)
 masks={'2mpz':mask_lowz,'wisc_b1':mask_lowz,'wisc_b2':mask_lowz,
        'wisc_b3':mask_lowz,'wisc_b4':mask_lowz,'wisc_b5':mask_lowz,
        'sdss_b1':mask_sdss,'sdss_b2':mask_sdss,'sdss_b3':mask_sdss,
@@ -257,14 +260,14 @@ for i in np.arange(np.sum(mask_cls)) :
 plt.legend(loc='lower left',ncol=3);
 plt.xscale('log'); plt.yscale('log'); #plt.ylim([5E-15,5E-10])
 plt.xlabel('$\\ell$',fontsize=15); plt.ylabel('$C^{gg}_\\ell$',fontsize=15)
-plt.savefig('plots/clgg.pdf',bbox_inches='tight')
+plt.savefig(predir_out+'/plots/clgg.pdf',bbox_inches='tight')
 
 def get_corr(c) :
     return c#/np.sqrt(np.diag(c)[:,None]*np.diag(c)[None,:])
 
 cov=covar_masked.reshape([15*nell,15*nell])
 plt.figure(); plt.imshow(np.log10(np.fabs(get_corr(cov))),interpolation='nearest')
-plt.savefig('plots/covar_auto.pdf',bbox_inches='tight')
+plt.savefig(predir_out+'/plots/covar_auto.pdf',bbox_inches='tight')
 
 #MILCA
 mask_cls=np.zeros(ncross,dtype=bool)
@@ -287,11 +290,11 @@ for i in np.arange(np.sum(mask_cls)) :
 plt.legend(loc='lower left',ncol=3);
 plt.xscale('log'); plt.yscale('log'); plt.ylim([5E-15,5E-10])
 plt.xlabel('$\\ell$',fontsize=15); plt.ylabel('$C^{yg}_\\ell$',fontsize=15)
-plt.savefig('plots/clyg_milca.pdf',bbox_inches='tight')
+plt.savefig(predir_out+'/plots/clyg_milca.pdf',bbox_inches='tight')
 
 cov=covar_masked.reshape([15*nell,15*nell])
 plt.figure(); plt.imshow(np.log10(np.fabs(get_corr(cov))),interpolation='nearest')
-plt.savefig('plots/covar_milca.pdf',bbox_inches='tight')
+plt.savefig(predir_out+'/plots/covar_milca.pdf',bbox_inches='tight')
 
 #NILC
 mask_cls=np.zeros(ncross,dtype=bool)
@@ -314,9 +317,9 @@ for i in np.arange(np.sum(mask_cls)) :
 plt.legend(loc='lower left',ncol=3);
 plt.xscale('log'); plt.yscale('log'); plt.ylim([5E-15,5E-10])
 plt.xlabel('$\\ell$',fontsize=15); plt.ylabel('$C^{yg}_\\ell$',fontsize=15)
-plt.savefig('plots/clyg_nilc.pdf',bbox_inches='tight')
+plt.savefig(predir_out+'/plots/clyg_nilc.pdf',bbox_inches='tight')
 
 cov=covar_masked.reshape([15*nell,15*nell])
 plt.figure(); plt.imshow(np.log10(np.fabs(get_corr(cov))),interpolation='nearest')
-plt.savefig('plots/covar_nilc.pdf',bbox_inches='tight')
+plt.savefig(predir_out+'/plots/covar_nilc.pdf',bbox_inches='tight')
 plt.show()
