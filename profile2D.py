@@ -38,7 +38,7 @@ class Arnaud(object):
 
     def kernel(self, cosmo, a, **kwargs):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
-        prefac = 4.017100792437957e-06 # avoid recomputing every time
+        prefac = 4.017100792437957e-06  # avoid recomputing every time
         return prefac*a
 
 
@@ -204,9 +204,9 @@ class HOD(object):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         # extract parameters
-        Mmin = kwargs["Mmin"]
-        M0 = kwargs["M0"]
-        M1 = kwargs["M1"]
+        Mmin = 10**kwargs["Mmin"]
+        M0 = 10**kwargs["M0"]
+        M1 = 10**kwargs["M1"]
         sigma_lnM = kwargs["sigma_lnM"]
         alpha = kwargs["alpha"]
         fc = kwargs["fc"]
@@ -231,9 +231,9 @@ class HOD(object):
         Default parameter values from Krause & Eifler (2014).
         """
         # extract parameters
-        Mmin = kwargs["Mmin"]
-        M0 = kwargs["M0"]
-        M1 = kwargs["M1"]
+        Mmin = 10**kwargs["Mmin"]
+        M0 = 10**kwargs["M0"]
+        M1 = 10**kwargs["M1"]
         sigma_lnM = kwargs["sigma_lnM"]
         alpha = kwargs["alpha"]
         fc = kwargs["fc"]

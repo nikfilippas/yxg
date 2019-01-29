@@ -4,8 +4,6 @@ retrieval and data analysis.
 """
 
 
-import numpy as np
-from scipy.interpolate import interp1d
 import pyccl as ccl
 
 
