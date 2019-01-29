@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.optimize import minimize
-from scipy.optimize import Bounds
 import emcee
 import pyccl as ccl
 
@@ -56,7 +55,15 @@ def func(args):
     Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
     chi2 = np.dot(cells-Cl, np.dot(I, cells-Cl))
     lnprob = -0.5 * chi2
-    return -lnprob
+    return lnprob
+
+
+Neval = 1
+def callbackf(X):
+    global Neval
+    print("{0:4d}   {1: 3.6f}   {2: 3.6f}   {3: 3.6f}   {4: 3.6f}   {5: 3.6f}   {6: 3.6f}".format(Neval, X[0], X[1], X[2], X[3], X[4], X[5]))
+    Neval += 1
+
 
 p0 = [12, 12.2, 13.65, 0.5, 1.0, 0.8]
 bds = [(6, 17),     # Mmin
@@ -65,7 +72,9 @@ bds = [(6, 17),     # Mmin
        (0.1, 1),    # sigma_lnM
        (0.5, 1.5),  # alpha
        (0.1, 1.0)]  # fc
-res = minimize(func, p0, method="Powell")
+res = minimize(func, p0, method="Powell",
+               bounds=bds, callback=callbackf,
+               options={"maxiter" : 6000})
 
 
 ### PLOTS ##
