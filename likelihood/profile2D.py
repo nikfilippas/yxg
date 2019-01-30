@@ -207,9 +207,9 @@ class HOD(object):
         Mmin = 10**kwargs["Mmin"]
         M0 = 10**kwargs["M0"]
         M1 = 10**kwargs["M1"]
-        sigma_lnM = 10**kwargs["sigma_lnM"]
-        alpha = 10**kwargs["alpha"]
-        fc = 10**kwargs["fc"]
+        sigma_lnM = kwargs["sigma_lnM"]
+        alpha = kwargs["alpha"]
+        fc = kwargs["fc"]
 
 
         logMmin, logMmax = (6, 17) # log of min and max halo mass [Msun]
