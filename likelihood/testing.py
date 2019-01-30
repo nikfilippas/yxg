@@ -38,10 +38,11 @@ kwargs = {"Mmin"      : 12,
           "alpha"     : 1.0,
           "fc"        : 0.8}
 
-Cl1 = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
-Cl2 = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=True, **kwargs)
+Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=True, **kwargs)
 
 plt.figure()
-plt.loglog(ells, cells, "rs")
-plt.loglog(ells, Cl1)
-plt.loglog(ells, Cl2)
+plt.errorbar(ells, cells, err_ell, fmt="rs")
+plt.loglog(ells, Cl)
+plt.xlabel('$\\ell$',fontsize=15)
+plt.ylabel('$C_\\ell$',fontsize=15)
+plt.savefig("../images/clgg_fit.pdf")

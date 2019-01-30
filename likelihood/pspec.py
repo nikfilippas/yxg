@@ -40,22 +40,22 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     **kwargs : keyword arguments
         Parametrisation of the profiles.
     """
+    # Profile normalisations
+    Unorm = p1.profnorm(cosmo, a, **kwargs)
+    Vnorm = p2.profnorm(cosmo, a, **kwargs)
+    if (Unorm < 1E-16) or (Vnorm < 1E-16):
+        return None
+
     # Set up integration boundaries
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
     mpoints = int(mpoints)        # number of integration points
     M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
-    Pl = ccl.linear_matter_power(cosmo, k_arr, a)  # linear matter power spectrum
-
-    # Profile normalisations
-    Unorm = p1.profnorm(cosmo, a, **kwargs)
-    Vnorm = p2.profnorm(cosmo, a, **kwargs)
-    if (Unorm<=1E-16) or (Vnorm<=1E-16) :
-        return None
+    Pl = ccl.linear_matter_power(cosmo, k_arr, a)   # linear matter power spectrum
 
     # Out-of-loop optimisations
     delta_matter = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
-    mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)  # mass function
-    bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)    # halo bias
+    mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)      # mass function
+    bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)        # halo bias
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
@@ -152,8 +152,10 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
                              logMrange=logMrange, mpoints=mpoints,
                              include_1h=include_1h, include_2h=include_2h,
                              **kwargs)
-        if Puv is None :
+        if Puv is None:
             return None
+
         I[:, x] = N[x] * Puv
+
     Cl = simps(I, x=x_arr)
     return Cl
