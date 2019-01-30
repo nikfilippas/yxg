@@ -257,6 +257,41 @@ Using the same approximation, the 1-halo term reads:
   &=(2\pi)^3\delta^{\cal D}({\bf k}-{\bf q})\int dM\,n(M)\,\left[\left\langle u(k|M)\right\rangle_p\left\langle v^*(k|M)\right\rangle_p+{\rm Cov}_p\left(u(k|M),v(k|M)\right)\right]
 \end{align}
 
+\subsection{The HOD example}
+In the case of HOD modelling of the galaxy overdensity, the galaxy density profile is modelled as:
+\begin{equation}
+  u({\bf r})=N_c\,\delta^{\cal D}({\bf r})+n_s({\bf r}),
+\end{equation}
+where $N_c$ is the number of central galaxies in the halo and $n_s$ is the density profile of satellite galaxies. Most commonly, $N_c$ is assumed to be either 0 or 1, and therefore has a Bernoulli distribution with probability $P(N_c=1|M)=1-P(N_c=0|M)\equiv \bar{N}_c(M)$. The satellite galaxies are usually assumed to be Poisson-distributed around a profile that is proportional to the NFW profile ($u_{\rm NFW}({\bf r}|M)$), as long as the halo already has a central galaxy. The last statement means that the number of satellite galaxies found in a differential volume element $d{\bf r}^3$ around ${\bf r}$ has a conditional distribution
+\begin{equation}
+ P(n_s({\bf r})\,d{\bf r}^3=N_s|N_c,M)=
+ \left\{\begin{array}{lll}
+          1 & {\rm if} & N_c=0\,{\rm and}\,N_s=0\\
+          0 & {\rm if} & N_c=0\,{\rm and}\,N_s>0\\
+          e^{-\lambda}\frac{\lambda^{N_s}}{N_s!} & {\rm if} & N_c=1
+        \end{array}\right.
+\end{equation}
+where $\lambda\equiv d{\bf r}^3\bar{N_s}(M)\,u_{\rm NFW}({\bf r}|M)$. Furthermore, the number of galaxies found in different volume elements are independent. The mean and variance of this distribution are:
+\begin{equation}
+ {\rm E}(n_s({\bf r})\,d{\bf r}^3|M)={\rm Var}(n_s({\bf r})\,d{\bf r}^3|M)=d{\bf r}^3 \bar{N}_s(M)\,u_{\rm NFW}({\bf r}|M).
+\end{equation}
+
+Using this model, the mean Fourier profile becomes
+\begin{align}
+ \langle u({\bf k})\rangle
+ &=\left\langle \sum_{\bf r} d{\bf r}^3 \left[N_c\,\delta^{\cal D}({\bf r})+n_s({\bf r})\right]e^{-i{\bf k}{\bf r}}\right\rangle\\
+ &=\bar{N_c}\left[1+\bar{N}_s\,u_{\rm NFW}(k|M)\right]\\
+\end{align}
+and its variance is
+\begin{align}
+\langle |u({\bf k})|^2\rangle
+ &=\left\langle \sum_{\bf x} d{\bf x}^3\sum_{\bf y} d{\bf y}^3 \left[N_c\,\delta^{\cal D}({\bf x})+n_s({\bf x})\right]\,\left[N_c\,\delta^{\cal D}({\bf y})+n_s({\bf y})\right]e^{i{\bf k}({\bf y}-{\bf x})}\right\rangle\\ 
+ &=\bar{N}_c\left(\left[1+\bar{N}_s\,u_{\rm NFW}({\bf k})\right]^2+\bar{N}_s\right)
+\end{align}
+
+
+
+
 \bibliography{notes}
 \bibliographystyle{habbrv}
 \end{document}
