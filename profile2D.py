@@ -195,7 +195,7 @@ class HOD(object):
 
     def kernel(self, cosmo, a):
         """The galaxy number overdensity window function."""
-        unit_norm = 3.3356409519815205e-04  # 1/c
+        unit_norm = 3.3356409519815204e-04  # 1/c
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
         return Hz*unit_norm * self.nzf(1/a-1)
 
@@ -204,12 +204,13 @@ class HOD(object):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         # extract parameters
-        Mmin = 10**kwargs["Mmin"]
-        M0 = 10**kwargs["M0"]
-        M1 = 10**kwargs["M1"]
-        sigma_lnM = kwargs["sigma_lnM"]
-        alpha = kwargs["alpha"]
-        fc = kwargs["fc"]
+        Mmin = 10**kwargs["Mmin"] if (6 <= kwargs["Mmin"] <= 17) else -np.inf
+        M0 = 10**kwargs["M0"] if (6 <= kwargs["M0"] <= 17) else -np.inf
+        M1 = 10**kwargs["M1"] if (6 <= kwargs["M1"] <= 17) else -np.inf
+        sigma_lnM = 10**kwargs["sigma_lnM"] if (0.1 <= kwargs["sigma_lnM"] <= 1.0) else -np.inf
+        alpha = 10**kwargs["alpha"] if (0.5 <= kwargs["alpha"] <= 1.5) else -np.inf
+        fc = 10**kwargs["fc"] if (0.1 <= kwargs["fc"] <= 1.0) else -np.inf
+
 
         logMmin, logMmax = (6, 17) # log of min and max halo mass [Msun]
         mpoints = int(256)         # number of integration points
@@ -231,12 +232,12 @@ class HOD(object):
         Default parameter values from Krause & Eifler (2014).
         """
         # extract parameters
-        Mmin = 10**kwargs["Mmin"]
-        M0 = 10**kwargs["M0"]
-        M1 = 10**kwargs["M1"]
-        sigma_lnM = kwargs["sigma_lnM"]
-        alpha = kwargs["alpha"]
-        fc = kwargs["fc"]
+        Mmin = 10**kwargs["Mmin"] if (6 <= kwargs["Mmin"] <= 17) else -np.inf
+        M0 = 10**kwargs["M0"] if (6 <= kwargs["M0"] <= 17) else -np.inf
+        M1 = 10**kwargs["M1"] if (6 <= kwargs["M1"] <= 17) else -np.inf
+        sigma_lnM = kwargs["sigma_lnM"] if (0.1 <= kwargs["sigma_lnM"] <= 1.0) else -np.inf
+        alpha = kwargs["alpha"] if (0.5 <= kwargs["alpha"] <= 1.5) else -np.inf
+        fc = kwargs["fc"] if (0.1 <= kwargs["fc"] <= 1.0) else -np.inf
 
         # HOD Model
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals

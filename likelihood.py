@@ -66,15 +66,7 @@ def callbackf(X):
 
 
 p0 = [12, 12.2, 13.65, 0.5, 1.0, 0.8]
-bds = [(6, 17),     # Mmin
-       (6, 17),     # M0
-       (6, 17),     # M1
-       (0.1, 1),    # sigma_lnM
-       (0.5, 1.5),  # alpha
-       (0.1, 1.0)]  # fc
-res = minimize(func, p0, method="Powell",
-               bounds=bds, callback=callbackf,
-               options={"maxiter" : 6000})
+res = minimize(func, p0, method="Powell", callback=callbackf, options={"maxiter" : 6000})
 
 
 ### PLOTS ##
