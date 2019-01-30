@@ -49,6 +49,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # Profile normalisations
     Unorm = p1.profnorm(cosmo, a, **kwargs)
     Vnorm = p2.profnorm(cosmo, a, **kwargs)
+    if (Unorm<=1E-16) or (Vnorm<=1E-16) :
+        return None
 
     # Out-of-loop optimisations
     delta_matter = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
@@ -150,7 +152,8 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
                              logMrange=logMrange, mpoints=mpoints,
                              include_1h=include_1h, include_2h=include_2h,
                              **kwargs)
-
+        if Puv is None :
+            return None
         I[:, x] = N[x] * Puv
     Cl = simps(I, x=x_arr)
     return Cl

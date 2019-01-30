@@ -204,12 +204,12 @@ class HOD(object):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         # extract parameters
-        Mmin = 10**kwargs["Mmin"] if (6 <= kwargs["Mmin"] <= 17) else -np.inf
-        M0 = 10**kwargs["M0"] if (6 <= kwargs["M0"] <= 17) else -np.inf
-        M1 = 10**kwargs["M1"] if (6 <= kwargs["M1"] <= 17) else -np.inf
-        sigma_lnM = 10**kwargs["sigma_lnM"] if (0.1 <= kwargs["sigma_lnM"] <= 1.0) else -np.inf
-        alpha = 10**kwargs["alpha"] if (0.5 <= kwargs["alpha"] <= 1.5) else -np.inf
-        fc = 10**kwargs["fc"] if (0.1 <= kwargs["fc"] <= 1.0) else -np.inf
+        Mmin = 10**kwargs["Mmin"]
+        M0 = 10**kwargs["M0"]
+        M1 = 10**kwargs["M1"]
+        sigma_lnM = 10**kwargs["sigma_lnM"]
+        alpha = 10**kwargs["alpha"]
+        fc = 10**kwargs["fc"]
 
 
         logMmin, logMmax = (6, 17) # log of min and max halo mass [Msun]
@@ -232,12 +232,12 @@ class HOD(object):
         Default parameter values from Krause & Eifler (2014).
         """
         # extract parameters
-        Mmin = 10**kwargs["Mmin"] if (6 <= kwargs["Mmin"] <= 17) else -np.inf
-        M0 = 10**kwargs["M0"] if (6 <= kwargs["M0"] <= 17) else -np.inf
-        M1 = 10**kwargs["M1"] if (6 <= kwargs["M1"] <= 17) else -np.inf
-        sigma_lnM = kwargs["sigma_lnM"] if (0.1 <= kwargs["sigma_lnM"] <= 1.0) else -np.inf
-        alpha = kwargs["alpha"] if (0.5 <= kwargs["alpha"] <= 1.5) else -np.inf
-        fc = kwargs["fc"] if (0.1 <= kwargs["fc"] <= 1.0) else -np.inf
+        Mmin = 10**kwargs["Mmin"]
+        M0 = 10**kwargs["M0"]
+        M1 = 10**kwargs["M1"]
+        sigma_lnM = kwargs["sigma_lnM"]
+        alpha = kwargs["alpha"]
+        fc = kwargs["fc"]
 
         # HOD Model
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals

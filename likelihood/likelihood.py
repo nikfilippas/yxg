@@ -9,8 +9,8 @@ import profile2D
 
 
 ## DATA ##
-dcl = np.load("cl_2mpz_2mpz.npz")
-dcov = np.load("cov_2mpz_2mpz_2mpz_2mpz.npz")
+dcl = np.load("../analysis/out_ns512_linlog/cl_2mpz_2mpz.npz")
+dcov = np.load("../analysis/out_ns512_linlog/cov_2mpz_2mpz_2mpz_2mpz.npz")
 
 # x-data
 ells = dcl['leff']
@@ -32,7 +32,7 @@ err_ell = np.sqrt(np.diag(covar))
 ## MODEL ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 
-nz = "data/2MPZ_histog_Lorentz_2.txt"
+nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)
 
 kwargs = {"Mmin"      : 12,
@@ -51,11 +51,16 @@ def func(args):
     """The function to be minimised."""
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc"]
     kwargs = dict(zip(params, args))
+    if (kwargs["Mmin"]>17) or (kwargs["Mmin"]<6) :
+        lnprob=-np.inf
+    else :
+        Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
+        if Cl is None :
+            lnprob=-np.inf
+        else :
+            lnprob=-0.5*np.dot(cells-Cl, np.dot(I, cells-Cl))
 
-    Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
-    chi2 = np.dot(cells-Cl, np.dot(I, cells-Cl))
-    lnprob = -0.5 * chi2
-    return lnprob
+    return -lnprob
 
 
 Neval = 1
@@ -66,6 +71,7 @@ def callbackf(X):
 
 
 p0 = [12, 12.2, 13.65, 0.5, 1.0, 0.8]
+func(p0)
 res = minimize(func, p0, method="Powell", callback=callbackf, options={"maxiter" : 6000})
 
 
