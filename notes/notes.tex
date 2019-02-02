@@ -260,9 +260,9 @@ Using the same approximation, the 1-halo term reads:
 \subsection{The HOD example}
 In the case of HOD modelling of the galaxy overdensity, the galaxy density profile is modelled as:
 \begin{equation}
-  u({\bf r})=N_c\,\delta^{\cal D}({\bf r})+n_s({\bf r}),
+  u({\bf r})=n_g^{-1}\left[N_c\,\delta^{\cal D}({\bf r})+n_s({\bf r})\right],
 \end{equation}
-where $N_c$ is the number of central galaxies in the halo and $n_s$ is the density profile of satellite galaxies. Most commonly, $N_c$ is assumed to be either 0 or 1, and therefore has a Bernoulli distribution with probability $P(N_c=1|M)=1-P(N_c=0|M)\equiv \bar{N}_c(M)$. The satellite galaxies are usually assumed to be Poisson-distributed around a profile that is proportional to the NFW profile ($u_{\rm NFW}({\bf r}|M)$), as long as the halo already has a central galaxy. The last statement means that the number of satellite galaxies found in a differential volume element $d{\bf r}^3$ around ${\bf r}$ has a conditional distribution
+where $n_g$ is the total mean density of galaxies, $N_c$ is the number of central galaxies in the halo and $n_s$ is the density profile of satellite galaxies. Most commonly, $N_c$ is assumed to be either 0 or 1, and therefore has a Bernoulli distribution with probability $P(N_c=1|M)=1-P(N_c=0|M)\equiv \bar{N}_c(M)$. The satellite galaxies are usually assumed to be Poisson-distributed around a profile that is proportional to the NFW profile ($u_{\rm NFW}({\bf r}|M)$), as long as the halo already has a central galaxy. The last statement means that the number of satellite galaxies found in a differential volume element $d{\bf r}^3$ around ${\bf r}$ has a conditional distribution
 \begin{equation}
  P(n_s({\bf r})\,d{\bf r}^3=N_s|N_c,M)=
  \left\{\begin{array}{lll}
@@ -279,14 +279,25 @@ where $\lambda\equiv d{\bf r}^3\bar{N_s}(M)\,u_{\rm NFW}({\bf r}|M)$. Furthermor
 Using this model, the mean Fourier profile becomes
 \begin{align}
  \langle u({\bf k})\rangle
- &=\left\langle \sum_{\bf r} d{\bf r}^3 \left[N_c\,\delta^{\cal D}({\bf r})+n_s({\bf r})\right]e^{-i{\bf k}{\bf r}}\right\rangle\\
- &=\bar{N_c}\left[1+\bar{N}_s\,u_{\rm NFW}(k|M)\right]\\
+ &=\left\langle n_g^{-1}\sum_{\bf r} d{\bf r}^3 \left[N_c\,\delta^{\cal D}({\bf r})+n_s({\bf r})\right]e^{-i{\bf k}{\bf r}}\right\rangle\\
+ &=n_g^{-1}\bar{N_c}\left[1+\bar{N}_s\,u_{\rm NFW}(k|M)\right]\\
 \end{align}
 and its variance is
 \begin{align}
-\langle |u({\bf k})|^2\rangle
- &=\left\langle \sum_{\bf x} d{\bf x}^3\sum_{\bf y} d{\bf y}^3 \left[N_c\,\delta^{\cal D}({\bf x})+n_s({\bf x})\right]\,\left[N_c\,\delta^{\cal D}({\bf y})+n_s({\bf y})\right]e^{i{\bf k}({\bf y}-{\bf x})}\right\rangle\\ 
- &=\bar{N}_c\left(\left[1+\bar{N}_s\,u_{\rm NFW}({\bf k})\right]^2+\bar{N}_s\right)
+  \langle |u({\bf k})|^2\rangle
+  &=n_g^{-2}\left\langle \sum_{\bf x} d{\bf x}^3\sum_{\bf y} d{\bf y}^3 \left[N_c\,\delta^{\cal D}({\bf x})+n_s({\bf x})\right]\,\left[N_c\,\delta^{\cal D}({\bf y})+n_s({\bf y})\right]e^{i{\bf k}({\bf y}-{\bf x})}\right\rangle\\ 
+  &=n_g^{-2}\bar{N}_c\left(\left[1+\bar{N}_s\,u_{\rm NFW}({\bf k})\right]^2+\bar{N}_s\right)
+\end{align}
+
+So far we have ignored the total galaxy density $n_g$. This is simply given by 
+\begin{equation}
+  n_g=\int dM\,n(M)\,\bar{N}_c(M)\left(1+\bar{N}_s(M)\right).
+\end{equation}
+We have also ignored the fact that we need to subtract the shot-noise contribution from the total galaxy power spectrum. This is given by $1/n_g$, which is equivalent to modifying the variance of the galaxy profile as:
+\begin{align}
+  \langle |u({\bf k})|^2\rangle
+  &=n_g^{-2}\left[\bar{N}_c\left(\left[1+\bar{N}_s\,u_{\rm NFW}({\bf k})\right]^2+\bar{N}_s\right)-\bar{N}_c(1+\bar{N}_s)\right]\\
+  &=n_g^{-2}\bar{N}_c\left[2\bar{N}_s\,u_{\rm NFW}({\bf k})+\bar{N}_s^2u_{\rm NFW}^2({\bf k})\right]
 \end{align}
 
 
