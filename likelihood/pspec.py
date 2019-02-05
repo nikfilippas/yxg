@@ -43,7 +43,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # Profile normalisations
     Unorm = p1.profnorm(cosmo, a, **kwargs)
     Vnorm = p2.profnorm(cosmo, a, **kwargs)
-    if (Unorm < 1E-16) or (Vnorm < 1E-16):
+    if (Unorm < 1E-16) or (Vnorm < 1E-16):  # deal with zero division
         return None
 
     # Set up integration boundaries
@@ -161,7 +161,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
                              logMrange=logMrange, mpoints=mpoints,
                              include_1h=include_1h, include_2h=include_2h,
                              **kwargs)
-        if Puv is None:
+        if Puv is None:  # deal with zero division
             return None
 
         I[:, x] = N[x] * Puv

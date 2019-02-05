@@ -1,12 +1,8 @@
 import numpy as np
 from scipy.optimize import minimize
-import emcee
 import pyccl as ccl
-
 import pspec
 import profile2D
-
-
 
 def func(args):
     """The function to be minimised."""
