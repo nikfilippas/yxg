@@ -219,7 +219,11 @@ class HOD(object):
         delta_matter = self.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Dm
         mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)        # mass function
         Nc = 0.5 * (1 + erf((np.log10(M_arr/Mmin))/sigma_lnM))     # centrals
-        Ns = np.heaviside(M_arr-M0, 0.5) * ((M_arr-M0)/M1)**alpha  # satellites
+        # Satellites (modified heaviside)
+        diff = M_arr-M0            # mass difference (no negative mass!)
+        pos = np.argmax(diff > 0)  # first positive (physical) value
+        Ns = np.heaviside(diff[pos:], 0.5) * (diff[pos:]/M1)**alpha
+        Ns = np.append(np.zeros(pos), Ns)  # for M < M0, no satellites
 
         dng = mfunc*Nc*(fc+Ns)  # integrand
 
@@ -241,7 +245,8 @@ class HOD(object):
 
         # HOD Model
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
-        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha   # satellites
+        # satellites
+        Ns = np.heaviside((M-M0)/M1, 0.5) * ((M-M0)/M1)**alpha if M > M0 else 0
 
         H = NFW().fourier_profile(cosmo, k, M, a)
 

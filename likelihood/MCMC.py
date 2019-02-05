@@ -1,9 +1,9 @@
 import numpy as np
-from scipy.optimize import minimize
+import emcee
 import pyccl as ccl
 
-import pspec
 import profile2D
+import pspec
 
 
 
@@ -23,7 +23,7 @@ def func(args):
     if not prior_test:  # deal with priors
         lnprob = -np.inf
     else:
-        Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
+        Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, **kwargs)
         if Cl is None:  # deal with zero division (unphysical)
             lnprob = -np.inf
         else :
@@ -31,17 +31,6 @@ def func(args):
 
 #    print(args)  # output trial parameter values
     return -lnprob
-
-
-
-Neval = 1  # display number of evaluations
-def callbackf(X):
-    global Neval
-    print("{0:4d}   {1: 3.6f}   {2: 3.6f}   {3: 3.6f}   \
-          {4: 3.6f}   {5: 3.6f}   {6: 3.6f}".format(Neval, X[0], X[1], X[2],
-                                                           X[3], X[4], X[5]))
-    Neval += 1
-
 
 
 ## DATA ##
@@ -61,7 +50,7 @@ cells = cells[mask]
 covar=dcov['cov']
 covar = covar[mask, :][:, mask]
 err_ell = np.sqrt(np.diag(covar))
-
+I = np.linalg.inv(covar)  # inverse covariance
 
 
 ## MODEL ##
@@ -70,35 +59,9 @@ cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)
 
+ndim, nwalkers = 6, 100
+ivar = 1 / np.random.rand(ndim)
+p0 = [12.061706, 12.881403, 13.567549, 0.632100, 1.238674, 0.644111]
 
-kwargs = {"Mmin"      : 12.012471,
-          "M0"        : 12.5394811,
-          "M1"        : 13.56884228,
-          "sigma_lnM" : 0.68020429,
-          "alpha"     : 1.26862144,
-          "fc"        : 0.53721529}
-Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
-I = np.linalg.inv(covar)  # inverse covariance
-
-
-p0 = [12, 12.2, 13.65, 0.5, 1.0, 0.8]
-res = minimize(func, p0, method="Powell", callback=callbackf)
-
-
-## PLOTS ##
-import matplotlib.pyplot as plt
-# PLOT 1
-plt.figure()
-plt.errorbar(ells, cells, yerr=err_ell, fmt='rs', ms=5)
-plt.loglog()
-plt.xlabel('$\\ell$',fontsize=15)
-plt.ylabel('$C_\\ell$',fontsize=15)
-# PLOT 2
-plt.loglog(ells, Cl)
-## PLOT 3
-from matplotlib.colors import SymLogNorm
-from pylab import cm
-P = plt.subplots(1, 2)
-[x.imshow(X.T, cmap=cm.viridis, norm=SymLogNorm(
-          linthresh=1e-17, vmin=X.min(), vmax=X.max()
-          )) for x, X in zip(P[1], [covar, I])]
+sampler = emcee.EnsembleSampler(nwalkers, ndim, func, args=[ivar])
+sampler.run_mcmc(p0, 1000)
