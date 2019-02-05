@@ -21,22 +21,19 @@ def func(args):
                  (0.1 <= kwargs["fc"] <= 1.0)
 
     # Piecewise probability handling
-#    if not prior_test:
-#        lnprob = -np.inf
-#    else:
-#        Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
-#        if Cl is None:
-#            lnprob = -np.inf
-#        else :
-#            lnprob = -0.5*np.dot(cells-Cl, np.dot(I, cells-Cl))
+    if not prior_test:
+        lnprob = -np.inf
+    else:
+        Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof,
+                                      zrange=(0.001,0.3),zpoints=64, is_zlog=False,
+                                      **kwargs)
+        if Cl is None:
+            lnprob = -np.inf
+        else :
+            lnprob = -0.5*np.dot(cells-Cl, np.dot(I, cells-Cl))
 
-    Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
-    lnprob = -0.5*np.dot(cells-Cl, np.dot(I, cells-Cl))
-
-#    print(args)  # output trial parameter values
+    print(args,-2*lnprob,len(ells))  # output trial parameter values
     return -lnprob
-
-
 
 Neval = 1  # display number of evaluations
 def callbackf(X):
@@ -45,8 +42,6 @@ def callbackf(X):
           {4: 3.6f}   {5: 3.6f}   {6: 3.6f}".format(Neval, X[0], X[1], X[2],
                                                            X[3], X[4], X[5]))
     Neval += 1
-
-
 
 ## DATA ##
 dcl = np.load("../analysis/out_ns512_linlog/cl_2mpz_2mpz.npz")
@@ -74,32 +69,28 @@ cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)
 
-kwargs = {"Mmin"      : 12,
-          "M0"        : 12.2,
-          "M1"        : 13.65,
-          "sigma_lnM" : 0.5,
-          "alpha"     : 1.0,
-          "fc"        : 0.8}
-Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof, is_zlog=False, **kwargs)
+kwargs={"Mmin"      : 12.3,
+        "M0"        : 12.5,
+        "M1"        : 13.65,
+        "sigma_lnM" : 0.5,
+        "alpha"     : 1.1,
+        "fc"        : 0.8}
+Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof,
+                              zrange=(0.001,0.3),zpoints=64, is_zlog=False,**kwargs)
 I = np.linalg.inv(covar)  # inverse covariance
 
 
-p0 = [12, 12.2, 13.65, 0.5, 1.0, 0.8]
+p0 = [12.3, 12.5, 13.65, 0.5, 1.1, 0.8]
 res = minimize(func, p0, method="Powell", callback=callbackf)#, options={"maxiter" : 6000})
 
-
 ### PLOTS ##
-#import matplotlib.pyplot as plt
-#from matplotlib.colors import SymLogNorm
-#from pylab import cm
-## PLOT 1
-#plt.figure()
-#plt.errorbar(ells, cells, yerr=err_ell, fmt='rs', ms=5)
-#plt.loglog()
-#plt.xlabel('$\\ell$',fontsize=15)
-#plt.ylabel('$C_\\ell$',fontsize=15)
-## PLOT 2
-#plt.loglog(ells, Cl)
-## PLOT 3
-#P = plt.subplots(1, 2)
-#[x.imshow(X.T, cmap=cm.viridis, norm=SymLogNorm(linthresh=1e-17, vmin=X.min(), vmax=X.max())) for x, X in zip(P[1], [covar, I])]
+import matplotlib.pyplot as plt
+from matplotlib.colors import SymLogNorm
+from pylab import cm
+plt.figure()
+plt.errorbar(ells, cells, yerr=err_ell, fmt='r.', ms=5)
+plt.loglog(ells, Cl,'k-')
+plt.loglog()
+plt.xlabel('$\\ell$',fontsize=15)
+plt.ylabel('$C_\\ell$',fontsize=15)
+plt.show()

@@ -60,10 +60,14 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        U = p1.fourier_profile(cosmo, k_arr, M, a, **kwargs)
-        V = p2.fourier_profile(cosmo, k_arr, M, a, **kwargs)
+        U,UU = p1.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
+        if p1==p2 :
+            V=U; UV=UU
+        else :
+            V,VV = p2.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
+            UV=U*V
 
-        I1h[:, m] = mfunc[m]*U*V
+        I1h[:, m] = mfunc[m]*UV
         I2h_1[:, m] = bh[m]*mfunc[m]*U
         I2h_2[:, m] = bh[m]*mfunc[m]*V
 
@@ -79,12 +83,17 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     n0_1h = (rhoM - np.sum(mfunc*M_arr) * dlM) / M_arr[0]
     n0_2h = (rhoM - np.sum(mfunc*bh*M_arr) * dlM) / M_arr[0]
 
-    prof1_0 = p1.fourier_profile(cosmo, k_arr, M_arr[0], a, **kwargs)
-    prof2_0 = p2.fourier_profile(cosmo, k_arr, M_arr[0], a, **kwargs)
+    prof1_0,prof1_02 = p1.fourier_profiles(cosmo, k_arr, M_arr[0], a, **kwargs)
+    if p1==p2 :
+        prof2_0=prof1_0
+        prof12_0=prof1_02
+    else :
+        prof2_0,prof2_02 = p2.fourier_profiles(cosmo, k_arr, M_arr[0], a, **kwargs)
+        prof12_0=prof1_0*prof2_0
 
     b2h_1 += n0_2h*prof1_0
     b2h_2 += n0_2h*prof2_0
-    P1h += n0_1h*prof1_0*prof2_0
+    P1h += n0_1h*prof12_0
 
     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
     return F

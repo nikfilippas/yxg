@@ -48,22 +48,22 @@ class Arnaud(object):
         return 1
 
 
-#    def norm(self, cosmo, M, a, b=0.4):
-#        """Computes the normalisation factor of the Arnaud profile.
-#
-#        .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
-#        (Arnaud et al., 2009)
-#        """
-#        aP = 0.12  # Arnaud et al.
-#        h70 = cosmo["h"]/0.7
-#        P0 = 6.41 # reference pressure
-#
-#        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
-#
-#        Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
-#        PM = (M*(1-b))**(2/3+aP)             # mass dependence
-#        P = K*Pz*PM
-#        return P
+    def norm(self, cosmo, M, a, b=0.4):
+        """Computes the normalisation factor of the Arnaud profile.
+
+        .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
+        (Arnaud et al., 2009)
+        """
+        aP = 0.12  # Arnaud et al.
+        h70 = cosmo["h"]/0.7
+        P0 = 6.41 # reference pressure
+
+        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
+
+        Pz = ccl.h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
+        PM = (M*(1-b))**(2/3+aP)             # mass dependence
+        P = K*Pz*PM
+        return P
 
 
     def form_factor(self, x):
@@ -119,7 +119,7 @@ class Arnaud(object):
         return F
 
 
-    def fourier_profile(self, cosmo, k, M, a, **kwargs):
+    def fourier_profiles(self, cosmo, k, M, a, **kwargs):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
@@ -127,8 +127,8 @@ class Arnaud(object):
         b = kwargs["b_hydro"]  # hydrostatic bias
         R = ct.R_Delta(cosmo, M, a, self.Delta) / a  # R_Delta*(1+z) [Mpc]
         F = self.norm(cosmo, M, a, b) * self._fourier_interp(np.log10(k*R))
-        return 4*np.pi * R**3 * F
-
+        F *= 4*np.pi*R**3
+        return F, F**2
 
 
 class NFW(object):
@@ -166,7 +166,7 @@ class NFW(object):
         return P1*P2
 
 
-    def fourier_profile(self, cosmo, k, M, a, **kwargs):
+    def fourier_profiles(self, cosmo, k, M, a, **kwargs):
         """Computes the Fourier transform of the Navarro-Frenk-White profile."""
         c = ct.concentration_duffy(M, a, is_D500=True)
 
@@ -180,9 +180,7 @@ class NFW(object):
         P3 = np.sin(c*x)/((1+c)*x)
 
         F = P1*(P2-P3)
-        return F
-
-
+        return F, F**2
 
 class HOD(object):
     """Calculates a Halo Occupation Distribution profile quantity of a halo."""
@@ -219,7 +217,9 @@ class HOD(object):
         delta_matter = self.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Dm
         mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)        # mass function
         Nc = 0.5 * (1 + erf((np.log10(M_arr/Mmin))/sigma_lnM))     # centrals
-        Ns = np.heaviside(M_arr-M0, 0.5) * ((M_arr-M0)/M1)**alpha  # satellites
+        f1=lambda x :np.zeros_like(x)
+        f2=lambda x :((x-M0)/M1)**alpha
+        Ns=np.piecewise(M_arr,[M_arr<=M0,M_arr>M0],[f1,f2]) # satellites
 
         dng = mfunc*Nc*(fc+Ns)  # integrand
 
@@ -227,7 +227,7 @@ class HOD(object):
         return ng
 
 
-    def fourier_profile(self, cosmo, k, M, a, **kwargs):
+    def fourier_profiles(self, cosmo, k, M, a, **kwargs):
         """Computes the Fourier transform of the Halo Occupation Distribution.
         Default parameter values from Krause & Eifler (2014).
         """
@@ -241,8 +241,12 @@ class HOD(object):
 
         # HOD Model
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
-        Ns = np.heaviside(M-M0, 0.5) * ((M-M0)/M1)**alpha   # satellites
+        if M<=M0 :
+            Ns=0
+        else :
+            Ns=((M-M0)/M1)**alpha   # satellites
 
-        H = NFW().fourier_profile(cosmo, k, M, a)
+        H,_ = NFW().fourier_profiles(cosmo, k, M, a)
 
-        return Nc * (fc + Ns*H)
+        return Nc * (fc + Ns*H), Nc * (2*fc*Ns*H + (Ns*H)**2)
+    
