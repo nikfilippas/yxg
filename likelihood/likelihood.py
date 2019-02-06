@@ -45,22 +45,23 @@ def callbackf(X):
 
 
 ## DATA ##
-dcl = np.load("../analysis/out_ns512_linlog/cl_2mpz_2mpz.npz")
-dcov = np.load("../analysis/out_ns512_linlog/cov_2mpz_2mpz_2mpz_2mpz.npz")
+# science
+data = np.load("../analysis/out_ns512_linlog/cl_2mpz_2mpz.npz")     # clgg
+# covariances
+cov = np.load("../analysis/out_ns512_linlog/cov_2mpz_2mpz_2mpz_2mpz.npz")        # clgg
 
 # x-data
-ells = dcl['leff']
-mask = ells < 260  # mask
-ells = ells[mask]
+l = data["leff"]
+mask = l < 260
+l = l[mask]
 # y-data
-cells_with_noise = dcl['cell']
-nells = dcl['nell']
-cells = cells_with_noise-nells
-cells = cells[mask]
+cl = data["cell"] - data["nell"]
+cl = cl[mask]
+
 # error bars
-covar=dcov['cov']
+covar = cov["cov"]
 covar = covar[mask, :][:, mask]
-err_ell = np.sqrt(np.diag(covar))
+err = np.sqrt(np.diag(covar))
 
 
 
@@ -76,26 +77,29 @@ I = np.linalg.inv(covar)  # inverse covariance
 p0 = [12.3, 12.5, 13.65, 0.5, 1.1, 0.8]
 res = minimize(func, p0, method="Powell", callback=callbackf)
 
+
+
 ## PLOTS ##
 import matplotlib.pyplot as plt
 
-def dataplot(xdata, ydata, yerr, popt):
+def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt):
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc"]
     kwargs = dict(zip(params, popt))
-    Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof,
-                                  zrange=(0.001,0.3), zpoints=64,
-                                  is_zlog=False,**kwargs)
+    Cl = pspec.ang_power_spectrum(cosmo, xdata, prof1, prof2,
+                                  zrange=(0.001, 0.3), zpoints=64,
+                                  is_zlog=False, **kwargs)
 
     plt.figure()
-    plt.xlabel('$\\ell$',fontsize=15)
-    plt.ylabel('$C_\\ell$',fontsize=15)
+    plt.xlabel("$\\ell$",fontsize=15)
+    plt.ylabel("$C_\\ell$",fontsize=15)
 
-    plt.errorbar(ells, cells, err_ell, fmt="rs")
-    plt.loglog(ells, Cl, "k-", lw=3)
+    plt.errorbar(xdata, ydata, yerr, fmt="rs")
+    plt.loglog(xdata, Cl, "k-", lw=3)
     plt.show()
 
 
-dataplot(ells, cells, err_ell, res.x)
+dataplot(cosmo, prof, prof, l, cl, err, p0)
+#dataplot(cosmo, prof, prof, ells, cells, err_ell, res.x)
 
 #kwargs={"Mmin"      : 12.3,
 #        "M0"        : 12.5,
