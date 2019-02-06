@@ -39,6 +39,7 @@ covar=dcov['cov']
 covar = covar[mask, :][:, mask]
 err_ell = np.sqrt(np.diag(covar))
 
+
 ## PROFILE ##
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)

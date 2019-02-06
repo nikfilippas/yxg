@@ -43,8 +43,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # Profile normalisations
     Unorm = p1.profnorm(cosmo, a, **kwargs)
     Vnorm = p2.profnorm(cosmo, a, **kwargs)
-    if (Unorm < 1E-16) or (Vnorm < 1E-16):  # deal with zero division
-        return None
+    if (Unorm < 1e-16) or (Vnorm < 1e-16): return None  # deal with zero division
 
     # Set up integration boundaries
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
@@ -60,12 +59,13 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
     for m, M in enumerate(M_arr):
-        U,UU = p1.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
-        if p1==p2 :
-            V=U; UV=UU
+        U, UU = p1.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
+        # optimise for autocorrelation (no need to compute again)
+        if p1 == p2:
+            V = U; UV = UU
         else :
-            V,VV = p2.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
-            UV=U*V
+            V, VV = p2.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
+            UV = U*V
 
         I1h[:, m] = mfunc[m]*UV
         I2h_1[:, m] = bh[m]*mfunc[m]*U
@@ -84,12 +84,12 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     n0_2h = (rhoM - np.sum(mfunc*bh*M_arr) * dlM) / M_arr[0]
 
     prof1_0,prof1_02 = p1.fourier_profiles(cosmo, k_arr, M_arr[0], a, **kwargs)
-    if p1==p2 :
-        prof2_0=prof1_0
-        prof12_0=prof1_02
+    if p1 == p2 :
+        prof2_0 = prof1_0
+        prof12_0 = prof1_02
     else :
         prof2_0,prof2_02 = p2.fourier_profiles(cosmo, k_arr, M_arr[0], a, **kwargs)
-        prof12_0=prof1_0*prof2_0
+        prof12_0 = prof1_0*prof2_0
 
     b2h_1 += n0_2h*prof1_0
     b2h_2 += n0_2h*prof2_0
@@ -161,8 +161,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
                              logMrange=logMrange, mpoints=mpoints,
                              include_1h=include_1h, include_2h=include_2h,
                              **kwargs)
-        if Puv is None:  # deal with zero division
-            return None
+        if Puv is None:  return None  # deal with zero division
 
         I[:, x] = N[x] * Puv
 

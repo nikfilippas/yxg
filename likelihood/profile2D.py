@@ -131,6 +131,7 @@ class Arnaud(object):
         return F, F**2
 
 
+
 class NFW(object):
     """Calculate a Navarro-Frenk-White profile quantity of a halo and its
     Fourier transform.
@@ -182,6 +183,8 @@ class NFW(object):
         F = P1*(P2-P3)
         return F, F**2
 
+
+
 class HOD(object):
     """Calculates a Halo Occupation Distribution profile quantity of a halo."""
     def __init__(self, nz_file=None):
@@ -217,9 +220,9 @@ class HOD(object):
         delta_matter = self.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Dm
         mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)        # mass function
         Nc = 0.5 * (1 + erf((np.log10(M_arr/Mmin))/sigma_lnM))     # centrals
-        f1=lambda x :np.zeros_like(x)
-        f2=lambda x :((x-M0)/M1)**alpha
-        Ns=np.piecewise(M_arr,[M_arr<=M0,M_arr>M0],[f1,f2]) # satellites
+        f1 = lambda x: np.zeros_like(x)
+        f2 = lambda x: ((x-M0)/M1)**alpha
+        Ns = np.piecewise(M_arr, [M_arr <= M0, M_arr > M0], [f1, f2]) # satellites
 
         dng = mfunc*Nc*(fc+Ns)  # integrand
 
@@ -241,12 +244,8 @@ class HOD(object):
 
         # HOD Model
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
-        if M<=M0 :
-            Ns=0
-        else :
-            Ns=((M-M0)/M1)**alpha   # satellites
+        Ns = 0 if M <= M0 else ((M-M0)/M1)**alpha           # satellites
 
-        H,_ = NFW().fourier_profiles(cosmo, k, M, a)
+        H, _ = NFW().fourier_profiles(cosmo, k, M, a)
 
-        return Nc * (fc + Ns*H), Nc * (2*fc*Ns*H + (Ns*H)**2)
-    
+        return Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)

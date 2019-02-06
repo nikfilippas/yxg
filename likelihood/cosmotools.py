@@ -3,7 +3,6 @@ This script contains definitions of useful cosmological functions for quick
 retrieval and data analysis.
 """
 
-import numpy as np
 import pyccl as ccl
 
 
