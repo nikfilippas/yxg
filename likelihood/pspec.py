@@ -28,11 +28,11 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
     a : float
         Scale factor.
     p1, p2 : `profile2D._profile_` objects
-        The profile isntances used in the computation.
+        The profile instances used in the computation.
     logMrange : tuple
         Logarithm (base-10) of the mass integration boundaries.
     mpoints : int
-        Number or integration sampling points.
+        Number of integration sampling points.
     include_1h : boolean
         If True, includes the 1-halo contribution.
     include_2h : boolean

@@ -68,3 +68,4 @@ plt.errorbar(l, cl, err, fmt="r.", ms=5)
 
 col = [viridis(i) for i in np.linspace(0, 0.9, len(b_test))]
 _ = [dataplot(cosmo, prof1, prof2, l, cl, err, p_trial[i], col[i]) for i, _ in enumerate(b_test)]
+plt.show()

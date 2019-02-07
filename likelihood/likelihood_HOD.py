@@ -10,6 +10,7 @@ def func(args):
     """The function to be minimised."""
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc"]
     kwargs = dict(zip(params, args))
+    global cosmo, prof, l, cl
 
     prior_test = (6 <= kwargs["Mmin"] <= 17)*\
                  (6 <= kwargs["M0"] <= 17)*\
@@ -22,15 +23,15 @@ def func(args):
     if not prior_test:
         lnprob = -np.inf
     else:
-        Cl = pspec.ang_power_spectrum(cosmo, ells, prof, prof,
+        Cl = pspec.ang_power_spectrum(cosmo, l, prof, prof,
                                       zrange=(0.001,0.3), zpoints=64,
                                       is_zlog=False, **kwargs)
         if Cl is None:
             lnprob = -np.inf
-        else :
-            lnprob = -0.5*np.dot(cells-Cl, np.dot(I, cells-Cl))
+        else:
+            lnprob = -0.5*np.dot(cl-Cl, np.dot(I, cl-Cl))
 
-    print(args,-2*lnprob,len(ells))  # output trial parameter values
+    print(args,-2*lnprob,len(l))  # output trial parameter values
     return -lnprob
 
 
@@ -46,9 +47,9 @@ def callbackf(X):
 
 ## DATA ##
 # science
-data = np.load("../analysis/out_ns512_linlog/cl_2mpz_2mpz.npz")     # clgg
+data = np.load("../analysis/out_ns512_linlog/cl_2mpz_2mpz.npz")            # clgg
 # covariances
-cov = np.load("../analysis/out_ns512_linlog/cov_2mpz_2mpz_2mpz_2mpz.npz")        # clgg
+cov = np.load("../analysis/out_ns512_linlog/cov_2mpz_2mpz_2mpz_2mpz.npz")  # clgg
 
 # x-data
 l = data["leff"]
@@ -65,7 +66,7 @@ err = np.sqrt(np.diag(covar))
 
 
 
-## MODEL ##
+## MODEL 1 ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
@@ -74,7 +75,7 @@ prof = profile2D.HOD(nz_file=nz)
 I = np.linalg.inv(covar)  # inverse covariance
 
 
-p0 = [12.3, 12.5, 13.65, 0.5, 1.1, 0.8]
+p0 = [12.0, 14.95, 13.18, 0.28, 1.44, 0.57]
 res = minimize(func, p0, method="Powell", callback=callbackf)
 
 
@@ -91,19 +92,27 @@ def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt):
 
     plt.figure()
     plt.xlabel("$\\ell$",fontsize=15)
-    plt.ylabel("$C_\\ell$",fontsize=15)
+    plt.ylabel("$C^{gg}_\\ell$",fontsize=15)
 
     plt.errorbar(xdata, ydata, yerr, fmt="rs")
     plt.loglog(xdata, Cl, "k-", lw=3)
     plt.show()
 
 
-dataplot(cosmo, prof, prof, l, cl, err, p0)
-#dataplot(cosmo, prof, prof, ells, cells, err_ell, res.x)
+#dataplot(cosmo, prof1, prof1, l, cl, err, p0)
+dataplot(cosmo, prof, prof, l, cl, err, res.x)
 
-#kwargs={"Mmin"      : 12.3,
-#        "M0"        : 12.5,
-#        "M1"        : 13.65,
-#        "sigma_lnM" : 0.5,
-#        "alpha"     : 1.1,
-#        "fc"        : 0.8}
+
+
+## MODEL 2 ##
+prof2 = profile2D.Arnaud()
+p2 = np.append(res.x, 0.4)
+res2 = minimize()
+
+
+#kwargs = {"Mmin"      : 12.00287818,
+#          "M0"        : 14.94087941,
+#          "M1"        : 13.18144554,
+#          "sigma_lnM" : 0.27649579,
+#          "alpha"     : 1.43902899,
+#          "fc"        : 0.57055288}
