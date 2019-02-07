@@ -147,7 +147,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     chi_arr = ccl.comoving_radial_distance(cosmo, 1/(1+z_arr))
 
     c1 = ccl.h_over_h0(cosmo,a_arr)*cosmo["h"]
-    invh_arr = 2997.92458 * jac/c1 # c*z/H(z)
+    invh_arr = 2997.92458 * jac/c1  # c*z/H(z)
 
     # Window functions
     Wu = p1.kernel(cosmo, a_arr)

@@ -20,7 +20,7 @@ def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt, color):
     plt.loglog(xdata, Cl, c=color)
 
 B = lambda l, sigma: np.exp(-(l*(l+1)/2)*sigma**2)
-sigma = np.deg2rad(10/60) / 2.355
+sigma = np.deg2rad(10/60) / (2*np.sqrt(2*np.log(2)))
 
 
 ## DATA ##
@@ -61,6 +61,7 @@ p_trial = [np.append(p0, b) for i, b in enumerate(b_test)]
 
 plt.figure()
 plt.loglog()
+plt.title("$b_{hydro}$ from $0.05$ to $0.95$ in increments of $0.05$")
 plt.xlabel("$\\ell$",fontsize=15)
 plt.ylabel("$C_\\ell$",fontsize=15)
 plt.errorbar(l, cl, err, fmt="r.", ms=5)

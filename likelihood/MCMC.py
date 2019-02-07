@@ -1,3 +1,6 @@
+"""
+TEMPORARY
+"""
 import numpy as np
 import emcee
 import pyccl as ccl
