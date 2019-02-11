@@ -25,8 +25,7 @@ def func(args):
         lnprob = -np.inf
     else:
         Cl = pspec.ang_power_spectrum(cosmo, l, prof1, prof2,
-                                      zrange=(0.001,0.3), zpoints=64,
-                                      is_zlog=False, **kwargs)
+                                      zrange=(0.001, 0.3), zpoints=64, **kwargs)
 
         if Cl is None:
             lnprob = -np.inf
@@ -90,8 +89,7 @@ def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt):
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
     kwargs = dict(zip(params, popt))
     Cl = pspec.ang_power_spectrum(cosmo, xdata, prof1, prof2,
-                                  zrange=(0.001, 0.3), zpoints=64,
-                                  is_zlog=False, **kwargs)
+                                  zrange=(0.001, 0.3), zpoints=64, **kwargs)
 
     plt.figure()
     plt.xlabel("$\\ell$",fontsize=15)
