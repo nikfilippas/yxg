@@ -109,8 +109,8 @@ def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt_free, popt_fix, b_hyd
     plt.ylabel("$C^{yg}_\\ell$",fontsize=15)
 
     plt.errorbar(xdata, ydata, yerr, fmt="rs")
-    plt.loglog(xdata, Cl_fix, "k-", lw=3, label="1 free, $b_{hydro} = %.2f$" % popt_fix[-1])
-    plt.loglog(xdata, Cl_free, "k--", lw=3, label="7 free, $b_{hydro} = %.2f$" % popt_free[-1])
+    plt.loglog(xdata, Cl_fix, "k-", lw=3, label="HOD fixed, $b_{hydro} = %.2f$" % popt_fix[-1])
+    plt.loglog(xdata, Cl_free, "k--", lw=3, label="HOD free, $b_{hydro} = %.2f$" % popt_free[-1])
     plt.legend(loc="upper right")
     plt.show()
 
