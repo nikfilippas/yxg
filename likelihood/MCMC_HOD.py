@@ -105,7 +105,7 @@ for i in range(ndim):
 
 
 # Figure 2 (corner plot) #
-cutoff = 0
+cutoff = 0  # burn-in after cutoff steps
 samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
 
 fig = corner.corner(samples, labels=yax)
