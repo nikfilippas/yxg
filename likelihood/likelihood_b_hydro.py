@@ -29,7 +29,7 @@ def func(p0, args=None):
         Cl = pspec.ang_power_spectrum(cosmo, l, prof1, prof2,
                                       zrange=(0.001, 0.3), zpoints=64, **kwargs)
 
-        if Cl is None:
+        if Cl is None:  # treat zero division (unphysical)
             lnprob = -np.inf
         else:
             lnprob = -0.5*np.dot(cl-Cl, np.dot(I, cl-Cl))
