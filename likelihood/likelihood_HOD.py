@@ -97,17 +97,11 @@ def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt):
     plt.show()
 
 
-#dataplot(cosmo, prof1, prof1, l, cl, err, p0)
 dataplot(cosmo, prof, prof, l, cl, err, res.x)
 
 
 
-## MODEL 2 ##
-prof2 = profile2D.Arnaud()
-p2 = np.append(res.x, 0.4)
-res2 = minimize()
-
-
+### RESULTS ##
 #kwargs = {"Mmin"      : 12.00287818,
 #          "M0"        : 14.94087941,
 #          "M1"        : 13.18144554,

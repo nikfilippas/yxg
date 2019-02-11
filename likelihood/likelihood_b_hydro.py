@@ -41,7 +41,7 @@ def func(p0, args=None):
 Neval = 1  # display number of evaluations
 def callbackf(X):
     global Neval
-    print("{0:4d}   {1: 3.6f}".format(Neval, X[0]))
+    print("{0:4d}".format(Neval), *X)
     Neval += 1
 
 
