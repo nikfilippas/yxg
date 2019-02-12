@@ -99,13 +99,13 @@ ax[-1].set_xlabel("step number", fontsize=15)
 
 for i in range(ndim):
     for j in range(nwalkers):
-        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.4)
+        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
     ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
     ax[i].set_ylabel(yax[i], fontsize=15)
 fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
 
 # Figure 2 (corner plot) #
-cutoff = 40  # burn-in after cutoff steps
+cutoff = 50  # burn-in after cutoff steps
 samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
 
 fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
