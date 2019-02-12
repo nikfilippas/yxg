@@ -3,6 +3,8 @@ This script contains definitions of useful cosmological functions for quick
 retrieval and data analysis.
 """
 
+import numpy as np
+from scipy.integrate import simps
 import pyccl as ccl
 
 
@@ -71,3 +73,13 @@ def R_Delta(cosmo, halo_mass, a, Delta=200, is_matter=False) :
     prefac = 1.16217766e12 * Delta * omega_factor * c1
 
     return (halo_mass/prefac)**(1/3)
+
+
+
+def max_multipole(fname, cosmo, Rmax=1):
+    z, N = np.loadtxt(fname, unpack=True)
+    N *= len(N)/simps(N, x=z)  # normalise histogram
+    z_avg = np.average(z, weights=N)
+    chi_avg = ccl.comoving_radial_distance(cosmo, 1/(1+z_avg))
+    lmax = 1/Rmax * chi_avg - 1/2
+    return lmax

@@ -4,6 +4,7 @@ import pyccl as ccl
 
 import profile2D
 import pspec
+import cosmotools as ct
 
 
 
@@ -36,7 +37,7 @@ def lnprob(theta):
         lnprob = -np.inf
     else:
         Cl = pspec.ang_power_spectrum(cosmo, l, prof, prof,
-                                      zrange=(0.001, 0.3), zpoints=64, **kwargs)
+                                      zrange=(0.001, 0.3), **kwargs)
 
         # treat zero division (unphysical)
         if Cl is None:
@@ -50,14 +51,16 @@ def lnprob(theta):
 
 
 ## DATA ##
+# dNdz
+fname = "../analysis/data/dndz/2MPZ_bin1.txt"
 # science
-data = np.load("../analysis/out_ns512_linlog/cl_2mpz_y_milca.npz")  # clyg
+data = np.load("../analysis/out_ns512_linlog/cl_2mpz_2mpz.npz")  # clgg
 # covariances
-cov = np.load("../analysis/out_ns512_linlog/cov_2mpz_y_milca_2mpz_y_milca.npz")  # clyg
+cov = np.load("../analysis/out_ns512_linlog/cov_2mpz_2mpz_2mpz_2mpz.npz")  # clgg
 
 # x-data
 l = data["leff"]
-mask = l < 260
+mask = l < ct.max_multipole(fname, cosmo)
 l = l[mask]
 # y-data
 cl = data["cell"] - data["nell"]
@@ -76,8 +79,8 @@ cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)
 
-ndim, nwalkers = 6, 100
 popt = [12.00287818, 14.94087941, 13.18144554, 0.27649579, 1.43902899, 0.57055288]
+ndim, nwalkers = len(popt), 100
 pos = [popt + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
@@ -85,32 +88,32 @@ sampler.run_mcmc(pos, 500)
 
 
 
-## PLOTS ##
-import matplotlib.pyplot as plt
-import corner
-
-yax = ["$\\mathrm{M_{min}}$", "$\\mathrm{M_0}$", "$\\mathrm{M_1}$",
-       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$"]
-
-# Figure 1 (burn-in histogram) #
-fig, ax = plt.subplots(6, 1, sharex=True, figsize=(5, 10))
-ax[-1].set_xlabel("step number", fontsize=15)
-
-
-for i in range(ndim):
-    for j in range(nwalkers):
-        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
-    ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
-    ax[i].set_ylabel(yax[i], fontsize=15)
-fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
-
-# Figure 2 (corner plot) #
-cutoff = 50  # burn-in after cutoff steps
-samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
-
-fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
-                    show_titles=True, quantiles=[0.16, 0.50, 0.84])
-fig.savefig("../images/MCMC_HOD_corner.pdf", dpi=600, bbox_inches="tight")
-
-val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
-               zip(*np.percentile(samples, [16, 50, 84], axis=0))))
+### PLOTS ##
+#import matplotlib.pyplot as plt
+#import corner
+#
+#yax = ["$\\mathrm{M_{min}}$", "$\\mathrm{M_0}$", "$\\mathrm{M_1}$",
+#       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$"]
+#
+## Figure 1 (burn-in histogram) #
+#fig, ax = plt.subplots(6, 1, sharex=True, figsize=(5, 10))
+#ax[-1].set_xlabel("step number", fontsize=15)
+#
+#
+#for i in range(ndim):
+#    for j in range(nwalkers):
+#        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
+#    ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
+#    ax[i].set_ylabel(yax[i], fontsize=15)
+#fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
+#
+## Figure 2 (corner plot) #
+#cutoff = 50  # burn-in after cutoff steps
+#samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
+#
+#fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
+#                    show_titles=True, quantiles=[0.16, 0.50, 0.84])
+#fig.savefig("../images/MCMC_HOD_corner.pdf", dpi=600, bbox_inches="tight")
+#
+#val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+#               zip(*np.percentile(samples, [16, 50, 84], axis=0))))
