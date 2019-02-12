@@ -5,7 +5,7 @@ import pyccl as ccl
 
 
 def power_spectrum(cosmo, k_arr, a, p1, p2,
-                   logMrange=(6, 17), mpoints=256,
+                   logMrange=(6, 17), mpoints=128,
                    include_1h=True, include_2h=True, **kwargs):
     """Computes the cross power spectrum of two halo profiles.
 
@@ -101,8 +101,8 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
 
 
 def ang_power_spectrum(cosmo, l_arr, p1, p2,
-                       zrange=(1e-6, 6), zpoints=128, is_zlog=True,
-                       logMrange=(6, 17), mpoints=256,
+                       zrange=(1e-6, 6), zpoints=32, is_zlog=True,
+                       logMrange=(6, 17), mpoints=128,
                        include_1h=True, include_2h=True, **kwargs):
     """Computes the angular cross power spectrum of two halo profiles.
 
