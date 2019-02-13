@@ -53,14 +53,38 @@ def lnprob(theta):
 
 
 
-def infunc(datas, covars, dNdz):
-    datadir = "../analysis/out_ns512_linlog/"
-    dndzdir = "..analysis/data/dndz/"
+def infunc(datasets, dndz):
+    global cosmo
+    # dictionary of surveys
+    sdss = ["sdss_b%d" % i for i in np.arange(10)]
+    wisc = ["wisc_b%d" % i for i in np.arange(6)]
+    dic = ["2mpz", "y_milca", "y_nilc"] + sdss + wisc
+    # data directories #
+    dir1 = "../analysis/data/dndz/"         # dndz
+    dir2 = "../analysis/out_ns512_linlog/"  # Cl, dCl
 
-    data = [np.load(datadir+datas[i]+".npz") for i, _ in enumerate(datas)]
+    # dndz #
+    dndz = dir1 + dndz + ".txt"
+    # science #
+    data = [np.load(dir2 + "cl_" + d + ".npz") for d in datasets]
+    # covariances #
+#    cov = [np.load(dir2 + "cov_" + d + "_" + d + ".npz") for d in datasets]
+# for loop - if statement - covar with flattened array
+
+    l_arr, cl_arr = [np.zeros(0) for i in range(2)]
+    for d, c in zip(data, cov):
+        # x-data
+        l = d["leff"]
+        mask = l < ct.max_multipole(dndz, cosmo)
+        l_arr = np.append(l_arr, l[mask])
+        # y-data
+        cl_arr = np.append(cl_arr, (d["cell"] - d["nell"])[mask])
+        # covariance
+        covar = (c["cov"])[mask, :][:, mask]
 
 
-    return None
+
+    return np.array(l_arr), np.array(cl_arr), np.array(I)
 
 
 
@@ -102,32 +126,32 @@ sampler.run_mcmc(pos, 500)
 
 
 
-### PLOTS ##
-#import matplotlib.pyplot as plt
-#import corner
-#
-#yax = ["$\\mathrm{M_{min}}$", "$\\mathrm{M_0}$", "$\\mathrm{M_1}$",
-#       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$"]
-#
-## Figure 1 (burn-in histogram) #
-#fig, ax = plt.subplots(6, 1, sharex=True, figsize=(5, 10))
-#ax[-1].set_xlabel("step number", fontsize=15)
-#
-#
-#for i in range(ndim):
-#    for j in range(nwalkers):
-#        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
-#    ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
-#    ax[i].set_ylabel(yax[i], fontsize=15)
-#fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
-#
-## Figure 2 (corner plot) #
-#cutoff = 50  # burn-in after cutoff steps
-#samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
-#
-#fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
-#                    show_titles=True, quantiles=[0.16, 0.50, 0.84])
-#fig.savefig("../images/MCMC_HOD_corner.pdf", dpi=600, bbox_inches="tight")
-#
-#val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
-#               zip(*np.percentile(samples, [16, 50, 84], axis=0))))
+## PLOTS ##
+import matplotlib.pyplot as plt
+import corner
+
+yax = ["$\\mathrm{M_{min}}$", "$\\mathrm{M_0}$", "$\\mathrm{M_1}$",
+       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$"]
+
+# Figure 1 (burn-in histogram) #
+fig, ax = plt.subplots(6, 1, sharex=True, figsize=(5, 10))
+ax[-1].set_xlabel("step number", fontsize=15)
+
+
+for i in range(ndim):
+    for j in range(nwalkers):
+        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
+    ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
+    ax[i].set_ylabel(yax[i], fontsize=15)
+fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
+
+# Figure 2 (corner plot) #
+cutoff = 50  # burn-in after cutoff steps
+samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
+
+fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
+                    show_titles=True, quantiles=[0.16, 0.50, 0.84])
+fig.savefig("../images/MCMC_HOD_corner.pdf", dpi=600, bbox_inches="tight")
+
+val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+               zip(*np.percentile(samples, [16, 50, 84], axis=0))))

@@ -79,7 +79,8 @@ cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)
 
-popt = [12.00287818, 14.94087941, 13.18144554, 0.27649579, 1.43902899, 0.57055288]
+popt = [11.992683381014938, 14.939646983122586, 13.176778910589404,
+        0.27649579, 1.43902899, 0.57055288]
 ndim, nwalkers = len(popt), 100
 pos = [popt + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
@@ -88,32 +89,32 @@ sampler.run_mcmc(pos, 500)
 
 
 
-### PLOTS ##
-#import matplotlib.pyplot as plt
-#import corner
-#
-#yax = ["$\\mathrm{M_{min}}$", "$\\mathrm{M_0}$", "$\\mathrm{M_1}$",
-#       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$"]
-#
-## Figure 1 (burn-in histogram) #
-#fig, ax = plt.subplots(6, 1, sharex=True, figsize=(5, 10))
-#ax[-1].set_xlabel("step number", fontsize=15)
-#
-#
-#for i in range(ndim):
-#    for j in range(nwalkers):
-#        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
-#    ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
-#    ax[i].set_ylabel(yax[i], fontsize=15)
-#fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
-#
-## Figure 2 (corner plot) #
-#cutoff = 50  # burn-in after cutoff steps
-#samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
-#
-#fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
-#                    show_titles=True, quantiles=[0.16, 0.50, 0.84])
-#fig.savefig("../images/MCMC_HOD_corner.pdf", dpi=600, bbox_inches="tight")
-#
-#val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
-#               zip(*np.percentile(samples, [16, 50, 84], axis=0))))
+## PLOTS ##
+import matplotlib.pyplot as plt
+import corner
+
+yax = ["$\\mathrm{M_{min}}$", "$\\mathrm{M_0}$", "$\\mathrm{M_1}$",
+       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$"]
+
+# Figure 1 (burn-in histogram) #
+fig, ax = plt.subplots(ndim, 1, sharex=True, figsize=(5, 10))
+ax[-1].set_xlabel("step number", fontsize=15)
+
+
+for i in range(ndim):
+    for j in range(nwalkers):
+        ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
+    ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
+    ax[i].set_ylabel(yax[i], fontsize=15)
+fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
+
+# Figure 2 (corner plot) #
+cutoff = 50  # burn-in after cutoff steps
+samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
+
+fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
+                    show_titles=True, quantiles=[0.16, 0.50, 0.84])
+fig.savefig("../images/MCMC_HOD_corner.pdf", dpi=600, bbox_inches="tight")
+
+val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+               zip(*np.percentile(samples, [16, 50, 84], axis=0))))
