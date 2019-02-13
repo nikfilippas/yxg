@@ -66,7 +66,7 @@ l, cl, I = ct.dataman(cosmo, datasets, covars, dndz)
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)
 
-popt = [11.99, 14.94, 13.18, 0.32, 1.41, 0.56]
+popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54]
 ndim, nwalkers = len(popt), 100
 pos = [popt + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
