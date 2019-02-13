@@ -83,3 +83,64 @@ def max_multipole(fname, cosmo, Rmax=1):
     chi_avg = ccl.comoving_radial_distance(cosmo, 1/(1+z_avg))
     lmax = 1/Rmax * chi_avg - 1/2
     return lmax
+
+
+
+def dataman(cosmo, datasets, covars, dndz):
+    """
+    Constructs data vectors from different data sets and computes their inverse
+    covariance matrix.
+
+    .. note:: At the moment, it works with equally sized data sets.
+
+    Arguments
+    ---------
+    datasets : list of strings
+        The names of the surveys being cross-correlated, e.g. ``["2mpz_2mpz"]``.
+    covars : list of strings
+        The names of the covariances being cross-correlated.
+        Must be ``len(datasets)**2``.
+    dndz : str
+        The name of the number density histogram for the survey used.
+
+    """
+    # check input
+    if len(covars) != len(datasets)**2:
+        raise NameError("Number of input covariances should be the square \
+                        of the number of input datasets")
+    # data directories #
+    dir1 = "../analysis/data/dndz/"         # dndz
+    dir2 = "../analysis/out_ns512_linlog/"  # Cl, dCl
+
+    # dndz #
+    dndz = dir1 + dndz + ".txt"
+    # science #
+    data = [np.load(dir2 + "cl_" + d + ".npz") for d in datasets]
+    # covariances #
+    cov = [np.load(dir2 + "cov_" + c + ".npz") for c in covars]
+
+
+    l_arr, cl_arr = [np.zeros(0) for i in range(2)]
+    for d in data:
+        # x-data
+        l = d["leff"]
+        mask = l < max_multipole(dndz, cosmo)
+        l_arr = np.append(l_arr, l[mask])
+        # y-data
+        cl_arr = np.append(cl_arr, (d["cell"] - d["nell"])[mask])
+
+
+    # covariances
+    # Individual covars are passed first across columns and then across rows.
+    # Extract covariance from dataset and mask it, then stack them across
+    # their columns in groups. Then, stack the groups across their rows
+    # to complete the square matrix.
+    covar = []
+    for i in len(datasets)*np.arange(len(datasets)):
+        covar.append(np.column_stack((
+                [  (c["cov"])[mask, :][:, mask]
+                for c in cov[i : i+len(datasets)] ] )) )
+    covar = np.vstack(([i for i in covar]))
+    I = np.linalg.inv(covar)
+
+    return l_arr, cl_arr, I
