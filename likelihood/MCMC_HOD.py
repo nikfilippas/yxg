@@ -29,7 +29,7 @@ def lnprob(theta):
     """Probability distribution to be sampled."""
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc"]
     kwargs = dict(zip(params, theta))
-    global cosmo, prof, l, cl, Neval
+    global cosmo, prof, l, cl, I, Neval
 
     lp = lnprior(theta)
     # Piecewise probability handling
