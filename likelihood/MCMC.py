@@ -16,7 +16,8 @@ def lnprior(theta):
                  (6 <= kwargs["M1"] <= 17)*\
                  (0.1 <= kwargs["sigma_lnM"] <= 1.0)*\
                  (0.5 <= kwargs["alpha"] <= 1.5)*\
-                 (0.1 <= kwargs["fc"] <= 1.0)
+                 (0.1 <= kwargs["fc"] <= 1.0)*\
+                 (kwargs["M0"] > kwargs["Mmin"])
 
     return 0.0 if prior_test else -np.inf
 
