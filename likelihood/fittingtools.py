@@ -14,6 +14,7 @@ import pspec
 
 
 def max_multipole(fname, cosmo, kmax=1):
+    """Calculates the highest working multipole for HOD cross-correlation."""
     z, N = np.loadtxt(fname, unpack=True)
     N *= len(N)/simps(N, x=z)  # normalise histogram
     z_avg = np.average(z, weights=N)
@@ -60,9 +61,9 @@ def dataman(cells, z_bin=None, cosmo=None):
     for i, c in enumerate(cells):
         keys = [x.strip() for x in c.split(",")]
         for key in keys:
-            if param[key] == "y":
+            if param[key] == "y":  # tSZ
                 profiles[i].append(profile2D.Arnaud())
-            if param[key] == "g":
+            if param[key] == "g":  # galaxy density
                 if not z_bin:
                     raise TypeError("You must define a redshift bin.")
                 if "dndz" not in locals():
@@ -100,8 +101,12 @@ def dataman(cells, z_bin=None, cosmo=None):
 
 
 
-def lnprob(theta, lnprior=None, Neval=1, **setup):
-    """Probability distribution to be sampled."""
+def lnprob(theta, lnprior=None, verbose=True, **setup):
+    """Posterior probability distribution to be sampled."""
+    if verbose:
+        global Neval
+        print(Neval, theta); Neval += 1
+
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
     kwargs = dict(zip(params, theta))
 
@@ -110,6 +115,7 @@ def lnprob(theta, lnprior=None, Neval=1, **setup):
     l_arr = setup["l_arr"]
     cl_arr = setup["cl_arr"]
     I = setup["inv_covar"]
+    zrange = setup["zrange"]
 
     lp = lnprior(theta) if lnprior else 0.0
     # Piecewise probability handling
@@ -117,15 +123,15 @@ def lnprob(theta, lnprior=None, Neval=1, **setup):
         lnprob = -np.inf
     else:
         lnprob = lp  # only priors
-        for l, cl, p in zip(l_arr, cl_arr, prof):
-            Cl = pspec.ang_power_spectrum(cosmo, l, p,
-                                          zrange=(0.001, 0.3), **kwargs)
+        Cl = [pspec.ang_power_spectrum(
+                                cosmo, l, p, zrange, **kwargs
+                                ) for l, cl, p in zip(l_arr, cl_arr, prof)]
+        cl, Cl = [np.array(x).flatten() for x in [cl_arr, Cl]]  # data vectors
 
-            # treat zero division (unphysical)
-            if Cl is None:
-                lnprob = -np.inf
-            else:
-                lnprob += -0.5*np.dot(cl-Cl, np.dot(I, cl-Cl))  # FIXME: fix this
+        # treat zero division (unphysical)
+        if not Cl.all():
+            lnprob = -np.inf
+        else:
+            lnprob += -0.5*np.dot(cl-Cl, np.dot(I, cl-Cl))
 
-    print(Neval, theta); Neval += 1  # output trial parameter values
     return lnprob
