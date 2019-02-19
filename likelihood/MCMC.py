@@ -1,3 +1,13 @@
+"""
+``zrange`` for different redshift bins:
+
+=======================================================
+ SURVEY       ZRANGE      ||  SURVEY       ZRANGE     |
+2mpz:     (0.001, 0.300)  || wisc_b3:  (0.020, 0.500) |
+wisc_b1:  (0.001, 0.320)  || wisc_b4:  (0.050, 0.600) |
+wisc_b2:  (0.005, 0.370)  || wisc_b5:  (0.070, 0.700) |
+=======================================================
+"""
 import numpy as np
 import emcee
 import pyccl as ccl
@@ -26,21 +36,21 @@ def lnprior(theta):
 
 ## INPUT ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-data = ["2mpz, 2mpz", "2mpz, y_milca"]
-l, cl, I, prof = ft.dataman(data, z_bin=1, cosmo=cosmo)
+data = ["wisc_b5, wisc_b5", "wisc_b5, y_milca"]
+l, cl, I, prof = ft.dataman(data, z_bin=5, cosmo=cosmo)
 
-
-
-## MODEL ##
 setup = {"cosmo"     : cosmo,
          "profiles"  : prof,
          "l_arr"     : l,
          "cl_arr"    : cl,
          "inv_covar" : I,
-         "zrange"    : (0.001, 0.3)}
-
+         "zrange"    : (0.070, 0.700)}
 
 popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
+
+
+
+## MODEL ##
 ndim, nwalkers = len(popt), 100
 pos = [popt + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 

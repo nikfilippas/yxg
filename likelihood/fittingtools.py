@@ -39,7 +39,9 @@ def dataman(cells, z_bin=None, cosmo=None):
         Cosmological parameters.
     """
     # dictionary of surveys #
-    param = {**dict.fromkeys(["2mpz", "sdss", "wisc"],  "g"),
+    sdss = ["sdss_b%d" % i for i in range(1, 10)]
+    wisc = ["wisc_b%d" % i for i in range(1, 6)]
+    param = {**dict.fromkeys(["2mpz"] + sdss + wisc,    "g"),
              **dict.fromkeys(["y_milca", "y_nilc"],     "y")}
 
     # data directories #
@@ -58,8 +60,8 @@ def dataman(cells, z_bin=None, cosmo=None):
 
     # profiles #
     profiles = [[] for C in cells]
-    for i, c in enumerate(cells):
-        keys = [x.strip() for x in c.split(",")]
+    for i, C in enumerate(cells):
+        keys = [x.strip() for x in C.split(",")]
         for key in keys:
             if param[key] == "y":  # tSZ
                 profiles[i].append(profile2D.Arnaud())
@@ -67,6 +69,7 @@ def dataman(cells, z_bin=None, cosmo=None):
                 if not z_bin:
                     raise TypeError("You must define a redshift bin.")
                 if "dndz" not in locals():
+                    key = key.strip("_b%d" % z_bin)
                     dndz = dir1 + key.upper() + "_bin%d" % z_bin + ".txt"
                 profiles[i].append(profile2D.HOD(nz_file=dndz))
 
@@ -125,7 +128,7 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
         lnprob = lp  # only priors
         Cl = [pspec.ang_power_spectrum(
                                 cosmo, l, p, zrange, **kwargs
-                                ) for l, cl, p in zip(l_arr, cl_arr, prof)]
+                                ) for l, p in zip(l_arr, prof)]
         cl, Cl = [np.array(x).flatten() for x in [cl_arr, Cl]]  # data vectors
 
         # treat zero division (unphysical)
