@@ -2,9 +2,7 @@ import numpy as np
 import emcee
 import pyccl as ccl
 
-import profile2D
-import pspec
-import cosmotools as ct
+import fittingtools as ft
 
 
 
@@ -24,53 +22,30 @@ def lnprior(theta):
 
 
 
-Neval = 1
-def lnprob(theta):
-    """Probability distribution to be sampled."""
-    params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc"]
-    kwargs = dict(zip(params, theta))
-    global cosmo, prof, l, cl, I, Neval
-
-    lp = lnprior(theta)
-    # Piecewise probability handling
-    if not np.isfinite(lp):
-        lnprob = -np.inf
-    else:
-        Cl = pspec.ang_power_spectrum(cosmo, l, prof, prof,
-                                      zrange=(0.001, 0.3), **kwargs)
-
-        # treat zero division (unphysical)
-        if Cl is None:
-            lnprob = -np.inf
-        else:
-            lnprob = lp + (-0.5*np.dot(cl-Cl, np.dot(I, cl-Cl)))
-
-    print(Neval, theta); Neval += 1  # output trial parameter values
-    return lnprob
-
-
-
 ## INPUT ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 
-datasets = ["2mpz_2mpz", "2mpz_y_milca"]
-covars = ["2mpz_2mpz_2mpz_2mpz", "2mpz_2mpz_2mpz_y_milca",
-          "2mpz_y_milca_2mpz_2mpz", "2mpz_y_milca_2mpz_y_milca"]
+data = ["2mpz, 2mpz", "2mpz, y_milca"]
 dndz = "2MPZ_bin1"
 
-l, cl, I = ct.dataman(cosmo, datasets, covars, dndz)
+l, cl, I, prof = ft.dataman(data, dndz, cosmo)
 
 
 
 ## MODEL ##
-nz = "../analysis/data/dndz/2MPZ_bin1.txt"
-prof = profile2D.HOD(nz_file=nz)
+setup = {"cosmo"     : cosmo,
+         "profiles"  : prof,
+         "l_arr"     : l,
+         "cl_arr"    : cl,
+         "inv_covar" : I}
 
-popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54]
+
+popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
 ndim, nwalkers = len(popt), 100
 pos = [popt + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
+sampler = emcee.EnsembleSampler(nwalkers, ndim, ft.lnprob,
+                                args=(lnprior,), kwargs=setup)
 sampler.run_mcmc(pos, 500)
 
 
