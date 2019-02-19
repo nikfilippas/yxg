@@ -23,7 +23,7 @@ def func(args):
     if not prior_test:
         lnprob = -np.inf
     else:
-        Cl = pspec.ang_power_spectrum(cosmo, l, prof, prof,
+        Cl = pspec.ang_power_spectrum(cosmo, l, (prof, prof),
                                       zrange=(0.001, 0.3), **kwargs)
 
         if Cl is None:  # treat zero division (unphysical)
@@ -86,7 +86,7 @@ import matplotlib.pyplot as plt
 def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt):
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc"]
     kwargs = dict(zip(params, popt))
-    Cl = pspec.ang_power_spectrum(cosmo, xdata, prof1, prof2,
+    Cl = pspec.ang_power_spectrum(cosmo, xdata, (prof1, prof2),
                                   zrange=(0.001, 0.3), **kwargs)
 
     plt.figure()

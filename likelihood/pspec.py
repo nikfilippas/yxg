@@ -4,7 +4,7 @@ import pyccl as ccl
 
 
 
-def power_spectrum(cosmo, k_arr, a, p1, p2,
+def power_spectrum(cosmo, k_arr, a, profiles,
                    logMrange=(6, 17), mpoints=128,
                    include_1h=True, include_2h=True, **kwargs):
     """Computes the cross power spectrum of two halo profiles.
@@ -27,7 +27,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
         The k-values of the cross power spectrum.
     a : float
         Scale factor.
-    p1, p2 : `profile2D._profile_` objects
+    profiles : tuple of `profile2D._profile_` objects
         The profile instances used in the computation.
     logMrange : tuple
         Logarithm (base-10) of the mass integration boundaries.
@@ -41,6 +41,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
         Parametrisation of the profiles.
     """
     # Profile normalisations
+    p1, p2 = profiles
     Unorm = p1.profnorm(cosmo, a, **kwargs)
     Vnorm = p2.profnorm(cosmo, a, **kwargs)
     if (Unorm < 1e-16) or (Vnorm < 1e-16): return None  # deal with zero division
@@ -100,7 +101,7 @@ def power_spectrum(cosmo, k_arr, a, p1, p2,
 
 
 
-def ang_power_spectrum(cosmo, l_arr, p1, p2,
+def ang_power_spectrum(cosmo, l_arr, profiles,
                        zrange=(1e-6, 6), zpoints=32, is_zlog=True,
                        logMrange=(6, 17), mpoints=128,
                        include_1h=True, include_2h=True, **kwargs):
@@ -115,7 +116,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
         Cosmological parameters.
     l_arr : array_like
         The l-values (multiple number) of the cross power spectrum.
-    p1, p2 : `profile2D._profile_` objects
+    profiles : tuple of `profile2D._profile_` objects
         The profile isntances used in the computation.
     zrange : tuple
         Minimum and maximum redshift probed.
@@ -150,6 +151,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     invh_arr = 2997.92458 * jac/c1  # c*z/H(z)
 
     # Window functions
+    p1, p2 = profiles
     Wu = p1.kernel(cosmo, a_arr)
     Wv = p2.kernel(cosmo, a_arr)
     N = invh_arr*Wu*Wv/chi_arr**2  # overall normalisation factor
@@ -157,7 +159,7 @@ def ang_power_spectrum(cosmo, l_arr, p1, p2,
     I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
     for x, chi in enumerate(chi_arr):
         k_arr = (l_arr+1/2)/chi
-        Puv = power_spectrum(cosmo, k_arr, a_arr[x], p1, p2,
+        Puv = power_spectrum(cosmo, k_arr, a_arr[x], profiles,
                              logMrange=logMrange, mpoints=mpoints,
                              include_1h=include_1h, include_2h=include_2h,
                              **kwargs)
