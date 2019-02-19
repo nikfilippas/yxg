@@ -24,11 +24,8 @@ def lnprior(theta):
 
 ## INPUT ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-
 data = ["2mpz, 2mpz", "2mpz, y_milca"]
-dndz = "2MPZ_bin1"
-
-l, cl, I, prof = ft.dataman(data, dndz, cosmo)
+l, cl, I, prof = ft.dataman(data, z_bin=1, cosmo=cosmo)
 
 
 

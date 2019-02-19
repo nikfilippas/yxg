@@ -23,7 +23,7 @@ def max_multipole(fname, cosmo, kmax=1):
 
 
 
-def dataman(cells, dndz=None, cosmo=None):
+def dataman(cells, z_bin=None, cosmo=None):
     """
     Constructs data vectors from different data sets and computes their inverse
     covariance matrix.
@@ -52,7 +52,6 @@ def dataman(cells, dndz=None, cosmo=None):
     cfiles = ["_".join(x) for x in cfiles]
 
     # load data #
-    dndz = dir1 + dndz + ".txt"                                   # dndz
     data = [np.load(dir2 + "cl_" + d + ".npz") for d in dfiles]   # science
     cov = [np.load(dir2 + "cov_" + c + ".npz") for c in cfiles]   # covariance
 
@@ -64,6 +63,10 @@ def dataman(cells, dndz=None, cosmo=None):
             if param[key] == "y":
                 profiles[i].append(profile2D.Arnaud())
             if param[key] == "g":
+                if not z_bin:
+                    raise TypeError("You must define a redshift bin.")
+                if "dndz" not in locals():
+                    dndz = dir1 + key.upper() + "_bin%d" % z_bin + ".txt"
                 profiles[i].append(profile2D.HOD(nz_file=dndz))
 
     # Unpacking science data
@@ -71,11 +74,12 @@ def dataman(cells, dndz=None, cosmo=None):
     for i, d in enumerate(data):
         # x-data
         l = d["leff"]
-        if dndz: mask[i] = l < max_multipole(dndz, cosmo)
+        if z_bin: mask[i] = l < max_multipole(dndz, cosmo)
         l_arr[i] = l[mask[i]]
         # y-data
         cl_arr[i] = (d["cell"] - d["nell"])[mask[i]]
 
+    del dndz  # removing dndz from locals
 
     # Unpacking covariances
     grid = list(product(range(len(data)), range(len(data))))  # coordinate grid
