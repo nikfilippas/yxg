@@ -36,15 +36,15 @@ def lnprior(theta):
 
 ## INPUT ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-data = ["wisc_b5, wisc_b5", "wisc_b5, y_milca"]
-l, cl, I, prof = ft.dataman(data, z_bin=5, cosmo=cosmo)
+data = ["2mpz, 2mpz", "2mpz, y_milca"]
+l, cl, I, prof = ft.dataman(data, z_bin=1, cosmo=cosmo)
 
 setup = {"cosmo"     : cosmo,
          "profiles"  : prof,
          "l_arr"     : l,
          "cl_arr"    : cl,
          "inv_covar" : I,
-         "zrange"    : (0.070, 0.700)}
+         "zrange"    : (0.001, 0.300)}
 
 popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
 
@@ -66,10 +66,11 @@ import matplotlib.pyplot as plt
 import corner
 
 yax = ["$\\mathrm{M_{min}}$", "$\\mathrm{M_0}$", "$\\mathrm{M_1}$",
-       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$"]
+       "$\\mathrm{\\sigma_{\\ln M}}$", "$\\mathrm{\\alpha}$", "$\\mathrm{fc}$",
+       "$\\mathrm{b_{hydro}}$"]
 
 # Figure 1 (burn-in histogram) #
-fig, ax = plt.subplots(6, 1, sharex=True, figsize=(5, 10))
+fig, ax = plt.subplots(len(popt), 1, sharex=True, figsize=(7, 12))
 ax[-1].set_xlabel("step number", fontsize=15)
 
 
@@ -78,15 +79,16 @@ for i in range(ndim):
         ax[i].plot(sampler.chain[j, :, i], "k-", lw=0.5, alpha=0.2)
     ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
     ax[i].set_ylabel(yax[i], fontsize=15)
-#fig.savefig("../images/MCMC_HOD_burn-in.pdf", dpi=600, bbox_inches="tight")
+plt.tight_layout()
+#fig.savefig("../images/MCMC_steps_2mpz.pdf", dpi=600, bbox_inches="tight")
 
 # Figure 2 (corner plot) #
-cutoff = 50  # burn-in after cutoff steps
+cutoff = 100  # burn-in after cutoff steps
 samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
 
 fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
                     show_titles=True, quantiles=[0.16, 0.50, 0.84])
-#fig.savefig("../images/MCMC_HOD_corner.pdf", dpi=600, bbox_inches="tight")
+#fig.savefig("../images/MCMC_2mpz.pdf", dpi=600, bbox_inches="tight")
 
 val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                zip(*np.percentile(samples, [16, 50, 84], axis=0))))
