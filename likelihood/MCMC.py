@@ -34,17 +34,30 @@ def lnprior(theta):
 
 
 
-## INPUT ##
+# INPUT #
+survey = "2mpz"
+
+# survey properties: name, zrange, bin
+sprops = {"2mpz"   :  [(0.001, 0.300), 1],
+          "wisc_b1":  [(0.001, 0.320), 1],
+          "wisc_b2":  [(0.005, 0.370), 2],
+          "wisc_b3":  [(0.020, 0.500), 3],
+          "wisc_b4":  [(0.050, 0.600), 4],
+          "wisc_b5":  [(0.070, 0.700), 5]}
+
+
+
+## DATA MANIPULATION ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-data = ["2mpz, 2mpz", "2mpz, y_milca"]
-l, cl, I, prof = ft.dataman(data, z_bin=1, cosmo=cosmo)
+data = [survey+","+survey, survey+","+"y_milca"]
+l, cl, I, prof = ft.dataman(data, z_bin=sprops[survey][1], cosmo=cosmo)
 
 setup = {"cosmo"     : cosmo,
          "profiles"  : prof,
          "l_arr"     : l,
          "cl_arr"    : cl,
          "inv_covar" : I,
-         "zrange"    : (0.001, 0.300)}
+         "zrange"    : sprops[survey][0]}
 
 popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
 
@@ -80,7 +93,7 @@ for i in range(ndim):
     ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
     ax[i].set_ylabel(yax[i], fontsize=15)
 plt.tight_layout()
-#fig.savefig("../images/MCMC_steps_2mpz.pdf", dpi=600, bbox_inches="tight")
+fig.savefig("../images/MCMC_steps_%s.pdf" % survey, dpi=600, bbox_inches="tight")
 
 # Figure 2 (corner plot) #
 cutoff = 100  # burn-in after cutoff steps
@@ -88,7 +101,7 @@ samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
 
 fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
                     show_titles=True, quantiles=[0.16, 0.50, 0.84])
-#fig.savefig("../images/MCMC_2mpz.pdf", dpi=600, bbox_inches="tight")
+fig.savefig("../images/MCMC_%s.pdf" % survey, dpi=600, bbox_inches="tight")
 
-val = list(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+val = list(map(lambda v: (v[1], v[1]-v[0], v[2]-v[1]),
                zip(*np.percentile(samples, [16, 50, 84], axis=0))))
