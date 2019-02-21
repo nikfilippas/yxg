@@ -1,5 +1,13 @@
 """
-testing convergence for is_log=True/False
+Testing convergence for is_log=True/False:
+    zpoints = 32;    mpoints = 128,
+as per other benchmarks, at the following redshift ranges:
+=======================================================
+ SURVEY       ZRANGE      ||  SURVEY       ZRANGE     |
+2mpz:     (0.001, 0.300)  || wisc_b3:  (0.020, 0.500) |
+wisc_b1:  (0.001, 0.320)  || wisc_b4:  (0.050, 0.600) |
+wisc_b2:  (0.005, 0.370)  || wisc_b5:  (0.070, 0.700) |
+=======================================================
 """
 
 import sys
@@ -13,68 +21,74 @@ import profile2D
 import pspec
 
 
-l_arr = np.arange(260)
-cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
 
-nz_file = "../../analysis/data/dndz/WISC_bin5.txt"
-prof1 = profile2D.HOD(nz_file=nz_file)
-z, nz = np.loadtxt(nz_file, unpack=True)
+## INPUT ##
+profplot = "gg"
+dir1 = "../../analysis/data/dndz/"
 
-#prof2 = prof1
-prof2 = profile2D.Arnaud()
+# g-surveys
+wisc = ["wisc_b%d" % i for i in range(1, 6)]
+surveys = ["2mpz"] + wisc
 
-kwargs={"Mmin"      : 12.3,
-        "M0"        : 12.5,
-        "M1"        : 13.65,
-        "sigma_lnM" : 0.5,
-        "alpha"     : 1.1,
-        "fc"        : 0.8,
-        "b_hydro"   : 0.4}
-
-
-imin, imax = 5, 11
-npoints = np.geomspace(2**imin, 2**imax, imax-imin+1)
-
-Cl = [np.zeros((len(npoints), len(l_arr))) for i in range(2)]
-for i, n in enumerate(npoints):
-    Cl[0][i] = pspec.ang_power_spectrum(cosmo, l_arr, (prof1, prof1),
-                                      zrange=(0.05, 0.6), zpoints=n,
-                                      is_zlog=True, **kwargs)
-
-    Cl[1][i] = pspec.ang_power_spectrum(cosmo, l_arr, (prof1, prof1),
-                                      zrange=(0.05, 0.6), zpoints=n,
-                                      is_zlog=False, **kwargs)
-
-    print(n)
+# parameters
+l_arr = np.arange(285)
+cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
+                      sigma8=0.8102, n_s=0.9665)
+params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
+popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
+kwargs = dict(zip(params, popt))
+sprops = {"2mpz"   :  (0.001, 0.300),
+          "wisc_b1":  (0.001, 0.320),
+          "wisc_b2":  (0.005, 0.370),
+          "wisc_b3":  (0.020, 0.500),
+          "wisc_b4":  (0.050, 0.600),
+          "wisc_b5":  (0.070, 0.700)}
 
 
+## BENCHMARK ##
+prof1 = profile2D.Arnaud()
+npoints = [32, 2048]
+Cl = np.zeros((len(surveys), 2, len(npoints), len(l_arr)))
+for s, sur in enumerate(surveys):
+    fname = dir1 + ("2MPZ_bin1.txt" if sur is "2mpz" else  sur[:4].upper() + "_bin%d.txt" % s)
+    prof2 = profile2D.HOD(nz_file=fname)
+    if profplot is "gg": prof1 = prof2
+    for i, n in enumerate(npoints):
+        Cl[s, 0, i] = pspec.ang_power_spectrum(cosmo, l_arr, (prof1, prof2),
+                                          zrange=sprops[sur], zpoints=n,
+                                          is_zlog=True, **kwargs)
 
-# PLOTS #
+        Cl[s, 1, i] = pspec.ang_power_spectrum(cosmo, l_arr, (prof1, prof2),
+                                          zrange=sprops[sur], zpoints=n,
+                                          is_zlog=False, **kwargs)
+    print(s+1,"/", len(surveys), sur)
+
+
+## PLOTS ##
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
 
-ratio = [Cl[i][1:]/Cl[i][:-1] for i in range(2)]
-q = 4
-plt.subplots(1, 1)
-plt.plot(l_arr, ratio[0][q], "k-", lw=3, label="$x=%d$, $\\mathtt{is\_log=True}$" % 2**(imin+q))
-plt.plot(l_arr, ratio[0][q+1], "k-", lw=1, label="$x=%d$, $\\mathtt{is\_log=True}$" % 2**(imin+q+1))
-plt.plot(l_arr, ratio[1][q], "r-", lw=3, label="$x=%d$, $\\mathtt{is\_log=False}$" % 2**(imin+q))
-plt.plot(l_arr, ratio[1][q+1], "r-", lw=1, label="$x=%d$, $\\mathtt{is\_log=False}$" % 2**(imin+q+1))
+ratio = np.abs(1- Cl[:, :, :-1] / Cl[:, :, 1:])
 
-plt.xlabel("$\\ell$", fontsize=15)
-plt.ylabel("$\\mathrm{R_{2^{x+1}:2^x}}$", fontsize=15)
-plt.legend(loc="lower right")
-plt.show()
+nrows, ncols = 2, 3
+fig, axes = plt.subplots(nrows, ncols, sharex=True, sharey="row",
+                         figsize=(12,10), gridspec_kw={"wspace":0.05, "hspace":0.05})
+fig.suptitle("$C^{%s}_{\\ell}$" % profplot, fontsize=18)
+for i, row in enumerate(axes):
+    for j, ax in enumerate(row):
+        if i == len(axes)-1: ax.set_xlabel("$\\ell$", fontsize=15)
+        if j == 0: ax.set_ylabel("$\\| 1 - \\frac{N_{32}}{N_{2048}} \\|$",
+                       fontsize=15)
+        ax.hlines(0, 0, 285, linestyle=":")
 
+axes = axes.flatten()
+for i, ax in enumerate(axes):
+    ax.loglog(l_arr, ratio[i, 0, 0, :], "g-", lw=3, label="%s T" % surveys[i])
+    ax.loglog(l_arr, ratio[i, 1, 0, :], "r-", lw=3, label="%s F" % surveys[i])
+    ax.legend(loc="lower right")
 
-from matplotlib.cm import autumn, winter
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+#    ax.ticklabel_format(useOffset=False)
 
-col1 = [autumn(i) for i in np.linspace(0, 1, imax-imin+1)]
-col2 = [winter(i) for i in np.linspace(0, 1, imax-imin+1)]
-
-plt.subplots(1, 1)
-plt.xlabel("$\\ell$", fontsize=15)
-plt.ylabel("$C_{\\ell}$", fontsize=15)
-[plt.loglog(l_arr, Cl[0][i], c=col1[i]) for i in range(imax-imin+1)]
-[plt.loglog(l_arr, Cl[1][i], c=col2[i]) for i in range(imax-imin+1)]
-plt.show()
-#plt.savefig("test3.png", dpi=600)
+fig.show()
+fig.savefig("../../images/is_zlog_%s.pdf" % profplot, dpi=1000, bbox_inches="tight")
