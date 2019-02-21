@@ -68,7 +68,7 @@ err = np.sqrt(np.diag(covar))
 
 
 ## MODEL 1 ##
-cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
+cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766, 			      sigma8=0.8102, n_s=0.9665, A_s=2.105e-9)
 
 nz = "../analysis/data/dndz/2MPZ_bin1.txt"
 prof1 = profile2D.HOD(nz_file=nz)

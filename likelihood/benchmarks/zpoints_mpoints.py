@@ -42,7 +42,7 @@ import pspec
 
 ## MODEL ##
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-nz = "../analysis/data/dndz/2MPZ_bin1.txt"
+nz = "../../analysis/data/dndz/2MPZ_bin1.txt"
 prof = profile2D.HOD(nz_file=nz)
 l_arr = np.arange(260)
 kwargs = {"Mmin"      : 12.00287818,
@@ -68,7 +68,7 @@ for i, z in enumerate(z_arr):
 
     t0 = time.time()
     for j in range(10):
-            Cl = pspec.ang_power_spectrum(cosmo, l_arr, prof, prof,
+            Cl = pspec.ang_power_spectrum(cosmo, l_arr, (prof, prof),
                                zrange=(0.001, 0.3), zpoints=z, is_zlog=True,
                                logMrange=(6, 17), mpoints=256,
                                include_1h=True, include_2h=True, **kwargs)
@@ -94,7 +94,7 @@ for i, m in enumerate(m_arr):
 
     t0 = time.time()
     for j in range(10):
-            Cl = pspec.ang_power_spectrum(cosmo, l_arr, prof, prof,
+            Cl = pspec.ang_power_spectrum(cosmo, l_arr, (prof, prof),
                                zrange=(0.001, 0.3), zpoints=128, is_zlog=True,
                                logMrange=(6, 17), mpoints=m,
                                include_1h=True, include_2h=True, **kwargs)
@@ -119,7 +119,7 @@ for i, t in enumerate(t_arr):
 
     t0 = time.time()
     for j in range(10):
-            Cl = pspec.ang_power_spectrum(cosmo, l_arr, prof, prof,
+            Cl = pspec.ang_power_spectrum(cosmo, l_arr, (prof, prof),
                                zrange=(0.001, 0.3), zpoints=t[0], is_zlog=True,
                                logMrange=(6, 17), mpoints=t[1],
                                include_1h=True, include_2h=True, **kwargs)
