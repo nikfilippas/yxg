@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.cm import copper
 
 
+
 # MCMC results: 50, 16, 84 quantiles
 bh = np.array([[0.22159627, 0.28700594, 0.16940808, 0.14136074, 0.34945891, 0.59129961],
                [0.07129987, 0.13041275, 0.04213337, 0.03056129, 0.11163703, 0.05378206],

@@ -106,3 +106,4 @@ fig.savefig("../images/MCMC_%s.pdf" % survey, dpi=600, bbox_inches="tight")
 
 val = list(map(lambda v: (v[1], v[1]-v[0], v[2]-v[1]),
                zip(*np.percentile(samples, [16, 50, 84], axis=0))))
+np.save("fit_vals/"+survey, np.array(val).T)

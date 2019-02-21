@@ -37,12 +37,12 @@ cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
 params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
 popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
 kwargs = dict(zip(params, popt))
-sprops = {"2mpz"   :  (0.001, 0.300),
-          "wisc_b1":  (0.001, 0.320),
-          "wisc_b2":  (0.005, 0.370),
-          "wisc_b3":  (0.020, 0.500),
-          "wisc_b4":  (0.050, 0.600),
-          "wisc_b5":  (0.070, 0.700)}
+sprops = {"2mpz"   :  [(0.001, 0.300), 1],
+          "wisc_b1":  [(0.001, 0.320), 1],
+          "wisc_b2":  [(0.005, 0.370), 2],
+          "wisc_b3":  [(0.020, 0.500), 3],
+          "wisc_b4":  [(0.050, 0.600), 4],
+          "wisc_b5":  [(0.070, 0.700), 5]}
 
 
 ## BENCHMARK ##
@@ -50,16 +50,17 @@ prof1 = profile2D.Arnaud()
 npoints = [32, 2048]
 Cl = np.zeros((len(surveys), 2, len(npoints), len(l_arr)))
 for s, sur in enumerate(surveys):
-    fname = dir1 + ("2MPZ_bin1.txt" if sur is "2mpz" else  sur[:4].upper() + "_bin%d.txt" % s)
+    fname = dir1 + ("2MPZ_bin1.txt" if sur is "2mpz" else  sur[:4].upper() +
+                    "_bin%d.txt" % sprops[sur][1])
     prof2 = profile2D.HOD(nz_file=fname)
     if profplot is "gg": prof1 = prof2
     for i, n in enumerate(npoints):
         Cl[s, 0, i] = pspec.ang_power_spectrum(cosmo, l_arr, (prof1, prof2),
-                                          zrange=sprops[sur], zpoints=n,
+                                          zrange=sprops[sur][0], zpoints=n,
                                           is_zlog=True, **kwargs)
 
         Cl[s, 1, i] = pspec.ang_power_spectrum(cosmo, l_arr, (prof1, prof2),
-                                          zrange=sprops[sur], zpoints=n,
+                                          zrange=sprops[sur][0], zpoints=n,
                                           is_zlog=False, **kwargs)
     print(s+1,"/", len(surveys), sur)
 
@@ -79,7 +80,7 @@ for i, row in enumerate(axes):
         if i == len(axes)-1: ax.set_xlabel("$\\ell$", fontsize=15)
         if j == 0: ax.set_ylabel("$\\| 1 - \\frac{N_{32}}{N_{2048}} \\|$",
                        fontsize=15)
-        ax.hlines(0, 0, 285, linestyle=":")
+        ax.hlines(0.01, 0, 285, linestyle=":")
 
 axes = axes.flatten()
 for i, ax in enumerate(axes):
@@ -91,4 +92,4 @@ for i, ax in enumerate(axes):
 #    ax.ticklabel_format(useOffset=False)
 
 fig.show()
-fig.savefig("../../images/is_zlog_%s.pdf" % profplot, dpi=1000, bbox_inches="tight")
+#fig.savefig("../../images/is_zlog_%s.pdf" % profplot, dpi=1000, bbox_inches="tight")
