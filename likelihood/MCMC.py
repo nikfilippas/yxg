@@ -49,7 +49,7 @@ sprops = {"2mpz"   :  [(0.001, 0.300), 1],
 
 ## DATA MANIPULATION ##
 cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
-                      sigma8=0.8102, n_s=0.9665, A_s=2.105e-9)
+                      sigma8=0.8102, n_s=0.9665)
 data = [survey+","+survey, survey+","+"y_milca"]
 l, cl, I, prof = ft.dataman(data, z_bin=sprops[survey][1], cosmo=cosmo)
 
