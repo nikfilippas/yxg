@@ -31,12 +31,12 @@ popt = np.array([np.load("fit_vals/"+sur+".npy") for sur in surveys])
 # outer --> inner: (l,cl,dcl) --> (yg,gg) --> (surveys)
 l, cl, dcl = [[[[] for s, _ in enumerate(surveys)] for i in range(2)] for i in range(3)]
 for i, sur in enumerate(surveys):
-    data = [sur+","+sur, sur+","+"y_milca"]
-    l_arr, cl_arr, dcl_arr, _, _ = ft.dataman(data, z_bin=sprops[sur][1], cosmo=cosmo)
+    data = [sur+","+"y_milca", sur+","+sur]
+    l_arr, cl_arr, I, _ = ft.dataman(data, z_bin=sprops[sur][1], cosmo=cosmo)
 
     l[0][i], l[1][i] = l_arr
     cl[0][i], cl[1][i] = cl_arr
-    dcl[0][i], dcl[1][i] = dcl_arr
+    dcl[0][i], dcl[1][i] = np.split(np.sqrt(np.diag(np.linalg.inv(I))), (len(l[0][i]),))
 
 
 
@@ -79,41 +79,36 @@ for i, sur in enumerate(surveys):
 ## PLOTS ##
 # setup
 nrows, ncols = 2, 3
-fig1, axes1 = plt.subplots(nrows, ncols, sharex=True, sharey=True,
-                         figsize=(12,10), gridspec_kw={"wspace":0.05, "hspace":0.05})
-fig2, axes2 = plt.subplots(nrows, ncols, sharex=True, sharey=True,
-                         figsize=(12,10), gridspec_kw={"wspace":0.05, "hspace":0.05})
-
+F = [plt.subplots(nrows, ncols, sharex=True, sharey="row", figsize=(15,10),
+                  gridspec_kw={"wspace":0.05, "hspace":0.05}) for i in range(2)]
+F = [list(x) for x in F]
 # axes labels
-fig1.suptitle("$C^{yg}_{\\ell}$", fontsize=18)
-fig2.suptitle("$C^{gg}_{\\ell}$", fontsize=18)
-
-for i, row in enumerate(np.column_stack((axes1, axes2))):
+for i, row in enumerate(np.column_stack((F[0][1], F[1][1]))):
     for j, ax in enumerate(row):
-        if i == nrows-1:
-            [a.set_xlabel("$\\ell$", fontsize=15) for a in row]
-        if j%3 == 0:
-            ax.set_ylabel("$C_{\\ell}$", fontsize=15)
+        if i == nrows-1: [a.set_xlabel("$\\ell$", fontsize=15) for a in row]
+        if j == 0: ax.set_ylabel("$C^{yg}_{\\ell}$", fontsize=15)
+        if j == ncols: ax.set_ylabel("$C^{gg}_{\\ell}$", fontsize=15)
 
 # plot
-axes1, axes2 = map(lambda x: x.flatten(), [axes1, axes2])
-[[x.loglog() for x in y] for y in [axes1, axes2]]
+F[0][1], F[1][1] = map(lambda x: x.flatten(), [F[0][1], F[1][1]])
+[[x.loglog() for x in y] for y in [F[0][1], F[1][1]]]
+col = ["forestgreen", "royalblue"]
 for i, sur in enumerate(surveys):
-    # data #
-    axes1[i].errorbar(l[0][i], cl[0][i], dcl[0][i], fmt="o", color="salmon",
-                      linewidth=3, ecolor="grey", elinewidth=2)
-    axes2[i].errorbar(l[1][i], cl[1][i], dcl[1][i], fmt="o", color="salmon",
-                      linewidth=3, ecolor="grey", elinewidth=2)
+
+    for j, _ in enumerate(F):
+        # data #
+        F[j][1][i].errorbar(l[j][i], cl[j][i], dcl[j][i], fmt="o", color="salmon",
+                            lw=3, ecolor="grey", elinewidth=2)
+        # model #
+        # 1h, 2h (loop works because len(F) == len(halos))
+        F[0][1][i].plot(l[j][i], hal[j][i], c=col[j], lw=1.5)
+        F[j][1][i].plot(l[j][i], Cl[j][i], c="crimson", lw=3)
 
 
-    # model #
-    axes1[i].plot(l[0][i], Cl[0][i], c="crimson", lw=3,
-                  label="$\\mathrm{\\chi^2=%d \n N=%d}$" % (chi2[0][i], Np[0][i]))
-    axes2[i].plot(l[1][i], Cl[1][i], c="crimson", lw=3,
-                  label="$\\mathrm{\\chi^2=%d \n N=%d}$")# % (chi2[1][i], Np[1][i]))
-    # 1h, 2h
-    axes1[i].plot(l[0][i], hal[0][i], c="limegreen", lw=3, ls="--")
-    axes1[i].plot(l[0][i], hal[1][i], c="royalblue", lw=3, ls="--")
+        txt = "%s \n $\\mathrm{\\chi^2=%d}$ \n $\\mathrm{N=%d}$" % \
+                (sur.upper(), chi2[j][i], Np[j][i])
+        F[j][1][i].text(0.84, 0.80, txt, transform=F[j][1][i].transAxes, ha="center",
+                      bbox={"edgecolor":"w", "facecolor":"white", "alpha":0}, fontsize=14)
 
-    axes1[i].legend(loc="upper right", fontsize=14, fancybox=True)
-    axes2[i].legend(loc="upper right", fontsize=14, fancybox=True)
+F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
+F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
