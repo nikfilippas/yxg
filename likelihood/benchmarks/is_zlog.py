@@ -77,7 +77,7 @@ fig, axes = plt.subplots(nrows, ncols, sharex=True, sharey="row",
 fig.suptitle("$C^{%s}_{\\ell}$" % profplot, fontsize=18)
 for i, row in enumerate(axes):
     for j, ax in enumerate(row):
-        if i == len(axes)-1: ax.set_xlabel("$\\ell$", fontsize=15)
+        if i == nrows-1: ax.set_xlabel("$\\ell$", fontsize=15)
         if j == 0: ax.set_ylabel("$\\| 1 - \\frac{N_{32}}{N_{2048}} \\|$",
                        fontsize=15)
         ax.hlines(0.01, 0, 285, linestyle=":")
