@@ -75,6 +75,16 @@ sampler.run_mcmc(pos, 500)
 
 
 
+## RESULTS & OUTPUT ##
+cutoff = 100  # burn-in after cutoff steps
+samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
+
+val = list(map(lambda v: (v[1], v[1]-v[0], v[2]-v[1]),
+               zip(*np.percentile(samples, [16, 50, 84], axis=0))))
+np.save("fit_vals/"+survey, np.array(val).T)
+
+
+
 ## PLOTS ##
 import matplotlib.pyplot as plt
 import corner
@@ -94,16 +104,9 @@ for i in range(ndim):
     ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
     ax[i].set_ylabel(yax[i], fontsize=15)
 plt.tight_layout()
-fig.savefig("../images/MCMC_steps_%s.pdf" % survey, dpi=600, bbox_inches="tight")
+fig.savefig("../images/MCMC/MCMC_steps_%s.pdf" % survey, dpi=600, bbox_inches="tight")
 
 # Figure 2 (corner plot) #
-cutoff = 100  # burn-in after cutoff steps
-samples = sampler.chain[:, cutoff:, :].reshape((-1, ndim))
-
 fig = corner.corner(samples, labels=yax, label_kwargs={"fontsize":15},
                     show_titles=True, quantiles=[0.16, 0.50, 0.84])
-fig.savefig("../images/MCMC_%s.pdf" % survey, dpi=600, bbox_inches="tight")
-
-val = list(map(lambda v: (v[1], v[1]-v[0], v[2]-v[1]),
-               zip(*np.percentile(samples, [16, 50, 84], axis=0))))
-np.save("fit_vals/"+survey, np.array(val).T)
+fig.savefig("../images/MCMC/MCMC_%s.pdf" % survey, dpi=600, bbox_inches="tight")
