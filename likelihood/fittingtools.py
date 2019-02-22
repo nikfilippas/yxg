@@ -74,14 +74,15 @@ def dataman(cells, z_bin=None, cosmo=None):
                 profiles[i].append(profile2D.HOD(nz_file=dndz))
 
     # Unpacking science data
-    l_arr, cl_arr, mask = [[[] for C in cells] for i in range(3)]
+    l_arr, cl_arr, dcl_arr, mask = [[[] for C in cells] for i in range(4)]
     for i, d in enumerate(data):
         # x-data
         l = d["leff"]
         if z_bin: mask[i] = l < max_multipole(dndz, cosmo)
         l_arr[i] = l[mask[i]]
         # y-data
-        cl_arr[i] = (d["cell"] - d["nell"])[mask[i]]
+        dcl_arr[i] = d["nell"][mask[i]]
+        cl_arr[i] = d["cell"][mask[i]] - dcl_arr[i]
 
     del dndz  # removing dndz from locals
 
@@ -100,7 +101,7 @@ def dataman(cells, z_bin=None, cosmo=None):
     covar = np.vstack((c))                                 # stack horizontally
     I = np.linalg.inv(covar)
 
-    return l_arr, cl_arr, I, profiles
+    return l_arr, cl_arr, dcl_arr, I, profiles
 
 
 
