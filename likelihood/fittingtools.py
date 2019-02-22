@@ -101,7 +101,7 @@ def dataman(cells, z_bin=None, cosmo=None):
     covar = np.vstack((c))                                 # stack horizontally
     I = np.linalg.inv(covar)
 
-    return l_arr, cl_arr, dcl_arr, I, profiles
+    return l_arr, cl_arr, I, profiles
 
 
 
