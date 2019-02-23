@@ -23,7 +23,7 @@ import pspec
 
 
 ## INPUT ##
-profplot = "gg"
+profplot = "yg"
 dir1 = "../../analysis/data/dndz/"
 
 # g-surveys

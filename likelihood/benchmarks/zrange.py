@@ -1,15 +1,3 @@
-"""
-Testing convergence for is_log=True/False:
-    zpoints = 32;    mpoints = 128,
-as per other benchmarks, at the following redshift ranges:
-=======================================================
- SURVEY       ZRANGE      ||  SURVEY       ZRANGE     |
-2mpz:     (0.001, 0.300)  || wisc_b3:  (0.020, 0.500) |
-wisc_b1:  (0.001, 0.320)  || wisc_b4:  (0.050, 0.600) |
-wisc_b2:  (0.005, 0.370)  || wisc_b5:  (0.070, 0.700) |
-=======================================================
-"""
-
 import sys
 import os
 sys.path.append(os.path.abspath(".."))
@@ -42,7 +30,7 @@ sprops = {"2mpz"   :  [(0.001, 0.300), 1],
           "wisc_b2":  [(0.005, 0.370), 2],
           "wisc_b3":  [(0.020, 0.500), 3],
           "wisc_b4":  [(0.050, 0.600), 4],
-          "wisc_b5":  [(0.070, 0.700), 5]}
+          "wisc_b5":  [(0.001, 0.700), 5]}
 
 
 ## BENCHMARK ##
