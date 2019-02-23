@@ -5,7 +5,6 @@ retrieval and data analysis.
 
 from itertools import product
 import numpy as np
-from scipy.integrate import simps
 import pyccl as ccl
 
 import profile2D
@@ -13,13 +12,12 @@ import pspec
 
 
 
-def max_multipole(fname, cosmo, kmax=1):
+def max_multipole(fname, cosmo):
     """Calculates the highest working multipole for HOD cross-correlation."""
     z, N = np.loadtxt(fname, unpack=True)
-    N *= len(N)/simps(N, x=z)  # normalise histogram
     z_avg = np.average(z, weights=N)
     chi_avg = ccl.comoving_radial_distance(cosmo, 1/(1+z_avg))
-    lmax = kmax * chi_avg - 1/2
+    lmax = chi_avg - 1/2
     return lmax
 
 
@@ -139,3 +137,20 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
             lnprob += -0.5*np.dot(cl-Cl, np.dot(I, cl-Cl))
 
     return lnprob
+
+
+
+class progressbar(object):
+    """Implement a progressbar to your run."""
+    def __init__(self, size, name=None, length=50):
+        self.s = size
+        self.l = length
+        self.n = "" if not name else name + "  "
+        self.bar = self.l*"█" + (self.l+1)*"░"
+
+
+    def progress(self, now):
+        N = now/self.s
+        x = int(N*self.l)
+        t = "\r" + self.n + self.bar[-self.l-x-1 : -1-x] + "  %.1f%%" % (100*N)
+        print(t, sep=" ", end="", flush=True)
