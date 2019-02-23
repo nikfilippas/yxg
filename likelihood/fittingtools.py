@@ -6,6 +6,7 @@ retrieval and data analysis.
 from itertools import product
 import numpy as np
 import pyccl as ccl
+import emcee
 
 import profile2D
 import pspec
@@ -103,6 +104,24 @@ def dataman(cells, z_bin=None, cosmo=None):
 
 
 
+def lnprior(theta):
+    """Priors."""
+    params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
+    kwargs = dict(zip(params, theta))
+
+    prior_test = (9 <= kwargs["Mmin"] <= 15)*\
+                 (10 <= kwargs["M0"] <= 16)*\
+                 (10 <= kwargs["M1"] <= 16)*\
+                 (0.1 <= kwargs["sigma_lnM"] <= 1.0)*\
+                 (0.5 <= kwargs["alpha"] <= 1.5)*\
+                 (0.1 <= kwargs["fc"] <= 1.0)*\
+                 (0.1 <= kwargs["b_hydro"] <= 0.9)*\
+                 (kwargs["M0"] > kwargs["Mmin"])
+
+    return 0.0 if prior_test else -np.inf
+
+
+
 def lnprob(theta, lnprior=None, verbose=True, **setup):
     """Posterior probability distribution to be sampled."""
     if verbose:
@@ -140,17 +159,25 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
 
 
 
-class progressbar(object):
-    """Implement a progressbar to your run."""
-    def __init__(self, size, name=None, length=50):
-        self.s = size
-        self.l = length
-        self.n = "" if not name else name + "  "
-        self.bar = self.l*"█" + (self.l+1)*"░"
+def MCMC(survey, sprops, cosmo, popt, lnprob, args, nwalkers=100, nsteps=500):
+    """Runs the MCMC."""
+    global Neval
+    Neval = 1  # counter
+    # Data Manipulation #
+    data = [survey+","+survey, survey+","+"y_milca"]
+    l, cl, I, prof = dataman(data, z_bin=sprops[survey][1], cosmo=cosmo)
+    setup = {"cosmo"     : cosmo,
+             "profiles"  : prof,
+             "l_arr"     : l,
+             "cl_arr"    : cl,
+             "inv_covar" : I,
+             "zrange"    : sprops[survey][0]}
 
+    # MCMC #
+    ndim = len(popt)
+    pos = [popt + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-    def progress(self, now):
-        N = now/self.s
-        x = int(N*self.l)
-        t = "\r" + self.n + self.bar[-self.l-x-1 : -1-x] + "  %.1f%%" % (100*N)
-        print(t, sep=" ", end="", flush=True)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
+                                    args=args, kwargs=setup)
+    sampler.run_mcmc(pos, nsteps)
+    return sampler
