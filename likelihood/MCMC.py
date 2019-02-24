@@ -5,8 +5,8 @@ import numpy as np
 import pyccl as ccl
 
 from joblib import Parallel, delayed
-import multiprocessing as mps
-
+import multiprocessing as mp
+from tqdm import tqdm
 
 import fittingtools as ft
 
@@ -32,8 +32,8 @@ popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
 sampler = lambda sur: ft.MCMC(sur, sprops, cosmo, popt,
                               ft.lnprob, args=(ft.lnprior,))
 
-ncpu = mps.cpu_count()
-results = Parallel(ncpu)(delayed(sampler)(sur) for sur in list(sprops.keys()))
+ncpu = mp.cpu_count()
+results = Parallel(ncpu)(delayed(sampler)(sur) for sur in tqdm(list(sprops.keys())))
 
 
 

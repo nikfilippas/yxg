@@ -2,6 +2,10 @@ import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
 
+from joblib import Parallel, delayed
+import multiprocessing
+global ncpu
+ncpu = multiprocessing.cpu_count()
 
 
 def power_spectrum(cosmo, k_arr, a, profiles,
@@ -59,10 +63,11 @@ def power_spectrum(cosmo, k_arr, a, profiles,
 
     # initialise integrands
     I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
-    for m, M in enumerate(M_arr):
+
+    def integrand(m, M):
         U, UU = p1.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
-        # optimise for autocorrelation (no need to compute again)
-        if p1 == p2:
+        # optimise for autocorrelation (no need to recompute)
+        if type(p1) == type(p2):
             V = U; UV = UU
         else :
             V, VV = p2.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
@@ -71,6 +76,8 @@ def power_spectrum(cosmo, k_arr, a, profiles,
         I1h[:, m] = mfunc[m]*UV
         I2h_1[:, m] = bh[m]*mfunc[m]*U
         I2h_2[:, m] = bh[m]*mfunc[m]*V
+    # parallelisation of independent for loops
+    Parallel(ncpu)(delayed(integrand)(m, M) for m, M in enumerate(M_arr))
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     P1h = simps(I1h, x=np.log10(M_arr))
@@ -157,15 +164,16 @@ def ang_power_spectrum(cosmo, l_arr, profiles,
     N = invh_arr*Wu*Wv/chi_arr**2  # overall normalisation factor
 
     I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
-    for x, chi in enumerate(chi_arr):
+    def integrand(x, chi):
         k_arr = (l_arr+1/2)/chi
         Puv = power_spectrum(cosmo, k_arr, a_arr[x], profiles,
                              logMrange=logMrange, mpoints=mpoints,
                              include_1h=include_1h, include_2h=include_2h,
                              **kwargs)
-        if Puv is None:  return None  # deal with zero division
-
-        I[:, x] = N[x] * Puv
+        I[:, x] = N[x] * Puv if Puv is not None else np.nan*np.ones_like(l_arr)
+    # parallelisation of independent for loops
+    Parallel(ncpu)(delayed(integrand)(x, chi) for x, chi in enumerate(chi_arr))
+    if np.isnan(I).any(): return None
 
     Cl = simps(I, x=x_arr)
     return Cl
