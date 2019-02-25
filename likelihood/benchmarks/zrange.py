@@ -18,6 +18,19 @@ dir1 = "../../analysis/data/dndz/"
 wisc = ["wisc_b%d" % i for i in range(1, 6)]
 surveys = ["2mpz"] + wisc
 
+
+# range selection #
+Z = [[] for i, _ in enumerate(surveys)]
+for i, sur in enumerate(surveys):
+    k = 1 if sur is "2mpz" else i
+    fname = dir1 + sur.strip("_b%d" % i).upper() + "_bin%d.txt" % k
+    z, N = np.loadtxt(fname, unpack=True)
+    m = N.argmax()
+    imin = np.abs(N[:m] - N.max()/100).argmin()
+    imax = np.abs(N[m:] - N.max()/100).argmin()
+    Z[i] = (z[imin], z[imax])
+
+
 # parameters
 l_arr = np.arange(300)
 cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
@@ -25,12 +38,14 @@ cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
 params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
 popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
 kwargs = dict(zip(params, popt))
-sprops = {"2mpz"   :  [(0.001, 0.300), 1],
-          "wisc_b1":  [(0.001, 0.320), 1],
-          "wisc_b2":  [(0.005, 0.370), 2],
-          "wisc_b3":  [(0.020, 0.500), 3],
-          "wisc_b4":  [(0.050, 0.600), 4],
-          "wisc_b5":  [(0.001, 0.700), 5]}
+sprops = {"2mpz"   :  [Z[0], 1],
+          "wisc_b1":  [Z[1], 1],
+          "wisc_b2":  [Z[2], 2],
+          "wisc_b3":  [Z[3], 3],
+          "wisc_b4":  [Z[4], 4],
+          "wisc_b5":  [Z[5], 5]}
+print(sprops)
+
 
 
 ## BENCHMARK ##
@@ -49,6 +64,7 @@ for s, sur in enumerate(surveys):
                                           is_zlog=False, **kwargs)
 
     print(s+1,"/", len(surveys), sur)
+
 
 
 ## PLOTS ##
@@ -74,7 +90,6 @@ for i, ax in enumerate(axes):
     ax.legend(loc="lower right")
 
     ax.xaxis.set_major_formatter(ScalarFormatter())
-#    ax.ticklabel_format(useOffset=False)
 
 fig.show()
-#fig.savefig("/zrange_%s.pdf" % profplot, dpi=1000, bbox_inches="tight")
+fig.savefig("/zrange_%s.pdf" % profplot, dpi=1000, bbox_inches="tight")
