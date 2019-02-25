@@ -44,7 +44,6 @@ sprops = {"2mpz"   :  [Z[0], 1],
           "wisc_b3":  [Z[3], 3],
           "wisc_b4":  [Z[4], 4],
           "wisc_b5":  [Z[5], 5]}
-print(sprops)
 
 
 
@@ -61,7 +60,7 @@ for s, sur in enumerate(surveys):
         zrange = sprops[sur][0], (0.1*sprops[sur][0][0], sprops[sur][0][1])
         Cl[s, i] = pspec.ang_power_spectrum(cosmo, l_arr, (prof1, prof2),
                                           zrange=zrange[i], zpoints=n,
-                                          is_zlog=False, **kwargs)
+                                          is_zlog=True, **kwargs)
 
     print(s+1,"/", len(surveys), sur)
 
@@ -92,4 +91,4 @@ for i, ax in enumerate(axes):
     ax.xaxis.set_major_formatter(ScalarFormatter())
 
 fig.show()
-fig.savefig("/zrange_%s.pdf" % profplot, dpi=1000, bbox_inches="tight")
+fig.savefig("zrange_%s.pdf" % profplot, dpi=1000, bbox_inches="tight")
