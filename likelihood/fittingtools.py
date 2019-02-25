@@ -126,7 +126,7 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
     """Posterior probability distribution to be sampled."""
     if verbose:
         global Neval
-        print(Neval, theta); Neval += 1
+        print("\r", Neval, theta); Neval += 1
 
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
     kwargs = dict(zip(params, theta))
