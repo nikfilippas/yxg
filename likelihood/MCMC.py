@@ -4,10 +4,10 @@
 import numpy as np
 import pyccl as ccl
 
-#from joblib import Parallel, delayed
-#import multiprocessing
-#ncpu = multiprocessing.cpu_count()
-#from tqdm import tqdm
+from joblib import Parallel, delayed
+import multiprocessing
+ncpu = multiprocessing.cpu_count()
+from tqdm import tqdm
 
 import fittingtools as ft
 
