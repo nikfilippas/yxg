@@ -33,7 +33,7 @@ sampler = lambda sur: ft.MCMC(sur, sprops, cosmo, popt,
                               ft.lnprob, args=(ft.lnprior,))
 
 ncpu = mp.cpu_count()
-results = Parallel(ncpu)(delayed(sampler)(sur) for sur in tqdm(list(sprops.keys())))
+results = Parallel(ncpu)(delayed(sampler)(sur) for sur in list(sprops.keys()))
 
 
 
