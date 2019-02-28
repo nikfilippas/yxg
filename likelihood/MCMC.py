@@ -32,8 +32,8 @@ popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
 sampler = lambda sur: ft.MCMC(sur, sprops, cosmo, popt,
                               ft.lnprob, args=(ft.lnprior,))
 
-results = [sampler(sur) for sur in list(sprops.keys())]
-#results = Parallel(ncpu)(delayed(sampler)(sur) for sur in list(sprops.keys()))
+#results = [sampler(sur) for sur in list(sprops.keys())]
+results = Parallel(ncpu)(delayed(sampler)(sur) for sur in list(sprops.keys()))
 
 
 

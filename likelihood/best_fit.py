@@ -3,20 +3,20 @@ import matplotlib.pyplot as plt
 import pyccl as ccl
 
 import fittingtools as ft
-import profile2D
-import pspec
+import profile2D as p2D
+import pspec as pspec
 
 
 
 dir1 = "../analysis/data/dndz/"
 
 # survey properties: name, zrange, bin
-sprops = {"2mpz"   :  [(0.001, 0.300), 1],
-          "wisc_b1":  [(0.001, 0.320), 1],
-          "wisc_b2":  [(0.005, 0.370), 2],
-          "wisc_b3":  [(0.020, 0.500), 3],
-          "wisc_b4":  [(0.050, 0.600), 4],
-          "wisc_b5":  [(0.070, 0.700), 5]}
+sprops = {"2mpz"     :  [(0.0005, 0.0745), 1],
+          "wisc_b1"  :  [(0.0005, 0.1405), 1],
+          "wisc_b2"  :  [(0.0215, 0.1575), 2],
+          "wisc_b3"  :  [(0.0505, 0.1785), 3],
+          "wisc_b4"  :  [(0.0735, 0.2035), 4],
+          "wisc_b5"  :  [(0.0895, 0.2355), 5]}
 surveys = list(sprops.keys())
 
 cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
@@ -42,28 +42,32 @@ for i, sur in enumerate(surveys):
 
 ## MODEL ##
 chi2, Np = [[[[] for s, _ in enumerate(surveys)] for i in range(2)] for i in range(2)]
-Cl = [[[] for s, _ in enumerate(surveys)] for i in range(2)]   # 2 (yg, gg)
-hal = [[[] for s, _ in enumerate(surveys)] for i in range(2)]  # 2 (1h, 2h)
-p1 = profile2D.Arnaud()
+Cl = [[[] for s, _ in enumerate(surveys)] for i in range(2)]
+hal = [[[[] for s, _ in enumerate(surveys)] for i in range(2)] for i in range(2)]
+p1 = p2D.Arnaud()
 for i, sur in enumerate(surveys):
     params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
     kwargs = dict(zip(params, popt[i][0]))
 
     fname = dir1 + ("2MPZ_bin1.txt" if sur is "2mpz" else  sur[:4].upper() +
                     "_bin%d.txt" % sprops[sur][1])
-    p2 = profile2D.HOD(nz_file=fname)
+    p2 = p2D.HOD(nz_file=fname)
 
     # yxg
-    Cl[0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2), zrange=sprops[sur][0],
-                      include_1h=True, include_2h=True, **kwargs)
-    hal[0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2), zrange=sprops[sur][0],
-                       include_1h=True, include_2h=False, **kwargs)
-    hal[1][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2), zrange=sprops[sur][0],
-                       include_1h=False, include_2h=True, **kwargs)
-
+    Cl[0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
+                                        zrange=sprops[sur][0], **kwargs)
     # gxg
-    Cl[1][i] = pspec.ang_power_spectrum(cosmo, l[1][i], (p2, p2), zrange=sprops[sur][0], **kwargs)
+    Cl[1][i] = pspec.ang_power_spectrum(cosmo, l[1][i], (p2, p2),
+                                        zrange=sprops[sur][0], **kwargs)
 
+    for j in range(2):
+        if j == 1: p1 = p2
+        hal[j][0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
+                                   zrange=sprops[sur][0],
+                                   include_1h=True, include_2h=False, **kwargs)
+        hal[j][1][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
+                                   zrange=sprops[sur][0],
+                                   include_1h=False, include_2h=True, **kwargs)
 
     # stats
     Np[0][i] = len(Cl[0][i])
@@ -101,9 +105,9 @@ for i, sur in enumerate(surveys):
                             lw=3, ecolor="grey", elinewidth=2)
         # model #
         # 1h, 2h (loop works because len(F) == len(halos))
-        F[0][1][i].plot(l[j][i], hal[j][i], c=col[j], lw=1.5)
         F[j][1][i].plot(l[j][i], Cl[j][i], c="crimson", lw=3)
-
+        for k in range(2):
+            F[k][1][i].plot(l[j][i], hal[k][j][i], c=col[j], lw=1.5)
 
         txt = "%s \n $\\mathrm{\\chi^2=%d}$ \n $\\mathrm{N=%d}$" % \
                 (sur.upper(), chi2[j][i], Np[j][i])
