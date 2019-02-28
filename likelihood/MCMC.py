@@ -4,9 +4,7 @@
 import numpy as np
 import pyccl as ccl
 
-from joblib import Parallel, delayed
-import multiprocessing
-ncpu = multiprocessing.cpu_count()
+import multiprocessing as mp
 from tqdm import tqdm
 
 import fittingtools as ft
@@ -27,13 +25,15 @@ cosmo = ccl.Cosmology(Omega_c=0.26066676,
                       n_s=0.9665)
 
 popt = [11.99, 14.94, 13.18, 0.26, 1.43, 0.54, 0.45]
+nwalkers, nsteps = 100, 500
+
+def sampler(sur):
+    return ft.MCMC(sur, sprops, cosmo, popt,
+                   ft.lnprob, args=(ft.lnprior,), nwalkers=nwalkers, nsteps=nsteps)
 
 
-sampler = lambda sur: ft.MCMC(sur, sprops, cosmo, popt,
-                              ft.lnprob, args=(ft.lnprior,))
-
-#results = [sampler(sur) for sur in list(sprops.keys())]
-results = Parallel(ncpu)(delayed(sampler)(sur) for sur in list(sprops.keys()))
+with mp.Pool(mp.cpu_count()) as p:
+    results = p.map(sampler, list(sprops.keys()))
 
 
 
