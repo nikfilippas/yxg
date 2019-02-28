@@ -32,7 +32,7 @@ for i, sur in enumerate(surveys):
 
 
 # parameters
-l_arr = np.arange(300)
+l_arr = np.arange(6, 300)
 cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
                       sigma8=0.8102, n_s=0.9665)
 params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
