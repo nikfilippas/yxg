@@ -271,7 +271,7 @@ class HOD(object):
         # HOD Model
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
         Ns = ((M-M0)*np.heaviside(M-M0, 0) / M1)**alpha     # satellites
-        Nc, Ns = map(lambda x: x[..., None, None], [Nc, Ns])
+        Nc, Ns = Nc[..., None, None], Ns[..., None, None]
 
         H, _ = NFW().fourier_profiles(cosmo, k, M, a)
 

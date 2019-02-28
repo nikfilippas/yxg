@@ -15,7 +15,7 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     Unorm = p1.profnorm(cosmo, a, squeeze=False, **kwargs)
     Vnorm = Unorm if type(p1) == type(p2) else p2.profnorm(cosmo, a, squeeze=False, **kwargs)
     if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any(): return None  # zero division
-    Unorm, Vnorm = map(lambda x: x[..., None], [Unorm, Vnorm])  # transform axes
+    Unorm, Vnorm = Unorm[..., None], Vnorm[..., None]  # transform axes
 
     # Set up integration boundaries
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
@@ -23,13 +23,12 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
 
     # Out-of-loop optimisations
-    Pl = [ccl.linear_matter_power(cosmo, k[i], a) for i, a in enumerate(a)]
+    Pl = np.array([ccl.linear_matter_power(cosmo, k[i], a) for i, a in enumerate(a)])
     Dm = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
-    mfunc = [ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)]
-    bh = [ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)]
+    mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+    bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
     # shape transformations
-    Pl, mfunc, bh = map(lambda x: np.array(x), [Pl, mfunc, bh])
-    mfunc, bh = map(lambda x: x.T[..., None], [mfunc, bh])
+    mfunc, bh = mfunc.T[..., None], bh.T[..., None]
 
     U, UU = p1.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
     # optimise for autocorrelation (no need to recompute)
@@ -56,10 +55,8 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     dlM = (logMmax-logMmin) / (mpoints-1)
     mfunc, bh = mfunc.squeeze(), bh.squeeze()  # squeeze extra dimensions
 
-    n0_1h = (rhoM - np.dot(M, mfunc) * dlM)/M[0]
-    n0_2h = (rhoM - np.dot(M, mfunc*bh) * dlM)/M[0]
-    n0_1h, n0_2h = map(lambda x: (np.array(x)[None, ..., None]), [n0_1h, n0_2h])
-
+    n0_1h = np.array((rhoM - np.dot(M, mfunc) * dlM)/M[0])[None, ..., None]
+    n0_2h = np.array((rhoM - np.dot(M, mfunc*bh) * dlM)/M[0])[None, ..., None]
 
     P1h += (n0_1h*P12_0).squeeze()
     b2h_1 += (n0_2h*p1_0).squeeze()
