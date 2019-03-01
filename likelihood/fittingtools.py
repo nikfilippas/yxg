@@ -13,12 +13,12 @@ import pspec
 
 
 
-def max_multipole(fname, cosmo):
+def max_multipole(fname, cosmo, kmax=1):
     """Calculates the highest working multipole for HOD cross-correlation."""
     z, N = np.loadtxt(fname, unpack=True)
     z_avg = np.average(z, weights=N)
     chi_avg = ccl.comoving_radial_distance(cosmo, 1/(1+z_avg))
-    lmax = chi_avg - 1/2
+    lmax = kmax*chi_avg - 1/2
     return lmax
 
 
@@ -77,7 +77,7 @@ def dataman(cells, z_bin=None, cosmo=None):
     for i, d in enumerate(data):
         # x-data
         l = d["leff"]
-        if z_bin: mask[i] = l < max_multipole(dndz, cosmo)
+        if z_bin: mask[i] = l < max_multipole(dndz, cosmo, kmax=2)
         l_arr[i] = l[mask[i]]
         # y-data
         dcl_arr[i] = d["nell"][mask[i]]
@@ -159,7 +159,7 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
 
 
 
-def MCMC(survey, sprops, cosmo, popt, lnprob, args, nwalkers=100, nsteps=500):
+def MCMC(survey, sprops, cosmo, p0, lnprob, args, nwalkers=100, nsteps=500):
     """Runs the MCMC."""
     global Neval
     Neval = 1  # counter
@@ -174,10 +174,10 @@ def MCMC(survey, sprops, cosmo, popt, lnprob, args, nwalkers=100, nsteps=500):
              "zrange"    : sprops[survey][0]}
 
     # MCMC #
-    ndim = len(popt)
-    pos = [popt + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
+    ndim = len(p0)
+    pos = [p0 + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
-                                    args=args, kwargs=setup)
+                                    args=args, kwargs=setup, live_dangerously=True)
     sampler.run_mcmc(pos, nsteps)
     return sampler
