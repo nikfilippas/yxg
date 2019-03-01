@@ -44,13 +44,6 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     b2h_2 = simps(bh*mfunc*V, x=np.log10(M), axis=0)
 
     # Contribution from small masses (added in the beginning)
-    p1_0, P1_0 = p1.fourier_profiles(cosmo, k, M[0], a, squeeze=False, **kwargs)
-    if type(p1) == type(p2):
-        p2_0, P12_0 = p1_0, P1_0
-    else:
-        p2_0, P2_0 = p2.fourier_profiles(cosmo, k, M[0], a, squeeze=False, **kwargs)
-        P12_0 = p1_0*p2_0
-
     rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
     dlM = (logMmax-logMmin) / (mpoints-1)
     mfunc, bh = mfunc.squeeze(), bh.squeeze()  # squeeze extra dimensions
@@ -58,9 +51,9 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     n0_1h = np.array((rhoM - np.dot(M, mfunc) * dlM)/M[0])[None, ..., None]
     n0_2h = np.array((rhoM - np.dot(M, mfunc*bh) * dlM)/M[0])[None, ..., None]
 
-    P1h += (n0_1h*P12_0).squeeze()
-    b2h_1 += (n0_2h*p1_0).squeeze()
-    b2h_2 += (n0_2h*p2_0).squeeze()
+    P1h += (n0_1h*U[0]*V[0]).squeeze()
+    b2h_1 += (n0_2h*U[0]).squeeze()
+    b2h_2 += (n0_2h*V[0]).squeeze()
 
     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
     return F.squeeze() if squeeze else F
