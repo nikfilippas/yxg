@@ -1,6 +1,9 @@
 # Directories
 __pycache__/
 
+# I can't remove this file because I'm no sudo :(
+likelihood/.nfs000000000040143a000002d8
+
 # Unused data files
 analysis/out_ns512_linlog/*.dat
 analysis/out_ns512_linlog/*.npz
