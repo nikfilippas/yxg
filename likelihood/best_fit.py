@@ -56,18 +56,22 @@ for i, sur in enumerate(surveys):
     # yxg
     Cl[0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
                                         zrange=sprops[sur][0], **kwargs)
+    hal[0][0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
+                               zrange=sprops[sur][0],
+                               include_1h=True, include_2h=False, **kwargs)
+    hal[0][1][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
+                               zrange=sprops[sur][0],
+                               include_1h=False, include_2h=True, **kwargs)
+
     # gxg
     Cl[1][i] = pspec.ang_power_spectrum(cosmo, l[1][i], (p2, p2),
                                         zrange=sprops[sur][0], **kwargs)
-
-    for j in range(2):
-        if j == 1: p1 = p2
-        hal[j][0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
-                                   zrange=sprops[sur][0],
-                                   include_1h=True, include_2h=False, **kwargs)
-        hal[j][1][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p1, p2),
-                                   zrange=sprops[sur][0],
-                                   include_1h=False, include_2h=True, **kwargs)
+    hal[1][0][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p2, p2),
+                               zrange=sprops[sur][0],
+                               include_1h=True, include_2h=False, **kwargs)
+    hal[1][1][i] = pspec.ang_power_spectrum(cosmo, l[0][i], (p2, p2),
+                               zrange=sprops[sur][0],
+                               include_1h=False, include_2h=True, **kwargs)
 
     # stats
     Np[0][i] = len(Cl[0][i])
@@ -75,8 +79,6 @@ for i, sur in enumerate(surveys):
 
     Np[1][i] = len(Cl[1][i])
     chi2[1][i] = np.sum((cl[1][i]-Cl[1][i])**2 / (dcl[1][i])**2)
-
-    print(i+1, "/", len(surveys))
 
 
 
@@ -114,5 +116,5 @@ for i, sur in enumerate(surveys):
         F[j][1][i].text(0.84, 0.80, txt, transform=F[j][1][i].transAxes, ha="center",
                       bbox={"edgecolor":"w", "facecolor":"white", "alpha":0}, fontsize=14)
 
-F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
-F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
+#F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
+#F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
