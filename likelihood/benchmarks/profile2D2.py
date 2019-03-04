@@ -9,7 +9,7 @@ import scipy.constants as u
 from scipy.constants import value as v
 import pyccl as ccl
 
-import cosmotools as ct
+import cosmotools2 as ct
 
 
 
@@ -243,4 +243,4 @@ class HOD(object):
 
         H, _ = NFW().fourier_profiles(cosmo, k, M, a)
 
-    return Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)
+        return Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)

@@ -2,11 +2,6 @@ import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
 
-#from joblib import Parallel, delayed
-#import multiprocessing
-#global ncpu
-#ncpu = multiprocessing.cpu_count()
-
 
 
 def power_spectrum(cosmo, k_arr, a, profiles,
@@ -73,9 +68,6 @@ def power_spectrum(cosmo, k_arr, a, profiles,
         I1h[:, m] = mfunc[m]*UV
         I2h_1[:, m] = bh[m]*mfunc[m]*U
         I2h_2[:, m] = bh[m]*mfunc[m]*V
-
-#    # parallelisation
-#    Parallel(ncpu)(delayed(integrand)(m, M) for m, M in enumerate(M_arr))
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     P1h = simps(I1h, x=np.log10(M_arr))
