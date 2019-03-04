@@ -77,7 +77,7 @@ def dataman(cells, z_bin=None, cosmo=None):
     for i, d in enumerate(data):
         # x-data
         l = d["leff"]
-        if z_bin: mask[i] = l < max_multipole(dndz, cosmo, kmax=2)
+        if z_bin: mask[i] = l < max_multipole(dndz, cosmo, kmax=1)
         l_arr[i] = l[mask[i]]
         # y-data
         dcl_arr[i] = d["nell"][mask[i]]

@@ -8,6 +8,7 @@ import pspec as pspec
 
 
 
+keyword = ""  # data identification keyword
 dir1 = "../analysis/data/dndz/"
 
 # survey properties: name, zrange, bin
@@ -23,7 +24,7 @@ cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
                       sigma8=0.8102, n_s=0.9665)
 
 
-popt = np.array([np.load("fit_vals/"+sur+".npy") for sur in surveys])
+popt = np.array([np.load("fit_vals/"+sur+keyword+".npy") for sur in surveys])
 
 
 
@@ -116,5 +117,5 @@ for i, sur in enumerate(surveys):
         F[j][1][i].text(0.84, 0.80, txt, transform=F[j][1][i].transAxes, ha="center",
                       bbox={"edgecolor":"w", "facecolor":"white", "alpha":0}, fontsize=14)
 
-#F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
-#F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
+F[0][0].savefig("../images/best_fit_clyg%s.pdf" % keyword, dpi=1000, bbox_inches="tight")
+F[1][0].savefig("../images/best_fit_clgg%s.pdf" % keyword, dpi=1000, bbox_inches="tight")
