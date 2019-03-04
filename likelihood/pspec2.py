@@ -2,66 +2,112 @@ import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
 
+#from joblib import Parallel, delayed
+#import multiprocessing
+#global ncpu
+#ncpu = multiprocessing.cpu_count()
 
 
-def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
-                   include_1h=True, include_2h=True, squeeze=True, **kwargs):
-    """Computes the cross power spectrum of two halo profiles."""
-    # Input handling
-    a, k = np.atleast_1d(a), np.atleast_2d(k)
 
+def power_spectrum(cosmo, k_arr, a, profiles,
+                   logMrange=(6, 17), mpoints=128,
+                   include_1h=True, include_2h=True, **kwargs):
+    """Computes the cross power spectrum of two halo profiles.
+    Uses the halo model prescription for the 3D power spectrum to compute
+    the linear cross power spectrum of two profiles.
+    For example, for the 1-halo term contribution, and for fourier space
+    profiles U(k) and V(k),
+    P1h = int(dM*dn/dM*U(k|M)*V(k|M)),
+    it creates a 3-dimensional space with vectors (M, k, integrand) and
+    uses `scipy.integrate.simps` to quench over the M-axis.
+    Parameters
+    ----------
+    cosmo : `pyccl.Cosmology` object
+        Cosmological parameters.
+    k_arr : array_like
+        The k-values of the cross power spectrum.
+    a : float
+        Scale factor.
+    profiles : tuple of `profile2D._profile_` objects
+        The profile instances used in the computation.
+    logMrange : tuple
+        Logarithm (base-10) of the mass integration boundaries.
+    mpoints : int
+        Number of integration sampling points.
+    include_1h : boolean
+        If True, includes the 1-halo contribution.
+    include_2h : boolean
+        If True, includes the 2-halo contribution.
+    **kwargs : keyword arguments
+        Parametrisation of the profiles.
+    """
     # Profile normalisations
     p1, p2 = profiles
-    Unorm = p1.profnorm(cosmo, a, squeeze=False, **kwargs)
-    Vnorm = Unorm if type(p1) == type(p2) else p2.profnorm(cosmo, a, squeeze=False, **kwargs)
-    if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any(): return None  # zero division
-    Unorm, Vnorm = Unorm[..., None], Vnorm[..., None]  # transform axes
+    Unorm = p1.profnorm(cosmo, a, **kwargs)
+    Vnorm = p2.profnorm(cosmo, a, **kwargs)
+    if (Unorm < 1e-16) or (Vnorm < 1e-16): return None  # deal with zero division
 
     # Set up integration boundaries
     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
     mpoints = int(mpoints)        # number of integration points
-    M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
+    M_arr = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
+    Pl = ccl.linear_matter_power(cosmo, k_arr, a)   # linear matter power spectrum
 
     # Out-of-loop optimisations
-    Pl = np.array([ccl.linear_matter_power(cosmo, k[i], a) for i, a in enumerate(a)])
-    Dm = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
-    mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
-    bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
-    # shape transformations
-    mfunc, bh = mfunc.T[..., None], bh.T[..., None]
+    delta_matter = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
+    mfunc = ccl.massfunc(cosmo, M_arr, a, delta_matter)      # mass function
+    bh = ccl.halo_bias(cosmo, M_arr, a, delta_matter)        # halo bias
 
-    U, UU = p1.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
-    # optimise for autocorrelation (no need to recompute)
-    if type(p1) == type(p2):
-        V = U; UV = UU
-    else :
-        V, VV = p2.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
-        UV = U*V
+    # initialise integrands
+    I1h, I2h_1, I2h_2 = [np.zeros((len(k_arr), len(M_arr)))  for i in range(3)]
+
+    for m, M in enumerate(M_arr):
+        U, UU = p1.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
+        # optimise for autocorrelation (no need to recompute)
+        if type(p1) == type(p2):
+            V = U; UV = UU
+        else :
+            V, VV = p2.fourier_profiles(cosmo, k_arr, M, a, **kwargs)
+            UV = U*V
+
+        I1h[:, m] = mfunc[m]*UV
+        I2h_1[:, m] = bh[m]*mfunc[m]*U
+        I2h_2[:, m] = bh[m]*mfunc[m]*V
+
+#    # parallelisation
+#    Parallel(ncpu)(delayed(integrand)(m, M) for m, M in enumerate(M_arr))
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
-    P1h = simps(mfunc*UV, x=np.log10(M), axis=0)
-    b2h_1 = simps(bh*mfunc*U, x=np.log10(M), axis=0)
-    b2h_2 = simps(bh*mfunc*V, x=np.log10(M), axis=0)
+    P1h = simps(I1h, x=np.log10(M_arr))
+    b2h_1 = simps(I2h_1, x=np.log10(M_arr))
+    b2h_2 = simps(I2h_2, x=np.log10(M_arr))
 
     # Contribution from small masses (added in the beginning)
     rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
     dlM = (logMmax-logMmin) / (mpoints-1)
-    mfunc, bh = mfunc.squeeze(), bh.squeeze()  # squeeze extra dimensions
 
-    n0_1h = np.array((rhoM - np.dot(M, mfunc) * dlM)/M[0])[None, ..., None]
-    n0_2h = np.array((rhoM - np.dot(M, mfunc*bh) * dlM)/M[0])[None, ..., None]
+    n0_1h = (rhoM - np.sum(mfunc*M_arr) * dlM) / M_arr[0]
+    n0_2h = (rhoM - np.sum(mfunc*bh*M_arr) * dlM) / M_arr[0]
 
-    P1h += (n0_1h*U[0]*V[0]).squeeze()
-    b2h_1 += (n0_2h*U[0]).squeeze()
-    b2h_2 += (n0_2h*V[0]).squeeze()
+    prof1_0,prof1_02 = p1.fourier_profiles(cosmo, k_arr, M_arr[0], a, **kwargs)
+    if p1 == p2 :
+        prof2_0 = prof1_0
+        prof12_0 = prof1_02
+    else :
+        prof2_0,prof2_02 = p2.fourier_profiles(cosmo, k_arr, M_arr[0], a, **kwargs)
+        prof12_0 = prof1_0*prof2_0
+
+    b2h_1 += n0_2h*prof1_0
+    b2h_2 += n0_2h*prof2_0
+    P1h += n0_1h*prof12_0
 
     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
-    return F.squeeze() if squeeze else F
+    return F
 
 
 
-def ang_power_spectrum(cosmo, l, profiles,
-                       zrange=(1e-6, 6), zpoints=32, zlog=True,
+def ang_power_spectrum(cosmo, l_arr, profiles,
+                       zrange=(1e-6, 6), zpoints=32, is_zlog=True,
                        logMrange=(6, 17), mpoints=128,
                        include_1h=True, include_2h=True, **kwargs):
     """Computes the angular cross power spectrum of two halo profiles.
@@ -71,7 +117,7 @@ def ang_power_spectrum(cosmo, l, profiles,
     ----------
     cosmo : `pyccl.Cosmology` object
         Cosmological parameters.
-    l : array_like
+    l_arr : array_like
         The l-values (multiple number) of the cross power spectrum.
     profiles : tuple of `profile2D._profile_` objects
         The profile isntances used in the computation.
@@ -79,15 +125,13 @@ def ang_power_spectrum(cosmo, l, profiles,
         Minimum and maximum redshift probed.
     zpoints : int
         Number or integration sampling points in redshift.
-    zlog : bool
-        Whether to use logarithmic spacing in redshifts.
     logMrange : tuple
         Logarithm (base-10) of the mass integration boundaries.
     mpoints : int
         Number or integration sampling points.
-    include_1h : bool
+    include_1h : boolean
         If True, includes the 1-halo contribution.
-    include_2h : bool
+    include_2h : boolean
         If True, includes the 2-halo contribution.
     **kwargs : keyword arguments
         Parametrisation of the profiles.
@@ -95,30 +139,35 @@ def ang_power_spectrum(cosmo, l, profiles,
     # Integration boundaries
     zmin, zmax = zrange
     # Distance measures & out-of-loop optimisations
-    if zlog:
-        z = np.geomspace(zmin, zmax, zpoints)
-        jac = z
-        x= np.log(z)
+    if is_zlog:
+        z_arr = np.geomspace(zmin, zmax, zpoints)
+        jac = z_arr
+        x_arr= np.log(z_arr)
     else:
-        z = np.linspace(zmin, zmax, zpoints)
+        z_arr = np.linspace(zmin, zmax, zpoints)
         jac = 1
-        x = z
-    a = 1/(1+z)
-    chi = ccl.comoving_radial_distance(cosmo, a)
+        x_arr = z_arr
+    a_arr = 1/(1+z_arr)
+    chi_arr = ccl.comoving_radial_distance(cosmo, 1/(1+z_arr))
 
-    H_inv = 2997.92458 * jac/(ccl.h_over_h0(cosmo, a)*cosmo["h"])  # c*z/H(z)
+    c1 = ccl.h_over_h0(cosmo,a_arr)*cosmo["h"]
+    invh_arr = 2997.92458 * jac/c1  # c*z/H(z)
 
     # Window functions
     p1, p2 = profiles
-    Wu = p1.kernel(cosmo, a)
-    Wv = Wu if (type(p1) == type(p2)) else p2.kernel(cosmo, a)
-    N = H_inv*Wu*Wv/chi**2  # overall normalisation factor
+    Wu = p1.kernel(cosmo, a_arr)
+    Wv = p2.kernel(cosmo, a_arr)
+    N = invh_arr*Wu*Wv/chi_arr**2  # overall normalisation factor
 
-    k = (l+1/2)/chi[..., None]
-    Puv = power_spectrum(cosmo, k, a, profiles, logMrange, mpoints,
-                         include_1h, include_2h, squeeze=False, **kwargs)
-    if type(Puv) is type(None): return None
-    I = N[..., None] * Puv
+    I = np.zeros((len(l_arr), len(chi_arr)))  # initialise integrand
+    for x, chi in enumerate(chi_arr):
+        k_arr = (l_arr+1/2)/chi
+        Puv = power_spectrum(cosmo, k_arr, a_arr[x], profiles,
+                             logMrange=logMrange, mpoints=mpoints,
+                             include_1h=include_1h, include_2h=include_2h,
+                             **kwargs)
+        if Puv is None: return None
+        I[:, x] = N[x] * Puv
 
-    Cl = simps(I, x, axis=0)
-return Cl
+    Cl = simps(I, x=x_arr)
+    return Cl
