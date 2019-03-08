@@ -197,12 +197,34 @@ class NFW(object):
         Si1, Ci1 = sici((1+c)*x)
         Si2, Ci2 = sici(x)
 
-        P1 = (np.log(1+c) - c/(1+c))**-1
+        P1 = 1/(np.log(1+c) - c/(1+c))
         P2 = np.sin(x)*(Si1-Si2) + np.cos(x)*(Ci1-Ci2)
         P3 = np.sin(c*x)/((1+c)*x)
 
         F = P1*(P2-P3)
         return (F.squeeze(), (F**2).squeeze()) if squeeze else (F, F**2)
+
+
+    def four(self, cosmo, k, M, a, squeeze=True, **kwargs):
+        """Computes a modified version of the NFW profile."""
+        # Input handling
+        M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
+
+        c = ct.concentration_duffy(M, a, is_D500=True, squeeze=False)
+
+        rs = 1
+        rmax = 1
+
+        Si1, Ci1 = sici(k*rs)
+        Si2, Ci2 = sici(k*(rs+rmax))
+
+        P1 = k*(rs+rmax) * (np.sin(k*rs)*(Si1-Si2) + np.cos(k*rs)*(Ci1-Ci2))
+        P2 = np.sin(k*rmax)
+        P3 = k*(rmax+(rs+rmax)*np.log(rs/(rs+rmax)))
+
+        F = (P1+P2)/P3
+        return (F.squeeze(), (F**2).squeeze()) if squeeze else (F, F**2)
+
 
 
 
