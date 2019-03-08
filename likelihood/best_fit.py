@@ -8,7 +8,7 @@ import pspec as pspec
 
 
 
-keyword = ""  # data identification keyword
+keyword = "_" + ""  # data identification keyword
 dir1 = "../analysis/data/dndz/"
 
 # survey properties: name, zrange, bin

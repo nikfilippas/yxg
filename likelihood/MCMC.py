@@ -4,7 +4,7 @@ import fittingtools as ft
 
 
 
-keyword = "ext_priors"
+keyword = "_" + ""  # data identification keyword
 
 # survey properties: name, zrange, bin
 sprops = {"2mpz"     :  [(0.0005, 0.0745), 1],
