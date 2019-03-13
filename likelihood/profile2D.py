@@ -205,29 +205,6 @@ class NFW(object):
         return (F.squeeze(), (F**2).squeeze()) if squeeze else (F, F**2)
 
 
-    def four(self, cosmo, k, M, a, squeeze=True, **kwargs):
-        """Computes a modified version of the NFW profile."""
-        # Input handling
-        M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
-
-        c = ct.concentration_duffy(M, a, is_D500=True, squeeze=False)
-
-        rs = 1
-        rmax = 1
-
-        Si1, Ci1 = sici(k*rs)
-        Si2, Ci2 = sici(k*(rs+rmax))
-
-        P1 = k*(rs+rmax) * (np.sin(k*rs)*(Si1-Si2) + np.cos(k*rs)*(Ci1-Ci2))
-        P2 = np.sin(k*rmax)
-        P3 = k*(rmax+(rs+rmax)*np.log(rs/(rs+rmax)))
-
-        F = (P1+P2)/P3
-        return (F.squeeze(), (F**2).squeeze()) if squeeze else (F, F**2)
-
-
-
-
 class HOD(object):
     """Calculates a Halo Occupation Distribution profile quantity of a halo."""
     def __init__(self, nz_file=None):
@@ -243,6 +220,24 @@ class HOD(object):
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
         return Hz*unit_norm * self.nzf(1/a - 1)
 
+    def n_cent(self,m,**kwargs) :
+        """
+        Number of central galaxies
+        """
+        lmmin=kwargs['Mmin']
+        sigm=kwargs['sigma_lnM']
+        return 0.5*(1+erf((np.log10(m)-lmmin)/sigm))
+    
+    def n_sat(self,m,**kwargs) :
+        """
+        Number of satellite galaxies
+        """
+        m0=10**kwargs['M0']
+        m1=10**kwargs['M1']
+        alpha=kwargs['alpha']
+        f1=lambda x: np.zeros_like(x)
+        f2=lambda x: ((x-m0)/m1)**alpha
+        return np.piecewise(m,[m<=m0,m>m0],[f1,f2])
 
     def profnorm(self, cosmo, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
@@ -251,11 +246,6 @@ class HOD(object):
         a = np.atleast_1d(a)
 
         # extract parameters
-        Mmin = 10**kwargs["Mmin"]
-        M0 = 10**kwargs["M0"]
-        M1 = 10**kwargs["M1"]
-        sigma_lnM = kwargs["sigma_lnM"]
-        alpha = kwargs["alpha"]
         fc = kwargs["fc"]
 
         logMmin, logMmax = (6, 17) # log of min and max halo mass [Msun]
@@ -265,14 +255,37 @@ class HOD(object):
         Dm = self.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses delta_matter
         mfunc = [ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)]
 
-        Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
-        Ns = ((M-M0)*np.heaviside(M-M0, 0) / M1)**alpha     # satellites
+        Nc = self.n_cent(M,**kwargs) # centrals
+        Ns = self.n_sat(M,**kwargs) # satellites
 
         dng = mfunc*Nc*(fc+Ns)  # integrand
 
         ng = simps(dng, x=np.log10(M))
         return ng.squeeze() if squeeze else ng
 
+    def nfw_mod(self, cosmo, k, M, a, squeeze=True, **kwargs):
+        """Computes the Fourier transform of the Navarro-Frenk-White profile."""
+        # Input handling
+        M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
+
+        bm=kwargs['beta_max']
+        bg=kwargs['beta_gal']
+        
+        c = ct.concentration_duffy(M, a, is_D500=True, squeeze=False)
+
+        R = ct.R_Delta(cosmo, M, a, self.Delta, is_matter=False, squeeze=False)/(c*a)
+        x = k*R[..., None]
+
+        c = c[..., None]*bm
+        Si1, Ci1 = sici((bg+c)*x)
+        Si2, Ci2 = sici(bg*x)
+
+        P1 = 1/(np.log(1+c/bg) - c/(1+c/bg))
+        P2 = np.sin(bg*x)*(Si1-Si2) + np.cos(bg*x)*(Ci1-Ci2)
+        P3 = np.sin(c*x)/((bg+c)*x)
+
+        F = P1*(P2-P3)
+        return F.squeeze() if squeeze else F
 
     def fourier_profiles(self, cosmo, k, M, a, squeeze=True, **kwargs):
         """Computes the Fourier transform of the Halo Occupation Distribution.
@@ -282,19 +295,14 @@ class HOD(object):
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
 
         # extract parameters
-        Mmin = 10**kwargs["Mmin"]
-        M0 = 10**kwargs["M0"]
-        M1 = 10**kwargs["M1"]
-        sigma_lnM = kwargs["sigma_lnM"]
-        alpha = kwargs["alpha"]
         fc = kwargs["fc"]
 
         # HOD Model
-        Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))  # centrals
-        Ns = ((M-M0)*np.heaviside(M-M0, 0) / M1)**alpha     # satellites
+        Nc = self.n_cent(M,**kwargs)  # centrals
+        Ns = self.n_sat(M,**kwargs)  # satellites
         Nc, Ns = Nc[..., None, None], Ns[..., None, None]
 
-        H, _ = NFW().fourier_profiles(cosmo, k, M, a)
+        H = self.nfw_mod(cosmo, k, M, a, **kwargs)
 
         F, F2 = Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)
         return (F.squeeze(), F2.squeeze()) if squeeze else F, F2
