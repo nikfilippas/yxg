@@ -13,7 +13,7 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     # Profile normalisations
     p1, p2 = profiles
     Unorm = p1.profnorm(cosmo, a, squeeze=False, **kwargs)
-    Vnorm = Unorm if type(p1) == type(p2) else p2.profnorm(cosmo, a, squeeze=False, **kwargs)
+    Vnorm = Unorm if p1.name == p2.name else p2.profnorm(cosmo, a, squeeze=False, **kwargs)
     if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any(): return None  # zero division
     Unorm, Vnorm = Unorm[..., None], Vnorm[..., None]  # transform axes
 
@@ -32,11 +32,16 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
 
     U, UU = p1.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
     # optimise for autocorrelation (no need to recompute)
-    if type(p1) == type(p2):
+    if p1.name == p2.name:
         V = U; UV = UU
     else :
         V, VV = p2.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
-        UV = U*V
+        if 'r_corr' in kwargs:
+            r=kwargs['r_corr']
+        else:
+            r=0
+        
+        UV = U*V*(1+r)
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     P1h = simps(mfunc*UV, x=np.log10(M), axis=0)
@@ -113,7 +118,7 @@ def ang_power_spectrum(cosmo, l, profiles,
     # Window functions
     p1, p2 = profiles
     Wu = p1.kernel(cosmo, a)
-    Wv = Wu if (type(p1) == type(p2)) else p2.kernel(cosmo, a)
+    Wv = Wu if (p1.name == p2.name) else p2.kernel(cosmo, a)
     N = H_inv*Wu*Wv/chi**2  # overall normalisation factor
 
     k = (l+1/2)/chi[..., None]

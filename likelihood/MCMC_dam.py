@@ -19,10 +19,15 @@ fit_gg=True
 fit_gy=bool(int(sys.argv[3]))
 
 #y-map beam
+nside=512
 fwhm_y_amin=10.
+fwhm_hp_amin=60*41.7/nside
 sigma_y_rad=np.radians(fwhm_y_amin/2.355/60)
+sigma_hp_rad=np.radians(fwhm_hp_amin/2.355/60)
 def beam_ymap(l):
     return np.exp(-0.5*l*(l+1)*sigma_y_rad**2)
+def beam_hpix(l):
+    return np.exp(-0.5*l*(l+1)*sigma_hp_rad**2)
 
 #Fiducial cosmology
 cosmo = ccl.Cosmology(Omega_c=0.26066676,
@@ -65,8 +70,8 @@ nl_gg=np.sum(mask_gg)
 nl_gy=np.sum(mask_gy)
 ls_gg=d_gg['leff'][mask_gg]
 ls_gy=d_gy['leff'][mask_gy]
-beam_gg=np.ones(nl_gg)
-beam_gy=beam_ymap(ls_gg)
+beam_gg=np.ones(nl_gg)*beam_hpix(ls_gg)**2
+beam_gy=beam_ymap(ls_gy)*beam_hpix(ls_gy)**2
 dv_gg=(d_gg['cell']-d_gg['nell'])[mask_gg]
 dv_gy=(d_gy['cell']-d_gy['nell'])[mask_gy]
 cv_gg_gg=d_gggg['cov'][mask_gg,:][:,mask_gg]
@@ -102,8 +107,8 @@ else:
 icv=np.linalg.inv(cv)
 
 #Set up profiles
-prof_y=Arnaud()
-prof_g=HOD(nz_file=fname_dndz)
+prof_y=Arnaud(y_sample)
+prof_g=HOD(g_sample+ibin_string,nz_file=fname_dndz)
 
 #Define likelihood
 priors={'fc':[1.,1.,1.],
@@ -114,7 +119,8 @@ priors={'fc':[1.,1.,1.],
         "beta_max":[1.,1.,1.],
         "beta_gal":[1.,1.,1.],
         "sigma_lnM":[0.15,0.15,0.15],
-        "b_hydro":[0.3,0.,1.0]
+        "b_hydro":[0.3,0.,1.0],
+        "r_corr":[0,-1.,1.]
         }
 if not fit_gy: #Fix b_hydro if not fitting gy
     priors['b_hydro'][1]=priors['b_hydro'][2]=priors['b_hydro'][0]
@@ -161,6 +167,7 @@ def lnlike(p):
     if tv is None:
         return -np.inf
     dx=dv-tv
+    print(params)
     return -0.5*np.einsum('i,ij,j',dx,icv,dx)
 
 def plot_theory(p):
@@ -184,7 +191,7 @@ def lnprob(p,sign=+1):
     pr=lnprior(p)
     if pr!=-np.inf:
         pr+=lnlike(p)
-
+    print(pr)
     return sign*pr
 
 print("Minimizing")
@@ -199,3 +206,4 @@ values=np.array([pars_final[k] for k in names])
 np.savez("result_"+g_sample+ibin_string+"_%d%d"%(int(fit_gg),int(fit_gy)),names=names,values=values,names_var=params_free_names,covar=covar)
 plot_theory(res.x)
 plt.savefig("result_"+g_sample+ibin_string+"_%d%d.pdf"%(int(fit_gg),int(fit_gy)),bbox_inches='tight')
+plt.show()
