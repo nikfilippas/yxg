@@ -32,6 +32,7 @@ class Arnaud(object):
         self.rrange = rrange         # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = 500             # reference overdensity (Arnaud et al.)
+        self.name = "Arnaud"
 
         self._fourier_interp = self._integ_interp()
 
@@ -191,6 +192,7 @@ class HOD(object):
         self.Delta = 500  # reference overdensity (Arnaud et al.)
         z, nz = np.loadtxt(nz_file, unpack=True)
         self.nzf = interp1d(z, nz, bounds_error=False, fill_value=0)
+        self.name = nz_file
 
 
     def kernel(self, cosmo, a):
