@@ -88,7 +88,7 @@ class Arnaud(object):
         """Computes the integral of the power spectrum at different points and
         returns an interpolating function connecting these points.
         """
-        def integrand(x): return self.form_factor(x)*x
+        integrand = lambda x: self.form_factor(x)*x
 
         ## Integration Boundaries ##
         rmin, rmax = self.rrange  # physical distance [R_Delta]
@@ -104,7 +104,7 @@ class Arnaud(object):
 
         ## Extrapolation ##
         # Backward Extrapolation
-        def F1(x): return f_arr[0]*np.ones_like(x)  # constant value
+        F1 = lambda x: f_arr[0]*np.ones_like(x)  # constant value
 
         # Forward Extrapolation
         # linear fitting
@@ -113,13 +113,13 @@ class Arnaud(object):
         A = np.vstack([Q, np.ones(len(Q))]).T
         m, c = lstsq(A, F, rcond=None)[0]
 
-        def F3(x): return 10**(m*x+c)  # logarithmic drop
+        F3 = lambda x: 10**(m*x+c)  # logarithmic drop
 
-        def F(x): return np.piecewise(x,
-                                     [x < lgqmin,        # backward extrapolation
-                                     (lgqmin <= x)*(x <= lgqmax),  # common range
-                                     lgqmax < x],       # forward extrapolation
-                                     [F1, F2, F3])
+        F = lambda x: np.piecewise(x,
+                                  [x < lgqmin,        # backward extrapolation
+                                  (lgqmin <= x)*(x <= lgqmax),  # common range
+                                  lgqmax < x],       # forward extrapolation
+                                  [F1, F2, F3])
         return F
 
 
