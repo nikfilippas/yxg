@@ -3,6 +3,7 @@ This script contains definitions of useful fitting functions for quick
 retrieval and data analysis.
 """
 
+from collections import ChainMap
 from itertools import product
 import numpy as np
 import pyccl as ccl
@@ -23,6 +24,22 @@ def max_multipole(fname, cosmo, kmax=1):
 
 
 
+def survey_properties(directory, surveys, bins, cutoff=0.5):
+    """Returns a ``dict`` of the survey ``zrange`` and its bin."""
+    Z = [[] for i, _ in enumerate(surveys)]
+    for i, sur in enumerate(surveys):
+        fname = directory + sur.strip("_b%d" % i).upper() + "_bin%d.txt" % bins[i]
+        z, N = np.loadtxt(fname, unpack=True)
+        m = N.argmax()
+        imin = np.abs(N[:m] - cutoff*N.max()/100).argmin()
+        imax = np.abs(N[m:] - cutoff*N.max()/100).argmin()
+        Z[i] = (z[imin], z[m+imax])
+
+    sprops = dict(zip(surveys, zip(Z, bins)))
+    return sprops
+
+
+
 def dataman(cells, z_bin=None, cosmo=None):
     """
     Constructs data vectors from different data sets and computes their inverse
@@ -37,6 +54,15 @@ def dataman(cells, z_bin=None, cosmo=None):
     cosmo : `pyccl.Cosmology` object
         Cosmological parameters.
     """
+    def Beam(l, profile, arcmin=10):
+        """Calculates the beam of a data set."""
+        if profile == "y":
+            sigma = np.deg2rad(arcmin/2.355/60)
+            B = np.exp(-0.5*l*(l+1)*sigma**2)
+        else:
+            B = np.ones_like(l)
+        return B
+
     # dictionary of surveys #
     sdss = ["sdss_b%d" % i for i in range(1, 10)]
     wisc = ["wisc_b%d" % i for i in range(1, 6)]
@@ -57,33 +83,36 @@ def dataman(cells, z_bin=None, cosmo=None):
     data = [np.load(dir2 + "cl_" + d + ".npz") for d in dfiles]   # science
     cov = [np.load(dir2 + "cov_" + c + ".npz") for c in cfiles]   # covariance
 
-    # profiles #
-    profiles = [[] for C in cells]
-    for i, C in enumerate(cells):
+    # Unpack science data & determine profile+beam
+    l_arr, cl_arr, dcl_arr, mask = [[[] for C in cells] for i in range(4)]
+    profiles, beams = [[[] for C in cells] for i in range(2)]
+    for i, (d, C) in enumerate(zip(data, cells)):
         keys = [x.strip() for x in C.split(",")]
+
+        # retrieve dN/dz if HOD profile is computed
+        if any([param[key] == "g" for key in keys]):
+            if z_bin is None:
+                raise TypeError("You must define a redshift bin.")
+
+            idx = np.where([param[key] == "g" for key in keys])[0][0]
+            key = keys[idx].strip("_b%d" % z_bin)
+            dndz = dir1 + key.upper() + "_bin%d" % z_bin + ".txt"
+
+        # x-data
+        l = d["leff"]
+        mask[i] = l < max_multipole(dndz, cosmo, kmax=1)
+        l_arr[i] = l[mask[i]]
+        # y-data
+        dcl_arr[i] = d["nell"][mask[i]]  # FIXME: is this the error?
+        cl_arr[i] = d["cell"][mask[i]] - dcl_arr[i]
+
         for key in keys:
             if param[key] == "y":  # tSZ
                 profiles[i].append(profile2D.Arnaud())
+                beams[i].append(Beam(l_arr[i], "y"))
             if param[key] == "g":  # galaxy density
-                if not z_bin:
-                    raise TypeError("You must define a redshift bin.")
-                if "dndz" not in locals():
-                    key = key.strip("_b%d" % z_bin)
-                    dndz = dir1 + key.upper() + "_bin%d" % z_bin + ".txt"
                 profiles[i].append(profile2D.HOD(nz_file=dndz))
-
-    # Unpacking science data
-    l_arr, cl_arr, dcl_arr, mask = [[[] for C in cells] for i in range(4)]
-    for i, d in enumerate(data):
-        # x-data
-        l = d["leff"]
-        if z_bin: mask[i] = l < max_multipole(dndz, cosmo, kmax=1)
-        l_arr[i] = l[mask[i]]
-        # y-data
-        dcl_arr[i] = d["nell"][mask[i]]
-        cl_arr[i] = d["cell"][mask[i]] - dcl_arr[i]
-
-    del dndz  # removing dndz from locals
+                beams[i].append(Beam(l_arr[i], "g"))
 
     # Unpacking covariances
     grid = list(product(range(len(data)), range(len(data))))  # coordinate grid
@@ -100,54 +129,79 @@ def dataman(cells, z_bin=None, cosmo=None):
     covar = np.vstack((c))                                 # stack horizontally
     I = np.linalg.inv(covar)
 
-    return l_arr, cl_arr, I, profiles
+    return l_arr, cl_arr, I, profiles, beams
 
 
 
-def lnprior(theta):
+def build_kwargs(popt, free, fixed, coupled):
+    """Reconstructs the posterior parameters."""
+    # update free parameters
+    for i, key in enumerate(sorted(free)):
+        free[key][0] = popt[i]
+    # update coupled parameters
+    for i, c in enumerate(coupled):
+        for key in c:
+            c[key][0] = popt[len(free)+i]
+
+    # re-build kwargs
+    kwargs = dict(ChainMap(*coupled), **free, **fixed)
+    kwargs = {key: kwargs[key][0] for key in kwargs}
+    return kwargs
+
+
+
+def split_kwargs(**priors):
+    """Splits priors into free, fixed, and coupled parameters."""
+    cvals = list(set([priors[key][1] for key in sorted(priors) if priors[key][1] < 0]))
+    coupled = [{key: priors[key] for key in sorted(priors) if priors[key][1] == val} for val in cvals]
+
+    for c in coupled:
+        vals = np.array(list(val[0] for val in list(c.values())))
+        try:
+            assert (vals == vals[0]).all()
+        except AssertionError:
+            raise(AssertionError("Declared coupled parameters don't match!"))
+
+    free = {key: priors[key] for key in sorted(priors) if priors[key][1] == 0}
+    fixed = {key: priors[key] for key in sorted(priors) if priors[key][1] == 1}
+    return free, fixed, coupled
+
+
+
+def lnprior(**priors):
     """Priors."""
-    params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
-    kwargs = dict(zip(params, theta))
-
-    prior_test = (9 <= kwargs["Mmin"] <= 15)*\
-                 (10 <= kwargs["M0"] <= 16)*\
-                 (10 <= kwargs["M1"] <= 16)*\
-                 (0.1 <= kwargs["sigma_lnM"] <= 1.0)*\
-                 (0.5 <= kwargs["alpha"] <= 1.5)*\
-                 (0.1 <= kwargs["fc"] <= 1.0)*\
-                 (0.1 <= kwargs["b_hydro"] <= 0.9)*\
-                 (kwargs["M0"] > kwargs["Mmin"])
-
-    return 0.0 if prior_test else -np.inf
+    fitpar = {key: priors[key] for key in priors if priors[key][1] != 1}
+    test = all([val[2][0] < val[0] < val[2][1] for val in fitpar.values()])
+    return 0.0 if test else -np.inf
 
 
 
 def lnprob(theta, lnprior=None, verbose=True, **setup):
     """Posterior probability distribution to be sampled."""
-    if verbose:
-        global Neval
-        print(Neval, theta); Neval += 1
-
-    params = ["Mmin", "M0", "M1", "sigma_lnM", "alpha", "fc", "b_hydro"]
-    kwargs = dict(zip(params, theta))
-
+    # extract parameters
     cosmo = setup["cosmo"]
     prof = setup["profiles"]
+    beams = setup["beams"]
     l_arr = setup["l_arr"]
     cl_arr = setup["cl_arr"]
     I = setup["inv_covar"]
     zrange = setup["zrange"]
 
-    lp = lnprior(theta) if lnprior else 0.0
+    free = setup["free"]
+    fixed = setup["fixed"]
+    coupled = setup["coupled"]
+
+    prior_test = dict(ChainMap(*coupled), **free)
+    lp = lnprior(**prior_test) if lnprior is not None else 0.0
     # Piecewise probability handling
     if not np.isfinite(lp):
         lnprob = -np.inf
     else:
         lnprob = lp  # only priors
-        Cl = [pspec.ang_power_spectrum(
-                                cosmo, l, p, zrange, **kwargs
-                                ) for l, p in zip(l_arr, prof)]
-        cl, Cl = [np.array(x).flatten() for x in [cl_arr, Cl]]  # data vectors
+        kwargs = build_kwargs(theta, free, fixed, coupled)
+        Cl = [pspec.ang_power_spectrum(cosmo, l, p, zrange, **kwargs
+                            )*b[0]*b[1] for l, p, b in zip(l_arr, prof, beams)]
+        cl, Cl = np.array(cl_arr).flatten(), np.array(Cl).flatten()  # data vectors
 
         # treat zero division (unphysical)
         if not Cl.all():
@@ -155,29 +209,53 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
         else:
             lnprob += -0.5*np.dot(cl-Cl, np.dot(I, cl-Cl))
 
+    if verbose:
+        order = setup["order"]
+        global Neval
+        params = [kwargs[key] for key in order]
+        print(Neval, params); Neval += 1
+
     return lnprob
 
 
 
-def MCMC(survey, sprops, cosmo, p0, lnprob, args, nwalkers=100, nsteps=500):
+def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps):
     """Runs the MCMC."""
     global Neval
     Neval = 1  # counter
+
     # Data Manipulation #
     data = [survey+","+survey, survey+","+"y_milca"]
-    l, cl, I, prof = dataman(data, z_bin=sprops[survey][1], cosmo=cosmo)
+    l, cl, I, prof, beams = dataman(data, z_bin=sprops[survey][1], cosmo=cosmo)
     setup = {"cosmo"     : cosmo,
              "profiles"  : prof,
+             "beams"     : beams,
              "l_arr"     : l,
              "cl_arr"    : cl,
              "inv_covar" : I,
              "zrange"    : sprops[survey][0]}
 
+    free, fixed, coupled = split_kwargs(**priors)
+
+    # update setup dictionary
+    setup["order"] = [key for key in priors if priors[key][1] != 1]
+    setup["free"] = free
+    setup["fixed"] = fixed
+    setup["coupled"] = coupled
+
+
     # MCMC #
+    p0 = np.array([val[0] for val in list(free.values())])
+    p0 = np.append(p0, [list(par.values())[0][0] for par in coupled])
     ndim = len(p0)
     pos = [p0 + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
-                                    args=args, kwargs=setup, live_dangerously=True)
-    sampler.run_mcmc(pos, nsteps)
+    # Set up backend for saving
+    filename = "samplers/%s" % survey
+    backend = emcee.backends.HDFBackend(filename)
+    backend.reset(nwalkers, ndim)
+
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(lnprior,),
+                                    kwargs=setup, backend=backend, live_dangerously=True)
+    sampler.run_mcmc(pos, nsteps, store=True)
     return sampler
