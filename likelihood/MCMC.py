@@ -30,9 +30,10 @@ priors = {"Mmin"       :  [11.99,   -1,   (10, 16)],
           "fc"         :  [0.54,    1,   (0.1, 1.0)],
           "bg"         :  [1.0,     1,   (0, np.inf)],
           "bmax"       :  [1.0,     1,   (0, np.inf)],
+          "r_corr"     :  [0.0,     0,   (-1, 1)],
           "b_hydro"    :  [0.45,    0,   (0.1, 0.9)]}
 
 
 nwalkers, nsteps = 60, 50
-def sampler(sur): return ft.MCMC(sur, sprops, cosmo, priors, nwalkers, nsteps)
+sampler = lambda sur: ft.MCMC(sur, sprops, cosmo, priors, nwalkers, nsteps)
 results = Pool().map(sampler, list(sprops.keys()))

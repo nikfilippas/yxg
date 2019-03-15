@@ -103,7 +103,7 @@ def dataman(cells, z_bin=None, cosmo=None):
         mask[i] = l < max_multipole(dndz, cosmo, kmax=1)
         l_arr[i] = l[mask[i]]
         # y-data
-        dcl_arr[i] = d["nell"][mask[i]]  # FIXME: is this the error?
+        dcl_arr[i] = d["nell"][mask[i]]
         cl_arr[i] = d["cell"][mask[i]] - dcl_arr[i]
 
         for key in keys:
@@ -124,9 +124,9 @@ def dataman(cells, z_bin=None, cosmo=None):
     # Concatenate
     c = [[] for i in data]
     for i, _ in enumerate(data):
-        idx = list(map(int, 2*i + np.arange(len(data))))   # group indices
-        c[i] = np.column_stack(([covar[j] for j in idx]))  # stack vertically
-    covar = np.vstack((c))                                 # stack horizontally
+        idx = list(map(int, len(data)*i + np.arange(len(data))))  # group indices
+        c[i] = np.column_stack(([covar[j] for j in idx]))         # stack vertically
+    covar = np.vstack((c))                                        # stack horizontally
     I = np.linalg.inv(covar)
 
     return l_arr, cl_arr, I, profiles, beams
@@ -171,12 +171,12 @@ def split_kwargs(**priors):
 def lnprior(**priors):
     """Priors."""
     fitpar = {key: priors[key] for key in priors if priors[key][1] != 1}
-    test = all([val[2][0] < val[0] < val[2][1] for val in fitpar.values()])
+    test = all([val[2][0] <= val[0] <= val[2][1] for val in fitpar.values()])
     return 0.0 if test else -np.inf
 
 
 
-def lnprob(theta, lnprior=None, verbose=True, **setup):
+def lnprob(theta, lnprior=None, negative=False, verbose=True, **setup):
     """Posterior probability distribution to be sampled."""
     # extract parameters
     cosmo = setup["cosmo"]
@@ -190,6 +190,7 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
     free = setup["free"]
     fixed = setup["fixed"]
     coupled = setup["coupled"]
+    kwargs = build_kwargs(theta, free, fixed, coupled)
 
     prior_test = dict(ChainMap(*coupled), **free)
     lp = lnprior(**prior_test) if lnprior is not None else 0.0
@@ -198,7 +199,6 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
         lnprob = -np.inf
     else:
         lnprob = lp  # only priors
-        kwargs = build_kwargs(theta, free, fixed, coupled)
         Cl = [pspec.ang_power_spectrum(cosmo, l, p, zrange, **kwargs
                             )*b[0]*b[1] for l, p, b in zip(l_arr, prof, beams)]
         cl, Cl = np.array(cl_arr).flatten(), np.array(Cl).flatten()  # data vectors
@@ -215,7 +215,7 @@ def lnprob(theta, lnprior=None, verbose=True, **setup):
         params = [kwargs[key] for key in order]
         print(Neval, params); Neval += 1
 
-    return lnprob
+    return lnprob if not negative else -lnprob
 
 
 
