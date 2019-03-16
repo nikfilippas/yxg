@@ -22,18 +22,22 @@ cosmo = ccl.Cosmology(Omega_c=0.26066676,
 
 # PARAMETER : [VALUE, STATUS, CONSTRAINTS]
 # (free : 0) ::: (fixed : 1) ::: (coupled : -N)
-priors = {"Mmin"       :  [11.99,   -1,   (10, 16)],
-          "M0"         :  [11.99,   -1,   (10, 16)],
-          "M1"         :  [13.18,   0,   (10, 16)],
-          "sigma_lnM"  :  [0.26,    1,   (0.1, 1.0)],
-          "alpha"      :  [1.43,    1,   (0.5, 1.5)],
-          "fc"         :  [0.54,    1,   (0.1, 1.0)],
+priors = {"Mmin"       :  [12.0,   -1,   (10, 16)],
+          "M0"         :  [12.0,   -1,   (10, 16)],
+          "M1"         :  [13.5,    0,   (10, 16)],
+          "sigma_lnM"  :  [0.15,    1,   (0.1, 1.0)],
+          "alpha"      :  [1.0,     1,   (0.5, 1.5)],
+          "fc"         :  [1.0,     1,   (0.1, 1.0)],
           "bg"         :  [1.0,     1,   (0, np.inf)],
           "bmax"       :  [1.0,     1,   (0, np.inf)],
           "r_corr"     :  [0.0,     0,   (-1, 1)],
-          "b_hydro"    :  [0.45,    0,   (0.1, 0.9)]}
+          "b_hydro"    :  [0.50,    0,   (0.1, 0.9)]}
 
 
+# minimizer
+minimizer = lambda sur: ft.param_fiducial(sur, sprops, cosmo, priors)
+p0 = Pool().map(minimizer, list(sprops.keys()))
+# MCMC
 nwalkers, nsteps = 60, 50
-sampler = lambda sur: ft.MCMC(sur, sprops, cosmo, priors, nwalkers, nsteps)
-results = Pool().map(sampler, list(sprops.keys()))
+sampler = lambda sur, p0: ft.MCMC(sur, sprops, cosmo, p0, nwalkers, nsteps)
+results = Pool().map(sampler, [list(sprops.keys()), p0])

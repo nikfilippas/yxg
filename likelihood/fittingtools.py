@@ -8,6 +8,7 @@ from itertools import product
 import numpy as np
 import pyccl as ccl
 import emcee
+from scipy.optimize import minimize
 
 import profile2D
 import pspec
@@ -133,23 +134,6 @@ def dataman(cells, z_bin=None, cosmo=None):
 
 
 
-def build_kwargs(popt, free, fixed, coupled):
-    """Reconstructs the posterior parameters."""
-    # update free parameters
-    for i, key in enumerate(sorted(free)):
-        free[key][0] = popt[i]
-    # update coupled parameters
-    for i, c in enumerate(coupled):
-        for key in c:
-            c[key][0] = popt[len(free)+i]
-
-    # re-build kwargs
-    kwargs = dict(ChainMap(*coupled), **free, **fixed)
-    kwargs = {key: kwargs[key][0] for key in kwargs}
-    return kwargs
-
-
-
 def split_kwargs(**priors):
     """Splits priors into free, fixed, and coupled parameters."""
     cvals = list(set([priors[key][1] for key in sorted(priors) if priors[key][1] < 0]))
@@ -168,6 +152,23 @@ def split_kwargs(**priors):
 
 
 
+def build_kwargs(popt, free, fixed, coupled):
+    """Reconstructs the posterior parameters."""
+    # update free parameters
+    for i, key in enumerate(sorted(free)):
+        free[key][0] = popt[i]
+    # update coupled parameters
+    for i, c in enumerate(coupled):
+        for key in c:
+            c[key][0] = popt[len(free)+i]
+
+    # re-build kwargs
+    kwargs = dict(ChainMap(*coupled), **free, **fixed)
+    kwargs = {key: kwargs[key][0] for key in kwargs}
+    return kwargs
+
+
+
 def lnprior(**priors):
     """Priors."""
     fitpar = {key: priors[key] for key in priors if priors[key][1] != 1}
@@ -176,7 +177,7 @@ def lnprior(**priors):
 
 
 
-def lnprob(theta, lnprior=None, negative=False, verbose=True, **setup):
+def lnprob(theta, setup, lnprior=None, negative=False, verbose=True):
     """Posterior probability distribution to be sampled."""
     # extract parameters
     cosmo = setup["cosmo"]
@@ -219,8 +220,8 @@ def lnprob(theta, lnprior=None, negative=False, verbose=True, **setup):
 
 
 
-def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps):
-    """Runs the MCMC."""
+def setup_run(survey, sprops, cosmo, priors):
+    """Sets up the parameter finder run."""
     global Neval
     Neval = 1  # counter
 
@@ -243,10 +244,17 @@ def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps):
     setup["fixed"] = fixed
     setup["coupled"] = coupled
 
-
-    # MCMC #
     p0 = np.array([val[0] for val in list(free.values())])
     p0 = np.append(p0, [list(par.values())[0][0] for par in coupled])
+
+    return p0, setup
+
+
+
+def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps):
+    """Runs the MCMC."""
+    p0, setup = setup_run(survey, sprops, cosmo, priors)
+
     ndim = len(p0)
     pos = [p0 + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
@@ -255,7 +263,21 @@ def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps):
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(nwalkers, ndim)
 
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(lnprior,),
-                                    kwargs=setup, backend=backend, live_dangerously=True)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
+                                    args=(setup, lnprior), backend=backend, live_dangerously=True)
     sampler.run_mcmc(pos, nsteps, store=True)
     return sampler
+
+
+
+def param_fiducial(survey, sprops, cosmo, priors):
+    """Calculates a set of proposal parameters for the MCMC via a minimization."""
+    p0, setup = setup_run(survey, sprops, cosmo, priors)
+
+    res = minimize(lnprob, p0, args=(setup, lnprior, True), method="Powell")
+
+    free, fixed, coupled = setup["free"], setup["fixed"], setup["coupled"]
+    new_priors = build_kwargs(res.x, free, fixed, coupled)
+    new_priors = {key: new_priors[key] for key in setup["order"]}
+
+    return new_priors

@@ -38,8 +38,9 @@ sprops = ft.survey_properties(dir1, surveys, bins)
 
 # INPUT #
 samplers = [emcee.backends.HDFBackend("samplers/%s" % sur) for sur in surveys]
-burnin = [int(np.ceil(2*np.max(sampler.get_autocorr_time()))) for sampler in samplers]
-autocorr = [0 for i in surveys]  # FIXME: delete
+tau = [np.max(sampler.get_autocorr_time()) for sampler in samplers]
+burnin = [int(np.ceil(2*np.max(t))) for t in tau]
+print(burnin)
 
 samples = [sampler.get_chain(discard=burn, flat=True) for sampler, burn in zip(samplers, burnin)]
 popt = [np.median(sample, axis=0) for sample in samples]
