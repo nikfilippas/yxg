@@ -10,9 +10,6 @@ import pspec as pspec
 
 
 
-keyword = ""  # data identification keyword
-
-
 # PARAMETER : [VALUE, STATUS, CONSTRAINTS] #
 # (free : 0) ::: (fixed : 1) ::: (coupled : -N)
 priors = {"Mmin"       :  [11.99,   -1,   (10, 16)],
@@ -38,7 +35,8 @@ sprops = ft.survey_properties(dir1, surveys, bins)
 
 # INPUT #
 samplers = [emcee.backends.HDFBackend("samplers/%s" % sur) for sur in surveys]
-tau = [np.max(sampler.get_autocorr_time()) for sampler in samplers]
+#tau = [np.max(sampler.get_autocorr_time()) for sampler in samplers]
+tau = np.zeros(6)
 burnin = [int(np.ceil(2*np.max(t))) for t in tau]
 print(burnin)
 
@@ -74,7 +72,7 @@ for i, sur in enumerate(surveys):
 
 
     ## MODEL ##
-    kwargs = ft.build_kwargs(popt[i], free, fixed, coupled)
+    kwargs = ft.build_kwargs(popt[i], free, fixed, coupled, full=False)
 
     fname = dir1 + sur.strip("_b%d" % i).upper() + "_bin%d.txt" % sprops[sur][1]
     p2 = p2D.HOD(nz_file=fname)
@@ -124,7 +122,6 @@ for s, sur in enumerate(sprops.keys()):
         ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
         ax[i].set_ylabel(yax[i], fontsize=15)
     plt.tight_layout()
-    fig.savefig("../images/MCMC/MCMC_steps_%s.pdf" % (sur+keyword), bbox_inches="tight")
 
 
 
@@ -132,7 +129,6 @@ for s, sur in enumerate(sprops.keys()):
 for s, sur in enumerate(sprops.keys()):
     fig = corner.corner(samples[s], labels=yax, quantiles=[0.16, 0.50, 0.84],
                         show_titles=True, label_kwargs={"fontsize":15})
-    fig.savefig("../images/MCMC/MCMC_%s.pdf" % (sur+keyword), bbox_inches="tight")
 
 
 # Figure 3 :: best-fits #
@@ -167,14 +163,18 @@ for i, sur in enumerate(surveys):
         F[j][1][i].text(0.84, 0.80, txt, transform=F[j][1][i].transAxes, ha="center",
                       bbox={"edgecolor":"w", "facecolor":"white", "alpha":0}, fontsize=14)
 
-F[0][0].savefig("../images/best_fit_clyg%s.pdf" % keyword, dpi=1000, bbox_inches="tight")
-F[1][0].savefig("../images/best_fit_clgg%s.pdf" % keyword, dpi=1000, bbox_inches="tight")
-
-
 
 
 # best fit values
 for s, sur in enumerate(sprops.keys()):
     val = list(map(lambda v: (v[1], v[1]-v[0], v[2]-v[1]),
                    zip(*np.percentile(samples[s], [16, 50, 84], axis=0))))
-    np.save("fit_vals/"+sur+keyword, np.array(val).T)
+
+
+
+# OUTPUT #
+#fig.savefig("../images/MCMC/MCMC_steps_%s.pdf" % sur, bbox_inches="tight")
+#fig.savefig("../images/MCMC/MCMC_%s.pdf" % sur, bbox_inches="tight")
+#F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
+#F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
+#np.save("fit_vals/"+sur, np.array(val).T)

@@ -1,11 +1,11 @@
+import sys
 import numpy as np
 from pathos.multiprocessing import ProcessingPool as Pool
 import pyccl as ccl
+
 import fittingtools as ft
 
 
-
-keyword = ""  # data identification keyword (add "_" for readability)
 
 # SURVEY PROPERTIES #
 dir1 = "../analysis/data/dndz/"
@@ -20,7 +20,9 @@ cosmo = ccl.Cosmology(Omega_c=0.26066676,
                       sigma8=0.8102,
                       n_s=0.9665)
 
-# PARAMETER : [VALUE, STATUS, CONSTRAINTS]
+
+
+# PARAMETER : [VALUE, STATUS, CONSTRAINTS] #
 # (free : 0) ::: (fixed : 1) ::: (coupled : -N)
 priors = {"Mmin"       :  [12.0,   -1,   (10, 16)],
           "M0"         :  [12.0,   -1,   (10, 16)],
@@ -34,10 +36,30 @@ priors = {"Mmin"       :  [12.0,   -1,   (10, 16)],
           "b_hydro"    :  [0.50,    0,   (0.1, 0.9)]}
 
 
-# minimizer
-minimizer = lambda sur: ft.param_fiducial(sur, sprops, cosmo, priors)
-p0 = Pool().map(minimizer, list(sprops.keys()))
+
+# INPUT HANDLING #
+if len(sys.argv) == 1:
+    y = input("Warning: Chains will start from the beginning!\nContinue? (y/n): ")
+    if y == "y":
+        c = False
+        # minimizer
+        minimizer = lambda sur: ft.param_fiducial(sur, sprops, cosmo, priors, v=True)
+        p0 = Pool().map(minimizer, list(sprops.keys()))
+        sys.argv.append(None)
+    elif y == "n":
+        y = input("Start chains from saved states? (y/n): ")
+        if y == "y":
+            sys.argv.append("continue")
+
+if sys.argv[1] == "continue":
+    c = True
+    p0 = [priors for sur in sprops]
+    print("Continuing from saved samplers...")
+else:
+    raise ValueError("To continue from saved backends, use 'continue' keyword.")
+
 
 # MCMC
-sampler = lambda sur, p: ft.MCMC(sur, sprops, cosmo, p, nwalkers=200, nsteps=1000)
+sampler = lambda sur, p: ft.MCMC(sur, sprops, cosmo, p,
+                                 nwalkers=200, nsteps=1000, continued=c, v=False)
 results = Pool().map(sampler, list(sprops.keys()), p0)

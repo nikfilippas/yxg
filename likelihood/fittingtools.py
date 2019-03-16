@@ -177,7 +177,7 @@ def lnprior(**priors):
 
 
 
-def lnprob(theta, setup, lnprior=None, negative=False, verbose=True):
+def lnprob(theta, setup, lnprior=None, negative=False, v=True):
     """Posterior probability distribution to be sampled."""
     # extract parameters
     cosmo = setup["cosmo"]
@@ -210,10 +210,10 @@ def lnprob(theta, setup, lnprior=None, negative=False, verbose=True):
         else:
             lnprob += -0.5*np.dot(cl-Cl, np.dot(I, cl-Cl))
 
-    if verbose:
+    if v:
         order = setup["order"]
-        global Neval
         params = [kwargs[key] for key in order]
+        global Neval
         print(Neval, params); Neval += 1
 
     return lnprob if not negative else -lnprob
@@ -251,31 +251,34 @@ def setup_run(survey, sprops, cosmo, priors):
 
 
 
-def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps):
+def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps, continued=False, v=False):
     """Runs the MCMC."""
     p0, setup = setup_run(survey, sprops, cosmo, priors)
-
     ndim = len(p0)
-    pos = [p0 + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
     # Set up backend for saving
     filename = "samplers/%s" % survey
     backend = emcee.backends.HDFBackend(filename)
-    backend.reset(nwalkers, ndim)
+    if not continued:
+        backend.reset(nwalkers, ndim)
+        pos = [p0 + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
+    else:
+        pos = None
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
-                                    args=(setup, lnprior), backend=backend, live_dangerously=True)
-    sampler.run_mcmc(pos, nsteps, store=True)
+                                    args=(setup, lnprior, False, v),
+                                    backend=backend)
+    sampler.run_mcmc(pos, nsteps, store=True, progress=(not v))
     return sampler
 
 
 
-def param_fiducial(survey, sprops, cosmo, priors):
+def param_fiducial(survey, sprops, cosmo, priors, v):
     """Calculates a set of proposal parameters for the MCMC via a minimization."""
     p0, setup = setup_run(survey, sprops, cosmo, priors)
     free, fixed, coupled = setup["free"], setup["fixed"], setup["coupled"]
 
-    res = minimize(lnprob, p0, args=(setup, lnprior, True), method="Powell")
+    res = minimize(lnprob, p0, args=(setup, lnprior, True, v), method="Powell")
 
     new_priors = build_kwargs(res.x, free, fixed, coupled)
     new_priors = {key: new_priors[key] for key in priors}
