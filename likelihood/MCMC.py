@@ -37,7 +37,7 @@ priors = {"Mmin"       :  [12.0,   -1,   (10, 16)],
 # minimizer
 minimizer = lambda sur: ft.param_fiducial(sur, sprops, cosmo, priors)
 p0 = Pool().map(minimizer, list(sprops.keys()))
+
 # MCMC
-nwalkers, nsteps = 60, 50
-sampler = lambda sur, p0: ft.MCMC(sur, sprops, cosmo, p0, nwalkers, nsteps)
-results = Pool().map(sampler, [list(sprops.keys()), p0])
+sampler = lambda sur, p: ft.MCMC(sur, sprops, cosmo, p, nwalkers=200, nsteps=1000)
+results = Pool().map(sampler, list(sprops.keys()), p0)

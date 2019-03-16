@@ -152,7 +152,7 @@ def split_kwargs(**priors):
 
 
 
-def build_kwargs(popt, free, fixed, coupled):
+def build_kwargs(popt, free, fixed, coupled, full=True):
     """Reconstructs the posterior parameters."""
     # update free parameters
     for i, key in enumerate(sorted(free)):
@@ -164,7 +164,7 @@ def build_kwargs(popt, free, fixed, coupled):
 
     # re-build kwargs
     kwargs = dict(ChainMap(*coupled), **free, **fixed)
-    kwargs = {key: kwargs[key][0] for key in kwargs}
+    if not full: kwargs = {key: kwargs[key][0] for key in kwargs}
     return kwargs
 
 
@@ -191,7 +191,7 @@ def lnprob(theta, setup, lnprior=None, negative=False, verbose=True):
     free = setup["free"]
     fixed = setup["fixed"]
     coupled = setup["coupled"]
-    kwargs = build_kwargs(theta, free, fixed, coupled)
+    kwargs = build_kwargs(theta, free, fixed, coupled, full=False)
 
     prior_test = dict(ChainMap(*coupled), **free)
     lp = lnprior(**prior_test) if lnprior is not None else 0.0
@@ -273,11 +273,11 @@ def MCMC(survey, sprops, cosmo, priors, nwalkers, nsteps):
 def param_fiducial(survey, sprops, cosmo, priors):
     """Calculates a set of proposal parameters for the MCMC via a minimization."""
     p0, setup = setup_run(survey, sprops, cosmo, priors)
+    free, fixed, coupled = setup["free"], setup["fixed"], setup["coupled"]
 
     res = minimize(lnprob, p0, args=(setup, lnprior, True), method="Powell")
 
-    free, fixed, coupled = setup["free"], setup["fixed"], setup["coupled"]
     new_priors = build_kwargs(res.x, free, fixed, coupled)
-    new_priors = {key: new_priors[key] for key in setup["order"]}
+    new_priors = {key: new_priors[key] for key in priors}
 
     return new_priors
