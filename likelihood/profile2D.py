@@ -165,8 +165,8 @@ class NFW(object):
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
 
         #extract parameters
-        bg = kwargs["bg"]
-        bmax = kwargs["bmax"]
+        bg = kwargs["bg"] if "bg" in kwargs else 1
+        bmax = kwargs["bmax"] if "bmax" in kwargs else 1
 
         c = ct.concentration_duffy(M, a, is_D500=True, squeeze=False)
         R = ct.R_Delta(cosmo, M, a, self.Delta, is_matter=False, squeeze=False)/(c*a)
