@@ -48,9 +48,9 @@ def callbackf(X):
 
 ## DATA ##
 # science
-data = np.load("../analysis/out_ns512_linlog/cl_2mpz_y_milca.npz")  # clyg
+data = np.load("../../analysis/out_ns512_linlog/cl_2mpz_y_milca.npz")  # clyg
 # covariances
-cov = np.load("../analysis/out_ns512_linlog/cov_2mpz_y_milca_2mpz_y_milca.npz")  # clyg
+cov = np.load("../../analysis/out_ns512_linlog/cov_2mpz_y_milca_2mpz_y_milca.npz")  # clyg
 
 # x-data
 l = data["leff"]
@@ -69,9 +69,9 @@ err = np.sqrt(np.diag(covar))
 
 ## MODEL 1 ##
 cosmo = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766,
-                      8102, n_s=0.9665, A_s=2.105e-9)
+                      n_s=0.9665, A_s=2.105e-9)
 
-nz = "../analysis/data/dndz/2MPZ_bin1.txt"
+nz = "../../analysis/data/dndz/2MPZ_bin1.txt"
 prof1 = profile2D.HOD(nz_file=nz)
 prof2 = profile2D.Arnaud()
 
@@ -116,7 +116,7 @@ def dataplot(cosmo, prof1, prof2, xdata, ydata, yerr, popt_free, popt_fix, b_hyd
 
 
 dataplot(cosmo, prof1, prof2, l, cl, err, res_free.x, popt_fix, res_fix.x)
-plt.savefig("../images/clyg_b_hydro_fit.pdf", dpi=600)
+#plt.savefig("../images/clyg_b_hydro_fit.pdf", dpi=600)
 
 
 ### RESULTS ##
