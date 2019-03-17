@@ -36,7 +36,7 @@ sprops = ft.survey_properties(dir1, surveys, bins)
 # INPUT #
 samplers = [emcee.backends.HDFBackend("samplers/%s" % sur) for sur in surveys]
 #tau = [np.max(sampler.get_autocorr_time()) for sampler in samplers]
-tau = np.zeros(6)
+tau = [80, 30, 80, 30, 30, 30]  # manual input
 burnin = [int(np.ceil(2*np.max(t))) for t in tau]
 print(burnin)
 
@@ -173,8 +173,8 @@ for i, sur in enumerate(surveys):
 
 F[0][0].show()
 F[1][0].show()
-#    F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
-#    F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
+F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
+F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
 
 
 
