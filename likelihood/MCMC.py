@@ -55,11 +55,9 @@ if sys.argv[1] == "continue":
     c = True
     p0 = [priors for sur in sprops]
     print("Continuing from saved samplers...")
-else:
-    raise ValueError("To continue from saved backends, use 'continue' keyword.")
 
 
 # MCMC
 sampler = lambda sur, p: ft.MCMC(sur, sprops, cosmo, p,
-                                 nwalkers=200, nsteps=1000, continued=c, v=False)
+                                 nwalkers=200, nsteps=1000, continued=c, v=True)
 results = Pool().map(sampler, list(sprops.keys()), p0)

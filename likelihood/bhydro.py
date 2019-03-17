@@ -35,7 +35,7 @@ z, N = map(lambda x: [np.array(y) for y in x], [z, N])
 
 
 
-# PLOTS #
+# PLOT #
 col = [copper(i) for i in np.linspace(0, 1, len(surveys))]
 
 fig, (hist, ax) = plt.subplots(2, 1, sharex=True, figsize=(10, 10),
@@ -61,4 +61,5 @@ markers, caps, bars = ax.errorbar(z_avg[0], bh[0],
 [cap.set_alpha(0.5) for cap in caps]
 
 hist.legend(loc="lower center", bbox_to_anchor=[0.5, 1], ncol=len(surveys), fontsize=12, fancybox=True)
-#fig.savefig("../images/b_hydro.pdf", dpi=1000, bbox_inches="tight")
+fig.show()
+fig.savefig("../images/b_hydro.pdf", bbox_inches="tight")

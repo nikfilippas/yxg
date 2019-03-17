@@ -97,7 +97,6 @@ for i, sur in enumerate(surveys):
 
 
 ## PLOTS ##
-# Figure 1 :: burn-in #
 lbl = {"Mmin"       :  "$\\mathrm{M_{min}}$",
        "M0"         :  "$\\mathrm{M_0}$",
        "M1"         :  "$\\mathrm{M_1}$",
@@ -111,24 +110,33 @@ lbl = {"Mmin"       :  "$\\mathrm{M_{min}}$",
 
 yax = [lbl[key] for key in free]
 yax.append(*["$\\mathrm{=}$".join([lbl[key] for key in c]) for c in coupled])
-# Figure (burn-in plot) #
-dims = [s.shape for s in samplers]  # extract sampler dimensions
-for s, sur in enumerate(sprops.keys()):
-    fig, ax = plt.subplots(dims[s][1], 1, sharex=True, figsize=(7, 12))
+
+
+
+# Figure 1 :: burn-in #
+for s, _ in enumerate(sprops):
+    dims = samplers[s].shape
+    fig, ax = plt.subplots(dims[1], 1, sharex=True, figsize=(7, 12))
     ax[-1].set_xlabel("step number", fontsize=15)
-    for i in range(dims[s][1]):
-        for j in range(dims[s][0]):
-            ax[i].plot(samplers[s].get_chain()[:, j, i], "k-", lw=0.5, alpha=0.2)
+    for i in range(dims[1]):
+        for j in range(dims[0]):
+            ax[i].plot(samplers[s].get_chain()[:, j, i], "k-", lw=0.5, alpha=0.05)
         ax[i].get_yaxis().get_major_formatter().set_useOffset(False)
         ax[i].set_ylabel(yax[i], fontsize=15)
     plt.tight_layout()
-
+    fig.show()
+    sur = list(sprops.keys())[s]
+    fig.savefig("../images/MCMC/MCMC_steps_%s.pdf" % sur, bbox_inches="tight")
+    fig.close()
 
 
 # Figure 2 :: corner plot #
-for s, sur in enumerate(sprops.keys()):
-    fig = corner.corner(samples[s], labels=yax, quantiles=[0.16, 0.50, 0.84],
+for sample, sur in zip(samples, list(sprops.keys())):
+    fig = corner.corner(sample, labels=yax, quantiles=[0.16, 0.50, 0.84],
                         show_titles=True, label_kwargs={"fontsize":15})
+    fig.show()
+    fig.savefig("../images/MCMC/MCMC_%s.pdf" % sur, bbox_inches="tight")
+
 
 
 # Figure 3 :: best-fits #
@@ -163,18 +171,15 @@ for i, sur in enumerate(surveys):
         F[j][1][i].text(0.84, 0.80, txt, transform=F[j][1][i].transAxes, ha="center",
                       bbox={"edgecolor":"w", "facecolor":"white", "alpha":0}, fontsize=14)
 
+F[0][0].show()
+F[1][0].show()
+#    F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
+#    F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
+
 
 
 # best fit values
 for s, sur in enumerate(sprops.keys()):
     val = list(map(lambda v: (v[1], v[1]-v[0], v[2]-v[1]),
                    zip(*np.percentile(samples[s], [16, 50, 84], axis=0))))
-
-
-
-# OUTPUT #
-#fig.savefig("../images/MCMC/MCMC_steps_%s.pdf" % sur, bbox_inches="tight")
-#fig.savefig("../images/MCMC/MCMC_%s.pdf" % sur, bbox_inches="tight")
-#F[0][0].savefig("../images/best_fit_clyg.pdf", dpi=1000, bbox_inches="tight")
-#F[1][0].savefig("../images/best_fit_clgg.pdf", dpi=1000, bbox_inches="tight")
-#np.save("fit_vals/"+sur, np.array(val).T)
+    np.save("fit_vals/"+sur, np.array(val).T)
