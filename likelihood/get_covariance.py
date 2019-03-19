@@ -17,6 +17,7 @@ y_sample='y_milca'
 prefix_cls='../analysis/out_ns512_linlog/'
 prefix_nz='../analysis/data/dndz/'
 kmax=1.
+zpoints=128
 
 #y-map beam
 nside=512
@@ -63,8 +64,8 @@ fsky=np.mean(hp.read_map("../analysis/data/maps/mask_v3.fits",verbose=False));
 zmean=np.sum(z*nz)/np.sum(nz)
 chimean=ccl.comoving_radial_distance(cosmo,1/(1.+zmean))
 lmax=int(kmax*chimean+0.5)
-mask_gg=d_gg['leff']<lmax
-mask_gy=d_gy['leff']<lmax
+mask_gg=(d_gg['leff']<lmax) & (d_gg['leff']>10)
+mask_gy=(d_gy['leff']<lmax) & (d_gy['leff']>10)
 
 #Form data vector and covariance
 nl_gg=len(mask_gg)
@@ -81,7 +82,7 @@ cv_gy_gy_G=d_gygy['cov']
 cv_gy_gg_G=cv_gg_gy_G.T
 
 #Read best-fit parameters
-res=np.load('result_'+g_sample+ibin_string+'_11.npz')
+res=np.load('result_b_'+g_sample+ibin_string+'_11.npz')
 params=dict(zip(res['names'],res['values']))
 
 #Set up profiles
@@ -89,18 +90,18 @@ py=Arnaud(y_sample)
 pg=HOD(g_sample+ibin_string,nz_file=fname_dndz)
 
 dcv_gg_gg_NG=ang_1halo_covariance(cosmo,fsky,ls_gg,(pg,pg),(pg,pg),
-                                  zrange_a=z_range,zpoints_a=128,zlog_a=True,
-                                  zrange_b=z_range,zpoints_b=128,zlog_b=True,**params)
+                                  zrange_a=z_range,zpoints_a=zpoints,zlog_a=True,
+                                  zrange_b=z_range,zpoints_b=zpoints,zlog_b=True,**params)
 dcv_gg_gy_NG=ang_1halo_covariance(cosmo,fsky,ls_gg,(pg,pg),(pg,py),
-                                  zrange_a=z_range,zpoints_a=128,zlog_a=True,
-                                  zrange_b=z_range,zpoints_b=128,zlog_b=True,**params)
+                                  zrange_a=z_range,zpoints_a=zpoints,zlog_a=True,
+                                  zrange_b=z_range,zpoints_b=zpoints,zlog_b=True,**params)
 dcv_gy_gy_NG=ang_1halo_covariance(cosmo,fsky,ls_gg,(pg,py),(pg,py),
-                                  zrange_a=z_range,zpoints_a=128,zlog_a=True,
-                                  zrange_b=z_range,zpoints_b=128,zlog_b=True,**params)
+                                  zrange_a=z_range,zpoints_a=zpoints,zlog_a=True,
+                                  zrange_b=z_range,zpoints_b=zpoints,zlog_b=True,**params)
 dcv_gy_gg_NG=dcv_gg_gy_NG.T
 
-tv_gg=ang_power_spectrum(cosmo,ls_gg,(pg,pg),zrange=z_range,zpoints=128,zlog=True,**params)*beam_gg
-tv_gy=ang_power_spectrum(cosmo,ls_gy,(pg,py),zrange=z_range,zpoints=128,zlog=True,**params)*beam_gy
+tv_gg=ang_power_spectrum(cosmo,ls_gg,(pg,pg),zrange=z_range,zpoints=zpoints,zlog=True,**params)*beam_gg
+tv_gy=ang_power_spectrum(cosmo,ls_gy,(pg,py),zrange=z_range,zpoints=zpoints,zlog=True,**params)*beam_gy
 
 cv_gg_gg_NG=cv_gg_gg_G+dcv_gg_gg_NG
 cv_gg_gy_NG=cv_gg_gy_G+dcv_gy_gg_NG
@@ -140,17 +141,18 @@ plt.figure()
 plt.imshow(cv_tot_NG/np.sqrt(np.diag(cv_tot_NG)[:,None]*np.diag(cv_tot_NG)[None,:]))
 
 plt.figure()
-plt.errorbar(ls_gg,dv_gg,yerr=np.sqrt(np.diag(cv_gg_gg_NG)),fmt='r.')
-plt.plot(ls_gg,tv_gg,'k-')
-plt.xlim([0.9*ls_gg[0],lmax])
-plt.loglog()
+plt.errorbar(ls_gg,(dv_gg-tv_gg)/np.sqrt(np.diag(cv_gg_gg_NG)),yerr=np.ones_like(ls_gg),fmt='r.')
+plt.plot(ls_gg,0*tv_gg,'k-')
+#plt.xlim([0.9*ls_gg[0],lmax])
+plt.xscale('log')
+#plt.ylim([-5,5])
 
 plt.figure()
-plt.errorbar(ls_gy,dv_gy,yerr=np.sqrt(np.diag(cv_gy_gy_NG)),fmt='r.')
-plt.plot(ls_gy,tv_gy,'k-')
-plt.xlim([0.9*ls_gy[0],lmax])
-plt.loglog()
-plt.show()
+plt.errorbar(ls_gy,(dv_gy-tv_gy)/np.sqrt(np.diag(cv_gy_gy_NG)),yerr=np.ones_like(ls_gy),fmt='r.')
+plt.plot(ls_gy,0*tv_gy,'k-')
+#plt.xlim([0.9*ls_gy[0],lmax])
+plt.xscale('log')
+#plt.ylim([-5,5])
 
 np.savez('dcov_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string,
          cov=dcv_gg_gg_NG)
@@ -164,5 +166,10 @@ def get_chi2(d,t,c,m):
     cv=c[m,:][:,m]
     icv=np.linalg.inv(cv)
     print(np.einsum('i,ij,j',dx,icv,dx),len(dx))
+get_chi2(dv_gg,tv_gg,cv_gg_gg_G,mask_gg)
+get_chi2(dv_gg,tv_gg,cv_gg_gg_NG,mask_gg)
 get_chi2(dv_gy,tv_gy,cv_gy_gy_G,mask_gy)
 get_chi2(dv_gy,tv_gy,cv_gy_gy_NG,mask_gy)
+get_chi2(np.concatenate((dv_gg,dv_gy)),np.concatenate((tv_gg,tv_gy)),cv_tot_G,np.concatenate((mask_gg,mask_gy)))
+get_chi2(np.concatenate((dv_gg,dv_gy)),np.concatenate((tv_gg,tv_gy)),cv_tot_NG,np.concatenate((mask_gg,mask_gy)))
+plt.show()

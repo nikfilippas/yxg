@@ -14,7 +14,7 @@ prefix_nz='../analysis/data/dndz/'
 g_sample=sys.argv[1]
 bin_no=int(sys.argv[2])
 y_sample='y_milca'
-kmax=1.
+kmax=4.
 fit_gg=True
 fit_gy=bool(int(sys.argv[3]))
 
@@ -49,6 +49,9 @@ fname_cl_gy=prefix_cls+'cl_'+g_sample+ibin_string+'_'+y_sample+'.npz'
 fname_cov_gg_gg=prefix_cls+'cov_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'.npz'
 fname_cov_gg_gy=prefix_cls+'cov_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+y_sample+'.npz'
 fname_cov_gy_gy=prefix_cls+'cov_'+g_sample+ibin_string+'_'+y_sample+'_'+g_sample+ibin_string+'_'+y_sample+'.npz'
+fname_dcov_gg_gg='dcov_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'.npz'
+fname_dcov_gg_gy='dcov_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+g_sample+ibin_string+'_'+y_sample+'.npz'
+fname_dcov_gy_gy='dcov_'+g_sample+ibin_string+'_'+y_sample+'_'+g_sample+ibin_string+'_'+y_sample+'.npz'
 z,nz=np.loadtxt(fname_dndz,unpack=True)
 z_inrange=z[(nz>0.005*np.amax(nz))];
 z_range=np.array([z_inrange[0],z_inrange[-1]])
@@ -57,6 +60,9 @@ d_gy=np.load(fname_cl_gy)
 d_gggg=np.load(fname_cov_gg_gg)
 d_gggy=np.load(fname_cov_gg_gy)
 d_gygy=np.load(fname_cov_gy_gy)
+dd_gggg=np.load(fname_dcov_gg_gg)
+dd_gggy=np.load(fname_dcov_gg_gy)
+dd_gygy=np.load(fname_dcov_gy_gy)
 
 #Scale cuts
 zmean=np.sum(z*nz)/np.sum(nz)
@@ -77,6 +83,9 @@ dv_gy=(d_gy['cell']-d_gy['nell'])[mask_gy]
 cv_gg_gg=d_gggg['cov'][mask_gg,:][:,mask_gg]
 cv_gg_gy=d_gggy['cov'][mask_gg,:][:,mask_gy]
 cv_gy_gy=d_gygy['cov'][mask_gy,:][:,mask_gy]
+#cv_gg_gg+=dd_gggg['cov'][mask_gg,:][:,mask_gg]
+#cv_gg_gy+=dd_gggy['cov'][mask_gg,:][:,mask_gy]
+#cv_gy_gy+=dd_gygy['cov'][mask_gy,:][:,mask_gy]
 cv_gy_gg=cv_gg_gy.T
 dv_tot=np.concatenate((dv_gg,dv_gy))
 ls_tot=np.concatenate((ls_gg,ls_gy))
@@ -115,9 +124,9 @@ priors={'fc':[1.,1.,1.],
         'Mmin':[12.,10.,16.],
         "M1":[13.5,10.,16.],
         "M0":"Mmin",
-        "alpha":[1.,1.,1.],
-        "beta_max":[1.,1.,1.],
-        "beta_gal":[1.,1.,1.],
+        "alpha":[1.,0.0,3.],
+        "beta_max":[1.,0.1,10.],
+        "beta_gal":[1.,0.1,10.],
         "sigma_lnM":[0.15,0.15,0.15],
         "b_hydro":[0.3,0.,1.0],
         "r_corr":[0,-1.,1.]
@@ -151,7 +160,7 @@ def lnprior(p):
         return -np.inf
     return 0
 
-def get_theory(z_log_gg=True,z_points_gg=128,z_log_gy=True,z_points_gy=128,**kwargs):
+def get_theory(z_log_gg=True,z_points_gg=32,z_log_gy=True,z_points_gy=32,**kwargs):
     tv_gg=[]; tv_gy=[];
     if fit_gg:
         tv_gg=ang_power_spectrum(cosmo,ls_gg,(prof_g,prof_g),zrange=z_range,zpoints=z_points_gg,zlog=z_log_gg,**kwargs)
@@ -167,7 +176,7 @@ def lnlike(p):
     if tv is None:
         return -np.inf
     dx=dv-tv
-    print(params)
+    #print(params)
     return -0.5*np.einsum('i,ij,j',dx,icv,dx)
 
 def plot_theory(p):
@@ -191,19 +200,42 @@ def lnprob(p,sign=+1):
     pr=lnprior(p)
     if pr!=-np.inf:
         pr+=lnlike(p)
-    print(pr)
+    #print(pr)
     return sign*pr
 
 print("Minimizing")
-res=minimize(lnprob,p0,method='Powell',args=(-1))
-print(g_sample+ibin_string,build_kwargs(res.x))
+#res=minimize(lnprob,p0,method='Powell',args=(-1))
+#p0=res.x
+d=np.load("result_b_"+g_sample+ibin_string+"_%d%d.npz"%(int(fit_gg),int(fit_gy))); 
+dc=dict(zip(d['names'],d['values']));
+p0=np.array([dc[n] for n in params_free_names])
+
+
 print("Computing covariance")
-import numdifftools as nd
-covar=np.linalg.inv(-nd.Hessian(lnprob)(res.x))
-pars_final=build_kwargs(res.x)
-names=sorted(pars_final.keys())
-values=np.array([pars_final[k] for k in names])
-np.savez("result_"+g_sample+ibin_string+"_%d%d"%(int(fit_gg),int(fit_gy)),names=names,values=values,names_var=params_free_names,covar=covar)
-plot_theory(res.x)
-plt.savefig("result_"+g_sample+ibin_string+"_%d%d.pdf"%(int(fit_gg),int(fit_gy)),bbox_inches='tight')
+#import numdifftools as nd
+#covar=np.linalg.inv(-nd.Hessian(lnprob)(p0))
+covar=d['covar']
+
+print("Sampling")
+import emcee as mc
+nwalkers=20
+sampler=mc.EnsembleSampler(nwalkers,len(p0),lnprob)
+p0s=p0*(1+1E-2*np.random.randn(nwalkers,len(p0)))
+#print(params_free_names,np.sqrt(np.diag(covar)),np.linalg.eigh(covar)[0]); exit(1)
+pos,prob,state=sampler.run_mcmc(p0s,10)
+print(sampler.chain.shape)
+print(pos)
+print(pos.shape)
+print(prob)
+print(prob.shape)
+print(state)
+exit(1)
+
+
+pars_p0=build_kwargs(p0)
+names=sorted(pars_p0.keys())
+values=np.array([pars_p0[k] for k in names])
+#np.savez("result_b_"+g_sample+ibin_string+"_%d%d"%(int(fit_gg),int(fit_gy)),names=names,values=values,names_var=params_free_names,covar=covar)
+plot_theory(p0)
+#plt.savefig("result_b_"+g_sample+ibin_string+"_%d%d.pdf"%(int(fit_gg),int(fit_gy)),bbox_inches='tight')
 plt.show()
