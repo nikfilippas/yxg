@@ -375,3 +375,74 @@ if p['jk']['do']:
                 cov=Covariance.from_jk(jk.npatches,prefix1,prefix2,".npz",
                                        fg.name,fy.name,fg.name,fy.name)
             cov.to_file(fname_out,n_samples=jk.npatches)
+
+    #Joint covariances
+    for fg in fields_ng:
+        #gggg
+        cvm_gggg=Covariance(covs_gggg_model[fg.name].names[0],
+                            covs_gggg_model[fg.name].names[1],
+                            covs_gggg_model[fg.name].names[2],
+                            covs_gggg_model[fg.name].names[3],
+                            covs_gggg_model[fg.name].covar+dcov_gggg[fg.name].covar)
+        cvd_gggg=Covariance(covs_gggg_data[fg.name].names[0],
+                            covs_gggg_data[fg.name].names[1],
+                            covs_gggg_data[fg.name].names[2],
+                            covs_gggg_data[fg.name].names[3],
+                            covs_gggg_data[fg.name].covar+dcov_gggg[fg.name].covar)
+        cvj_gggg=Covariance.from_file(get_fname_cov(fg,fg,fg,fg,"jk"),
+                                      covs_gggg_data[fg.name].names[0],
+                                      covs_gggg_data[fg.name].names[1],
+                                      covs_gggg_data[fg.name].names[2],
+                                      covs_gggg_data[fg.name].names[3])
+        cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvm_gggg,cvm_gggg)
+        cov.to_file(get_fname_cov(fg,fg,fg,fg,'comb_m'))
+        cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvj_gggg,cvj_gggg)
+        cov.to_file(get_fname_cov(fg,fg,fg,fg,'comb_j'))
+        
+        for fy in fields_sz:
+            #gggy
+            cvm_gggy=Covariance(covs_gggy_model[fy.name][fg.name].names[0],
+                                covs_gggy_model[fy.name][fg.name].names[1],
+                                covs_gggy_model[fy.name][fg.name].names[2],
+                                covs_gggy_model[fy.name][fg.name].names[3],
+                                covs_gggy_model[fy.name][fg.name].covar+
+                                dcov_gggy[fy.name][fg.name].covar)
+            cvd_gggy=Covariance(covs_gggy_data[fy.name][fg.name].names[0],
+                                covs_gggy_data[fy.name][fg.name].names[1],
+                                covs_gggy_data[fy.name][fg.name].names[2],
+                                covs_gggy_data[fy.name][fg.name].names[3],
+                                covs_gggy_data[fy.name][fg.name].covar+
+                                dcov_gggy[fy.name][fg.name].covar)
+            cvj_gggy=Covariance.from_file(get_fname_cov(fg,fg,fg,fy,"jk"),
+                                          covs_gggy_data[fy.name][fg.name].names[0],
+                                          covs_gggy_data[fy.name][fg.name].names[1],
+                                          covs_gggy_data[fy.name][fg.name].names[2],
+                                          covs_gggy_data[fy.name][fg.name].names[3])
+            cvm_gygy=Covariance(covs_gygy_model[fy.name][fg.name].names[0],
+                                covs_gygy_model[fy.name][fg.name].names[1],
+                                covs_gygy_model[fy.name][fg.name].names[2],
+                                covs_gygy_model[fy.name][fg.name].names[3],
+                                covs_gygy_model[fy.name][fg.name].covar+
+                                dcov_gygy[fy.name][fg.name].covar)
+            cvd_gygy=Covariance(covs_gygy_data[fy.name][fg.name].names[0],
+                                covs_gygy_data[fy.name][fg.name].names[1],
+                                covs_gygy_data[fy.name][fg.name].names[2],
+                                covs_gygy_data[fy.name][fg.name].names[3],
+                                covs_gygy_data[fy.name][fg.name].covar+dcov_gygy[fy.name][fg.name].covar)
+            cvj_gygy=Covariance.from_file(get_fname_cov(fg,fy,fg,fy,"jk"),
+                                          covs_gygy_data[fy.name][fg.name].names[0],
+                                          covs_gygy_data[fy.name][fg.name].names[1],
+                                          covs_gygy_data[fy.name][fg.name].names[2],
+                                          covs_gygy_data[fy.name][fg.name].names[3])
+            cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvm_gggy,cvm_gggg,
+                                        covars2=[cvm_gygy,cvd_gygy,cvj_gygy],cov_diag2=cvm_gygy)
+            cov.to_file(get_fname_cov(fg,fg,fg,fy,'comb_m'))
+            cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvj_gggy,cvj_gggg,
+                                        covars2=[cvm_gygy,cvd_gygy,cvj_gygy],cov_diag2=cvj_gygy)
+            cov.to_file(get_fname_cov(fg,fg,fg,fy,'comb_j'))
+
+            #gygy
+            cov=Covariance.from_options([cvm_gygy,cvd_gygy,cvj_gygy],cvm_gygy,cvm_gygy)
+            cov.to_file(get_fname_cov(fg,fy,fg,fy,'comb_m'))
+            cov=Covariance.from_options([cvm_gygy,cvd_gygy,cvj_gygy],cvj_gygy,cvj_gygy)
+            cov.to_file(get_fname_cov(fg,fy,fg,fy,'comb_j'))
