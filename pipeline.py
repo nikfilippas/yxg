@@ -8,12 +8,12 @@ import pyccl as ccl
 import matplotlib.pyplot as plt
 import healpy as hp
 from scipy.interpolate import interp1d
-from analysis.bandpowers import Bandpowers
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
 from analysis.beams import beam_y_planck, beam_hpix
 from analysis.jackknife import JackKnife
+from analysis.params import ParamRun
 from model.profile2D import Arnaud,HOD
 from model.power_spectrum import hm_power_spectrum, hm_ang_power_spectrum
 from model.trispectrum import hm_1h_trispectrum, hm_ang_1h_covariance
@@ -23,66 +23,47 @@ try:
 except:
     raise ValueError("Must provide param file name as command-line argument")
 
-with open(fname_params) as f:
-    p=yaml.safe_load(f)
+p=ParamRun(fname_params)
 
 #Read off N_side
-nside=p['global']['nside']
+nside=p.get_nside()
 
 #JackKnives setup
-if p['jk']['do']:
+if p.do_jk():
     #Set union mask
     msk_tot=np.ones(hp.nside2npix(nside))
-    for k in p['masks'].keys():
-        msk_tot*=hp.ud_grade(hp.read_map(p['masks'][k],verbose=False),nside_out=nside)
+    for k in p.get('masks').keys():
+        msk_tot*=hp.ud_grade(hp.read_map(p.get('masks')[k],verbose=False),nside_out=nside)
     #Set jackknife regions
-    jk=JackKnife(p['jk']['nside'],msk_tot)
+    jk=JackKnife(p.get('jk')['nside'],msk_tot)
 
 #Cosmology (Planck 2018)
-cosmo = ccl.Cosmology(Omega_c=0.26066676,
-                      Omega_b=0.048974682,
-                      h=0.6766,
-                      sigma8=0.8102,
-                      n_s=0.9665)
+cosmo = p.get_cosmo()
 
 #Create output directory if needed
-os.system('mkdir -p '+p['global']['output_dir'])
+os.system('mkdir -p '+p.get_outdir())
 
 #Generate bandpowers
 print("Generating bandpowers")
-bpw=Bandpowers(nside,p['bandpowers'])
+bpw=p.get_bandpowers()
 
 #Generate all fields
 print("Reading fields")
-fields_ng=[]; fields_sz=[]; models={};
-for d in p['maps']:
+models=p.get_models()
+fields_ng=[]; fields_sz=[];
+for d in p.get('maps'):
     print(" "+d['name'])
-    f=Field(nside,d['name'],d['mask'],p['masks'][d['mask']],
+    f=Field(nside,d['name'],d['mask'],p.get('masks')[d['mask']],
             d['map'],d['dndz'],is_ndens=d['type']=='g')
     if f.is_ndens:
         fields_ng.append(f)
     else:
         fields_sz.append(f)
-    models[d['name']]=d.get('model')
 
 #Compute power spectra
 print("Computing power spectra")
-def get_fname_mcm(f1,f2,jk_region=None):
-    fname=p['global']['output_dir']+"/mcm_"+f1.mask_id+"_"+f2.mask_id
-    if jk_region is not None:
-        fname+="_jk%d"%jk_region
-    fname+=".mcm"
-    return fname
-
-def get_fname_cls(f1,f2,jk_region=None):
-    fname=p['global']['output_dir']+"/cls_"+f1.name+"_"+f2.name
-    if jk_region is not None:
-        fname+="_jk%d"%jk_region
-    fname+=".npz"
-    return fname
-
 def get_mcm(f1,f2,jk_region=None):
-    fname=get_fname_mcm(f1,f2,jk_region=jk_region)
+    fname=p.get_fname_mcm(f1,f2,jk_region=jk_region)
     mcm=nmt.NmtWorkspace()
     try:
         mcm.read_from(fname)
@@ -95,12 +76,12 @@ def get_mcm(f1,f2,jk_region=None):
 def get_power_spectrum(f1,f2,jk_region=None,save_windows=True):
     print(" "+f1.name+","+f2.name)
     try:
-        cls=Spectrum.from_file(get_fname_cls(f1,f2,jk_region=jk_region),f1.name,f2.name)
+        cls=Spectrum.from_file(p.get_fname_cls(f1,f2,jk_region=jk_region),f1.name,f2.name)
     except:
         print("  Computing Cl")
         cls=Spectrum.from_fields(f1,f2,bpw,wsp=get_mcm(f1,f2,jk_region=jk_region),
                                  save_windows=save_windows)
-        cls.to_file(get_fname_cls(f1,f2,jk_region=jk_region))
+        cls.to_file(p.get_fname_cls(f1,f2,jk_region=jk_region))
     return cls
 
 #gg power spectra
@@ -149,7 +130,7 @@ for fg in fields_ng:
     larr=np.arange(3*nside)
     nlarr=np.mean(cls_gg[fg.name].nell)*np.ones_like(larr)
     try:
-        d=np.load(p['global']['output_dir']+'/cl_th_'+fg.name+'.npz')
+        d=np.load(p.get_outdir()+'/cl_th_'+fg.name+'.npz')
         clgg=d['clgg']
         clgy=d['clgy']
     except:
@@ -160,7 +141,7 @@ for fg in fields_ng:
         clgy=hm_ang_power_spectrum(cosmo,larr,(prof_g,prof_y),
                                    zrange=fg.zrange,zpoints=64,zlog=True,
                                    **(models[fg.name]))*beam_y_planck(larr)*beam_hpix(larr,nside)**2
-        np.savez(p['global']['output_dir']+'/cl_th_'+fg.name+'.npz',
+        np.savez(p.get_outdir()+'/cl_th_'+fg.name+'.npz',
                  clgg=clgg,clgy=clgy,ls=larr)
     clgg+=nlarr
     cls_cov_gg_model[fg.name]=clgg
@@ -172,24 +153,9 @@ for fy in fields_sz:
 
 #Generate covariances
 print("Computing covariances")
-def get_fname_cmcm(f1,f2,f3,f4):
-    fname=p['global']['output_dir']+"/cmcm_"
-    fname+=f1.mask_id+"_"
-    fname+=f2.mask_id+"_"
-    fname+=f3.mask_id+"_"
-    fname+=f4.mask_id+".cmcm"
-    return fname
-
-def get_fname_cov(f1,f2,f3,f4,suffix):
-    fname=p['global']['output_dir']+"/cov_"+suffix+"_"
-    fname+=f1.name+"_"
-    fname+=f2.name+"_"
-    fname+=f3.name+"_"
-    fname+=f4.name+".npz"
-    return fname
 
 def get_cmcm(f1,f2,f3,f4):
-    fname=get_fname_cmcm(f1,f2,f3,f4)
+    fname=p.get_fname_cmcm(f1,f2,f3,f4)
     cmcm=nmt.NmtCovarianceWorkspace()
     try:
         cmcm.read_from(fname)
@@ -202,7 +168,7 @@ def get_cmcm(f1,f2,f3,f4):
 def get_covariance(fa1,fa2,fb1,fb2,suffix,
                    cla1b1,cla1b2,cla2b1,cla2b2):
     print(" "+fa1.name+","+fa2.name+","+fb1.name+","+fb2.name)
-    fname_cov=get_fname_cov(fa1,fa2,fb1,fb2,suffix)
+    fname_cov=p.get_fname_cov(fa1,fa2,fb1,fb2,suffix)
     try:
         cov=Covariance.from_file(fname_cov,fa1.name,fa2.name,fb1.name,fb2.name)
     except:
@@ -296,18 +262,18 @@ for fy in fields_sz:
 
 #Save 1-halo covariance
 for fg in fields_ng:
-    dcov_gggg[fg.name].to_file(p['global']['output_dir']+"/dcov_1h4pt_"+
+    dcov_gggg[fg.name].to_file(p.get_outdir()+"/dcov_1h4pt_"+
                                fg.name+"_"+fg.name+"_"+fg.name+"_"+fg.name+".npz")
     for fy in fields_sz:
-        dcov_gggy[fy.name][fg.name].to_file(p['global']['output_dir']+"/dcov_1h4pt_"+
+        dcov_gggy[fy.name][fg.name].to_file(p.get_outdir()+"/dcov_1h4pt_"+
                                             fg.name+"_"+fg.name+"_"+fg.name+"_"+fy.name+".npz")
-        dcov_gygy[fy.name][fg.name].to_file(p['global']['output_dir']+"/dcov_1h4pt_"+
+        dcov_gygy[fy.name][fg.name].to_file(p.get_outdir()+"/dcov_1h4pt_"+
                                             fg.name+"_"+fy.name+"_"+fg.name+"_"+fy.name+".npz")
 
 #Do jackknife
-if p['jk']['do']:
+if p.do_jk():
     for jk_id in range(jk.npatches):
-        if os.path.isfile(get_fname_cls(fields_sz[-1],fields_sz[-1],jk_region=jk_id)):
+        if os.path.isfile(p.get_fname_cls(fields_sz[-1],fields_sz[-1],jk_region=jk_id)):
             print("Found %d"%(jk_id+1))
             continue
         print("%d-th JK sample out of %d"%(jk_id+1,jk.npatches))
@@ -333,19 +299,18 @@ if p['jk']['do']:
             get_power_spectrum(fy,fy,jk_region=jk_id,save_windows=False)
 
         #Cleanup MCMs
-        if not p['jk']['store_mcm']:
-            os.system("rm "+p['global']['output_dir']+'/mcm_*_jk%d.mcm'%jk_id)
+        if not p.get('jk')['store_mcm']:
+            os.system("rm "+p.get_outdir()+'/mcm_*_jk%d.mcm'%jk_id)
 
     #Get covariances
     #gggg
     for fg in fields_ng:
-        fname_out=get_fname_cov(fg,fg,fg,fg,"jk")
+        fname_out=p.get_fname_cov(fg,fg,fg,fg,"jk")
         try:
             cov=Covariance.from_file(fname_out,fg.name,fg.name,fg.name,fg.name)
         except:
-            prefix=p['global']['output_dir']+'/cls_'
-            prefix1=prefix+fg.name+"_"+fg.name+"_jk"
-            prefix2=prefix+fg.name+"_"+fg.name+"_jk"
+            prefix1=p.get_prefix_cls(fg,fg)+"_jk"
+            prefix2=p.get_prefix_cls(fg,fg)+"_jk"
             cov=Covariance.from_jk(jk.npatches,prefix1,prefix2,".npz",
                                    fg.name,fg.name,fg.name,fg.name)
         cov.to_file(fname_out,n_samples=jk.npatches)
@@ -353,25 +318,24 @@ if p['jk']['do']:
     for fy in fields_sz:
         for fg in fields_ng:
             #gggy
-            fname_out=get_fname_cov(fg,fg,fg,fy,"jk")
+            fname_out=p.get_fname_cov(fg,fg,fg,fy,"jk")
             try:
                 cov=Covariance.from_file(fname_out,fg.name,fg.name,fg.name,fy.name)
             except:
-                prefix=p['global']['output_dir']+'/cls_'
-                prefix1=prefix+fg.name+"_"+fg.name+"_jk"
-                prefix2=prefix+fy.name+"_"+fg.name+"_jk"
+                prefix1=p.get_prefix_cls(fg,fg)+"_jk"
+                prefix2=p.get_prefix_cls(fy,fg)+"_jk"
                 cov=Covariance.from_jk(jk.npatches,prefix1,prefix2,".npz",
                                        fg.name,fg.name,fg.name,fy.name)
             cov.to_file(fname_out,n_samples=jk.npatches)
 
             #gygy
-            fname_out=get_fname_cov(fg,fy,fg,fy,"jk")
+            fname_out=p.get_fname_cov(fg,fy,fg,fy,"jk")
             try:
                 cov=Covariance.from_file(fname_out,fg.name,fy.name,fg.name,fy.name)
             except:
-                prefix=p['global']['output_dir']+'/cls_'
-                prefix1=prefix+fy.name+"_"+fg.name+"_jk"
-                prefix2=prefix+fy.name+"_"+fg.name+"_jk"
+                prefix=p.get_outdir()+'/cls_'
+                prefix1=p.get_prefix_cls(fy,fg)+"_jk"
+                prefix2=p.get_prefix_cls(fy,fg)+"_jk"
                 cov=Covariance.from_jk(jk.npatches,prefix1,prefix2,".npz",
                                        fg.name,fy.name,fg.name,fy.name)
             cov.to_file(fname_out,n_samples=jk.npatches)
@@ -389,15 +353,15 @@ if p['jk']['do']:
                             covs_gggg_data[fg.name].names[2],
                             covs_gggg_data[fg.name].names[3],
                             covs_gggg_data[fg.name].covar+dcov_gggg[fg.name].covar)
-        cvj_gggg=Covariance.from_file(get_fname_cov(fg,fg,fg,fg,"jk"),
+        cvj_gggg=Covariance.from_file(p.get_fname_cov(fg,fg,fg,fg,"jk"),
                                       covs_gggg_data[fg.name].names[0],
                                       covs_gggg_data[fg.name].names[1],
                                       covs_gggg_data[fg.name].names[2],
                                       covs_gggg_data[fg.name].names[3])
         cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvm_gggg,cvm_gggg)
-        cov.to_file(get_fname_cov(fg,fg,fg,fg,'comb_m'))
+        cov.to_file(p.get_fname_cov(fg,fg,fg,fg,'comb_m'))
         cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvj_gggg,cvj_gggg)
-        cov.to_file(get_fname_cov(fg,fg,fg,fg,'comb_j'))
+        cov.to_file(p.get_fname_cov(fg,fg,fg,fg,'comb_j'))
         
         for fy in fields_sz:
             #gggy
@@ -413,7 +377,7 @@ if p['jk']['do']:
                                 covs_gggy_data[fy.name][fg.name].names[3],
                                 covs_gggy_data[fy.name][fg.name].covar+
                                 dcov_gggy[fy.name][fg.name].covar)
-            cvj_gggy=Covariance.from_file(get_fname_cov(fg,fg,fg,fy,"jk"),
+            cvj_gggy=Covariance.from_file(p.get_fname_cov(fg,fg,fg,fy,"jk"),
                                           covs_gggy_data[fy.name][fg.name].names[0],
                                           covs_gggy_data[fy.name][fg.name].names[1],
                                           covs_gggy_data[fy.name][fg.name].names[2],
@@ -429,20 +393,20 @@ if p['jk']['do']:
                                 covs_gygy_data[fy.name][fg.name].names[2],
                                 covs_gygy_data[fy.name][fg.name].names[3],
                                 covs_gygy_data[fy.name][fg.name].covar+dcov_gygy[fy.name][fg.name].covar)
-            cvj_gygy=Covariance.from_file(get_fname_cov(fg,fy,fg,fy,"jk"),
+            cvj_gygy=Covariance.from_file(p.get_fname_cov(fg,fy,fg,fy,"jk"),
                                           covs_gygy_data[fy.name][fg.name].names[0],
                                           covs_gygy_data[fy.name][fg.name].names[1],
                                           covs_gygy_data[fy.name][fg.name].names[2],
                                           covs_gygy_data[fy.name][fg.name].names[3])
             cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvm_gggy,cvm_gggg,
                                         covars2=[cvm_gygy,cvd_gygy,cvj_gygy],cov_diag2=cvm_gygy)
-            cov.to_file(get_fname_cov(fg,fg,fg,fy,'comb_m'))
+            cov.to_file(p.get_fname_cov(fg,fg,fg,fy,'comb_m'))
             cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvj_gggy,cvj_gggg,
                                         covars2=[cvm_gygy,cvd_gygy,cvj_gygy],cov_diag2=cvj_gygy)
-            cov.to_file(get_fname_cov(fg,fg,fg,fy,'comb_j'))
+            cov.to_file(p.get_fname_cov(fg,fg,fg,fy,'comb_j'))
 
             #gygy
             cov=Covariance.from_options([cvm_gygy,cvd_gygy,cvj_gygy],cvm_gygy,cvm_gygy)
-            cov.to_file(get_fname_cov(fg,fy,fg,fy,'comb_m'))
+            cov.to_file(p.get_fname_cov(fg,fy,fg,fy,'comb_m'))
             cov=Covariance.from_options([cvm_gygy,cvd_gygy,cvj_gygy],cvj_gygy,cvj_gygy)
-            cov.to_file(get_fname_cov(fg,fy,fg,fy,'comb_j'))
+            cov.to_file(p.get_fname_cov(fg,fy,fg,fy,'comb_j'))
