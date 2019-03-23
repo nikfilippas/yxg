@@ -20,6 +20,50 @@ masks:
     mask_lowz: "data/maps/mask_v3.fits"
     mask_tsz: "data/maps/mask_planck60.fits"
 
+params:
+    - name: "M0"
+      alias: "Mmin"
+    - name: "M1"
+      vary: True
+      value: 13.5
+      prior:
+          type: "TopHat"
+          values: [10.,16.]
+    - name: "Mmin"
+      vary: True
+      value: 12.
+      prior:
+          type: "TopHat"
+          values: [10.,16.]
+    - name: "fc"
+      vary: False
+      value: 1.
+    - name: "alpha"
+      vary: False
+      value: 1.
+    - name: "beta_max"
+      vary: False
+      value: 1.
+    - name: "beta_gal"
+      vary: False
+      value: 1.
+    - name: "sigma_lnM"
+      vary: False
+      value: 0.15
+    - name: "b_hydro"
+      vary: True
+      value: 0.3
+      prior:
+          type: "TopHat"
+          values: [0.,1.]
+    - name: "r_corr"
+      vary: True
+      value: 0.
+      prior:
+          type: "TopHat"
+          values: [-1.,1.]
+
+
 maps:
     - name: "2mpz"
       type: "g"
