@@ -11,12 +11,12 @@ from scipy.interpolate import interp1d
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
-from analysis.beams import beam_y_planck, beam_hpix
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
 from model.profile2D import Arnaud,HOD
 from model.power_spectrum import hm_power_spectrum, hm_ang_power_spectrum
 from model.trispectrum import hm_1h_trispectrum, hm_ang_1h_covariance
+from model.beams import beam_gaussian, beam_hpix
 
 try:
     fname_params=sys.argv[1]
@@ -54,7 +54,7 @@ fields_ng=[]; fields_sz=[];
 for d in p.get('maps'):
     print(" "+d['name'])
     f=Field(nside,d['name'],d['mask'],p.get('masks')[d['mask']],
-            d['map'],d['dndz'],is_ndens=d['type']=='g')
+            d['map'],d.get('dndz'),is_ndens=d['type']=='g')
     if f.is_ndens:
         fields_ng.append(f)
     else:
@@ -140,7 +140,7 @@ for fg in fields_ng:
                                    **(models[fg.name]))*beam_hpix(larr,nside)**2
         clgy=hm_ang_power_spectrum(cosmo,larr,(prof_g,prof_y),
                                    zrange=fg.zrange,zpoints=64,zlog=True,
-                                   **(models[fg.name]))*beam_y_planck(larr)*beam_hpix(larr,nside)**2
+                                   **(models[fg.name]))*beam_gaussian(larr,10.)*beam_hpix(larr,nside)**2
         np.savez(p.get_outdir()+'/cl_th_'+fg.name+'.npz',
                  clgg=clgg,clgy=clgy,ls=larr)
     clgg+=nlarr
@@ -227,7 +227,7 @@ for fy in fields_sz:
                                   zrange_a=fg.zrange,zpoints_a=64,zlog_a=True,
                                   zrange_b=fg.zrange,zpoints_b=64,zlog_b=True,**(models[fg.name]))
         b_hp=beam_hpix(cls_gg[fg.name].leff,nside)
-        b_y=beam_y_planck(cls_gg[fg.name].leff)
+        b_y=beam_gaussian(cls_gg[fg.name].leff,10.)
         dcov*=(b_hp**2)[:,None]*(b_hp**2*b_y)[None,:]
         dcov_gggy[fy.name][fg.name]=Covariance(fg.name,fg.name,fg.name,fy.name,dcov)
 #gygy
@@ -256,7 +256,7 @@ for fy in fields_sz:
                                   zrange_a=fg.zrange,zpoints_a=64,zlog_a=True,
                                   zrange_b=fg.zrange,zpoints_b=64,zlog_b=True,**(models[fg.name]))
         b_hp=beam_hpix(cls_gg[fg.name].leff,nside)
-        b_y=beam_y_planck(cls_gg[fg.name].leff)
+        b_y=beam_gaussian(cls_gg[fg.name].leff,10.)
         dcov*=(b_hp**2*b_y)[:,None]*(b_hp**2*b_y)[None,:]
         dcov_gygy[fy.name][fg.name]=Covariance(fg.name,fy.name,fg.name,fy.name,dcov)
 

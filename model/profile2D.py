@@ -27,12 +27,12 @@ class Arnaud(object):
     qpoints : int
         Number of integration sampling points.
     """
-    def __init__(self, rrange=(1e-3, 10), qpoints=1e2):
+    def __init__(self, name='Arnaud', rrange=(1e-3, 10), qpoints=1e2):
 
         self.rrange = rrange         # range of probed distances [R_Delta]
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = 500             # reference overdensity (Arnaud et al.)
-        self.name = "Arnaud"
+        self.name = name
 
         self._fourier_interp = self._integ_interp()
 
@@ -147,10 +147,11 @@ class NFW(object):
     """Calculate a Navarro-Frenk-White profile quantity of a halo and its
     Fourier transform.
     """
-    def __init__(self, kernel=None):
+    def __init__(self, name='NFW', kernel=None):
 
         self.Delta = 500      # reference overdensity (Arnaud et al.)
         self.kernel = kernel  # associated window function
+        self.name = name
 
 
     def profnorm(self, cosmo, a, squeeze=True, **kwargs):
@@ -187,12 +188,12 @@ class NFW(object):
 
 class HOD(object):
     """Calculates a Halo Occupation Distribution profile quantity of a halo."""
-    def __init__(self, nz_file=None):
+    def __init__(self, name= 'HOD', nz_file=None):
 
         self.Delta = 500  # reference overdensity (Arnaud et al.)
         z, nz = np.loadtxt(nz_file, unpack=True)
         self.nzf = interp1d(z, nz, bounds_error=False, fill_value=0)
-        self.name = nz_file
+        self.name = name
 
 
     def kernel(self, cosmo, a):

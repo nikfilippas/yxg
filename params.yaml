@@ -20,6 +20,125 @@ masks:
     mask_lowz: "data/maps/mask_v3.fits"
     mask_tsz: "data/maps/mask_planck60.fits"
 
+maps:
+    - name: "2mpz"
+      type: "g"
+      map: "data/maps/2mpz_05_01_512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/2MPZ_bin1.txt"
+      beam: False
+      model:
+          M0:  11.819296066010548
+          M1:  13.08953452582468
+          Mmin:  11.819296066010548
+          alpha:  1.0
+          b_hydro:  0.3664729231819921
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.2190961041633896
+          sigma_lnM:  0.15
+    - name: "wisc1"
+      type: "g"
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin1.txt"
+      beam: False
+      model:
+          M0:  12.127579700404691
+          M1:  13.470002326394642
+          Mmin:  12.127579700404691
+          alpha:  1.0
+          b_hydro:  0.4206032405310551
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.48205884075500993
+          sigma_lnM:  0.15
+    - name: "wisc2"
+      type: "g"
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin2.txt"
+      beam: False
+      model:
+          M0:  12.063309910969627
+          M1:  13.35186889632406
+          Mmin:  12.063309910969627
+          alpha:  1.0
+          b_hydro:  0.42936987420799055
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.5119147997822887
+          sigma_lnM:  0.15
+    - name: "wisc3"
+      type: "g"
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin3.txt"
+      beam: False
+      model:
+          M0:  11.919767524955585
+          M1:  13.139743499087519
+          Mmin:  11.919767524955585
+          alpha:  1.0
+          b_hydro:  0.4392974224108877
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.5527964171093198
+          sigma_lnM:  0.15
+    - name: "wisc4"
+      type: "g"
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin4.txt"
+      beam: False
+      model:
+          M0:  11.93656331307651
+          M1:  13.126517875739742
+          Mmin:  11.93656331307651
+          alpha:  1.0
+          b_hydro:  0.4879808227067266
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.54574470592155
+          sigma_lnM:  0.15
+    - name: "wisc5"
+      type: "g"
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin5.txt"
+      beam: False
+      model:
+          M0:  12.442928720307966
+          M1:  13.303037401959886
+          Mmin:  12.442928720307966
+          alpha:  1.0
+          b_hydro:  0.5047829367573827
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.6590293057265538
+          sigma_lnM:  0.15
+    - name: "y_milca"
+      type: "y"
+      map: "data/maps/milca_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+    - name: "y_nilc"
+      type: "y"
+      map: "data/maps/nilc_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+
+mcmc:
+    kmax: 1.
+    nz_points_g: 64
+    z_log_sampling: True
+
 params:
     - name: "M0"
       alias: "Mmin"
@@ -63,111 +182,46 @@ params:
           type: "TopHat"
           values: [-1.,1.]
 
-
-maps:
-    - name: "2mpz"
-      type: "g"
-      map: "data/maps/2mpz_05_01_512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/2MPZ_bin1.txt"
-      model:
-          M0:  11.819296066010548
-          M1:  13.08953452582468
-          Mmin:  11.819296066010548
-          alpha:  1.0
-          b_hydro:  0.3664729231819921
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr:  -0.2190961041633896
-          sigma_lnM:  0.15
-    - name: "wisc1"
-      type: "g"
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin1.txt"
-      model:
-          M0:  12.127579700404691
-          M1:  13.470002326394642
-          Mmin:  12.127579700404691
-          alpha:  1.0
-          b_hydro:  0.4206032405310551
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr:  -0.48205884075500993
-          sigma_lnM:  0.15
-    - name: "wisc2"
-      type: "g"
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin2.txt"
-      model:
-          M0:  12.063309910969627
-          M1:  13.35186889632406
-          Mmin:  12.063309910969627
-          alpha:  1.0
-          b_hydro:  0.42936987420799055
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr:  -0.5119147997822887
-          sigma_lnM:  0.15
-    - name: "wisc3"
-      type: "g"
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin3.txt"
-      model:
-          M0:  11.919767524955585
-          M1:  13.139743499087519
-          Mmin:  11.919767524955585
-          alpha:  1.0
-          b_hydro:  0.4392974224108877
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr:  -0.5527964171093198
-          sigma_lnM:  0.15
-    - name: "wisc4"
-      type: "g"
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin4.txt"
-      model:
-          M0:  11.93656331307651
-          M1:  13.126517875739742
-          Mmin:  11.93656331307651
-          alpha:  1.0
-          b_hydro:  0.4879808227067266
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr:  -0.54574470592155
-          sigma_lnM:  0.15
-    - name: "wisc5"
-      type: "g"
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin5.txt"
-      model:
-          M0:  12.442928720307966
-          M1:  13.303037401959886
-          Mmin:  12.442928720307966
-          alpha:  1.0
-          b_hydro:  0.5047829367573827
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr:  -0.6590293057265538
-          sigma_lnM:  0.15
-    - name: "y_milca"
-      type: "y"
-      map: "data/maps/milca_ymaps.fits"
-      mask: "mask_tsz"
-      dndz: "none"
-    - name: "y_nilc"
-      type: "y"
-      map: "data/maps/nilc_ymaps.fits"
-      mask: "mask_tsz"
-      dndz: "none"
+data_vectors:
+    - type: 'Cl'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['2mpz','2mpz']
+            lmin: 0
+          - tracers: ['2mpz','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc1','wisc1']
+            lmin: 0
+          - tracers: ['wisc1','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc2','wisc2']
+            lmin: 0
+          - tracers: ['wisc2','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc3','wisc3']
+            lmin: 0
+          - tracers: ['wisc3','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc4','wisc4']
+            lmin: 0
+          - tracers: ['wisc4','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc5','wisc5']
+            lmin: 0
+          - tracers: ['wisc5','y_milca']
+            lmin: 0
