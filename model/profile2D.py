@@ -5,12 +5,8 @@ from scipy.special import erf
 from scipy.integrate import quad
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
-import scipy.constants as u
-from scipy.constants import value as v
 import pyccl as ccl
-
 from .cosmotools import R_Delta, concentration_duffy
-
 
 
 class Arnaud(object):
@@ -36,18 +32,15 @@ class Arnaud(object):
 
         self._fourier_interp = self._integ_interp()
 
-
     def kernel(self, cosmo, a, **kwargs):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
         prefac = 4.017100792437957e-06  # avoid recomputing every time
         return prefac*a
 
-
     def profnorm(self, cosmo, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         return np.ones_like(a)
-
 
     def norm(self, cosmo, M, a, b, squeeze=True):
         """Computes the normalisation factor of the Arnaud profile.
@@ -60,7 +53,7 @@ class Arnaud(object):
 
         aP = 0.12  # Arnaud et al.
         h70 = cosmo["h"]/0.7
-        P0 = 6.41 # reference pressure
+        P0 = 6.41  # reference pressure
 
         K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
 
@@ -69,7 +62,6 @@ class Arnaud(object):
 
         P = K * PM[..., None] * Pz
         return P.squeeze() if squeeze else P
-
 
     def form_factor(self, x):
         """Computes the form factor of the Arnaud profile."""
@@ -83,14 +75,14 @@ class Arnaud(object):
         f2 = (1+(c500*x)**alpha)**(-(beta-gama)/alpha)
         return f1*f2
 
-
     def _integ_interp(self):
         """Computes the integral of the power spectrum at different points and
         returns an interpolating function connecting these points.
         """
-        integrand = lambda x: self.form_factor(x)*x
+        def integrand(x):
+            return self.form_factor(x)*x
 
-        ## Integration Boundaries ##
+        # # Integration Boundaries # #
         rmin, rmax = self.rrange  # physical distance [R_Delta]
         lgqmin, lgqmax = np.log10(1/rmax), np.log10(1/rmin)  # log10 bounds
 
@@ -102,9 +94,10 @@ class Arnaud(object):
 
         F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic")
 
-        ## Extrapolation ##
+        # # Extrapolation # #
         # Backward Extrapolation
-        F1 = lambda x: f_arr[0]*np.ones_like(x)  # constant value
+        def F1(x):
+            return f_arr[0]*np.ones_like(x)  # constant value
 
         # Forward Extrapolation
         # linear fitting
@@ -113,15 +106,16 @@ class Arnaud(object):
         A = np.vstack([Q, np.ones(len(Q))]).T
         m, c = lstsq(A, F, rcond=None)[0]
 
-        F3 = lambda x: 10**(m*x+c)  # logarithmic drop
+        def F3(x):
+            return 10**(m*x+c)  # logarithmic drop
 
-        F = lambda x: np.piecewise(x,
-                                  [x < lgqmin,        # backward extrapolation
-                                  (lgqmin <= x)*(x <= lgqmax),  # common range
-                                  lgqmax < x],       # forward extrapolation
-                                  [F1, F2, F3])
+        def F(x):
+            return np.piecewise(x,
+                                [x < lgqmin,        # backward extrapolation
+                                 (lgqmin <= x)*(x <= lgqmax),  # common range
+                                 lgqmax < x],       # forward extrapolation
+                                [F1, F2, F3])
         return F
-
 
     def fourier_profiles(self, cosmo, k, M, a, squeeze=True, **kwargs):
         """Computes the Fourier transform of the Arnaud profile.
@@ -131,16 +125,18 @@ class Arnaud(object):
         # Input handling
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
 
-        b = kwargs["b_hydro"]  # hydrostatic bias
-        R = R_Delta(cosmo, M, a, self.Delta, squeeze=False) / a  # R_Delta*(1+z)
-        R = R[..., None]  # transform axes
+        # hydrostatic bias
+        b = kwargs["b_hydro"]
+        # R_Delta*(1+z)
+        R = R_Delta(cosmo, M, a, self.Delta, squeeze=False) / a
+        # transform axes
+        R = R[..., None]
 
         ff = self._fourier_interp(np.log10(k*R))
         nn = self.norm(cosmo, M, a, b)[..., None]
 
         F = 4*np.pi*R**3 * nn * ff
         return (F.squeeze(), (F**2).squeeze()) if squeeze else (F, F**2)
-
 
 
 class NFW(object):
@@ -153,24 +149,25 @@ class NFW(object):
         self.kernel = kernel  # associated window function
         self.name = name
 
-
     def profnorm(self, cosmo, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular
         cross-correlation calculation."""
         return np.ones_like(a)
 
-
     def fourier_profiles(self, cosmo, k, M, a, squeeze=True, **kwargs):
-        """Computes the Fourier transform of the Navarro-Frenk-White profile."""
+        """
+        Computes the Fourier transform of the Navarro-Frenk-White profile.
+        """
         # Input handling
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
 
-        #extract parameters
+        # extract parameters
         bg = kwargs["bg"] if "bg" in kwargs else 1
         bmax = kwargs["bmax"] if "bmax" in kwargs else 1
 
         c = concentration_duffy(M, a, is_D500=True, squeeze=False)
-        R = R_Delta(cosmo, M, a, self.Delta, is_matter=False, squeeze=False)/(c*a)
+        R = R_Delta(cosmo, M, a, self.Delta,
+                    is_matter=False, squeeze=False)/(c*a)
         x = k*R[..., None]
 
         c = c[..., None]*bmax  # optimise
@@ -185,23 +182,20 @@ class NFW(object):
         return (F.squeeze(), (F**2).squeeze()) if squeeze else (F, F**2)
 
 
-
 class HOD(object):
     """Calculates a Halo Occupation Distribution profile quantity of a halo."""
-    def __init__(self, name= 'HOD', nz_file=None):
+    def __init__(self, name='HOD', nz_file=None):
 
         self.Delta = 500  # reference overdensity (Arnaud et al.)
         z, nz = np.loadtxt(nz_file, unpack=True)
         self.nzf = interp1d(z, nz, bounds_error=False, fill_value=0)
         self.name = name
 
-
     def kernel(self, cosmo, a):
         """The galaxy number overdensity window function."""
         unit_norm = 3.3356409519815204e-04  # 1/c
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
         return Hz*unit_norm * self.nzf(1/a - 1)
-
 
     def n_cent(self, M, **kwargs):
         """Number of central galaxies in a halo."""
@@ -210,7 +204,6 @@ class HOD(object):
 
         Nc = 0.5 * (1 + erf((np.log10(M/Mmin))/sigma_lnM))
         return Nc
-
 
     def n_sat(self, M, **kwargs):
         """Number of satellite galaxies in a halo."""
@@ -221,7 +214,6 @@ class HOD(object):
         Ns = ((M-M0)*np.heaviside(M-M0, 0) / M1)**alpha
         return Ns
 
-
     def profnorm(self, cosmo, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
@@ -231,11 +223,12 @@ class HOD(object):
         # extract parameters
         fc = kwargs["fc"]
 
-        logMmin, logMmax = (6, 17) # log of min and max halo mass [Msun]
-        mpoints = int(64)          # number of integration points
+        logMmin, logMmax = (6, 17)  # log of min and max halo mass [Msun]
+        mpoints = int(64)           # number of integration points
         M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
 
-        Dm = self.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses delta_matter
+        # CCL uses delta_matter
+        Dm = self.Delta/ccl.omega_x(cosmo, a, "matter")
         mfunc = [ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)]
 
         Nc = self.n_cent(M, **kwargs)   # centrals
@@ -246,9 +239,10 @@ class HOD(object):
         ng = simps(dng, x=np.log10(M))
         return ng.squeeze() if squeeze else ng
 
-
     def fourier_profiles(self, cosmo, k, M, a, squeeze=True, **kwargs):
-        """Computes the Fourier transform of the Halo Occupation Distribution."""
+        """
+        Computes the Fourier transform of the Halo Occupation Distribution.
+        """
         # Input handling
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
 

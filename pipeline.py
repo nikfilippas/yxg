@@ -1,11 +1,8 @@
 from __future__ import print_function
 import numpy as np
-import yaml
 import sys
 import os
 import pymaster as nmt
-import pyccl as ccl
-import matplotlib.pyplot as plt
 import healpy as hp
 from scipy.interpolate import interp1d
 from analysis.field import Field
@@ -13,400 +10,443 @@ from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
-from model.profile2D import Arnaud,HOD
-from model.power_spectrum import hm_power_spectrum, hm_ang_power_spectrum
-from model.trispectrum import hm_1h_trispectrum, hm_ang_1h_covariance
+from model.profile2D import Arnaud, HOD
+from model.power_spectrum import hm_ang_power_spectrum
+from model.trispectrum import hm_ang_1h_covariance
 from model.beams import beam_gaussian, beam_hpix
 
 try:
-    fname_params=sys.argv[1]
+    fname_params = sys.argv[1]
 except:
     raise ValueError("Must provide param file name as command-line argument")
 
-p=ParamRun(fname_params)
+p = ParamRun(fname_params)
 
-#Read off N_side
-nside=p.get_nside()
+# Read off N_side
+nside = p.get_nside()
 
-#JackKnives setup
+# JackKnives setup
 if p.do_jk():
-    #Set union mask
-    msk_tot=np.ones(hp.nside2npix(nside))
+    # Set union mask
+    msk_tot = np.ones(hp.nside2npix(nside))
     for k in p.get('masks').keys():
-        msk_tot*=hp.ud_grade(hp.read_map(p.get('masks')[k],verbose=False),nside_out=nside)
-    #Set jackknife regions
-    jk=JackKnife(p.get('jk')['nside'],msk_tot)
+        msk_tot *= hp.ud_grade(hp.read_map(p.get('masks')[k],
+                                           verbose=False),
+                               nside_out=nside)
+    # Set jackknife regions
+    jk = JackKnife(p.get('jk')['nside'], msk_tot)
 
-#Cosmology (Planck 2018)
+# Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
 
-#Create output directory if needed
-os.system('mkdir -p '+p.get_outdir())
+# Create output directory if needed
+os.system('mkdir -p ' + p.get_outdir())
 
-#Generate bandpowers
+# Generate bandpowers
 print("Generating bandpowers")
-bpw=p.get_bandpowers()
+bpw = p.get_bandpowers()
 
-#Generate all fields
+# Generate all fields
 print("Reading fields")
-models=p.get_models()
-fields_ng=[]; fields_sz=[];
+models = p.get_models()
+fields_ng = []
+fields_sz = []
 for d in p.get('maps'):
-    print(" "+d['name'])
-    f=Field(nside,d['name'],d['mask'],p.get('masks')[d['mask']],
-            d['map'],d.get('dndz'),is_ndens=d['type']=='g')
+    print(" " + d['name'])
+    f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
+              d['map'], d.get('dndz'), is_ndens=d['type'] == 'g')
     if f.is_ndens:
         fields_ng.append(f)
     else:
         fields_sz.append(f)
 
-#Compute power spectra
+# Compute power spectra
 print("Computing power spectra")
-def get_mcm(f1,f2,jk_region=None):
-    fname=p.get_fname_mcm(f1,f2,jk_region=jk_region)
-    mcm=nmt.NmtWorkspace()
+def get_mcm(f1, f2, jk_region=None):
+    fname = p.get_fname_mcm(f1, f2, jk_region=jk_region)
+    mcm = nmt.NmtWorkspace()
     try:
         mcm.read_from(fname)
     except:
         print("  Computing MCM")
-        mcm.compute_coupling_matrix(f1.field,f2.field,bpw.bn)
+        mcm.compute_coupling_matrix(f1.field, f2.field, bpw.bn)
         mcm.write_to(fname)
     return mcm
 
-def get_power_spectrum(f1,f2,jk_region=None,save_windows=True):
-    print(" "+f1.name+","+f2.name)
+def get_power_spectrum(f1, f2, jk_region=None, save_windows=True):
+    print(" " + f1.name + "," + f2.name)
     try:
-        cls=Spectrum.from_file(p.get_fname_cls(f1,f2,jk_region=jk_region),f1.name,f2.name)
+        fname = p.get_fname_cls(f1, f2, jk_region=jk_region)
+        cls = Spectrum.from_file(fname, f1.name, f2.name)
     except:
         print("  Computing Cl")
-        cls=Spectrum.from_fields(f1,f2,bpw,wsp=get_mcm(f1,f2,jk_region=jk_region),
-                                 save_windows=save_windows)
-        cls.to_file(p.get_fname_cls(f1,f2,jk_region=jk_region))
+        wsp = get_mcm(f1, f2, jk_region=jk_region)
+        cls = Spectrum.from_fields(f1, f2, bpw, wsp=wsp,
+                                   save_windows=save_windows)
+        cls.to_file(p.get_fname_cls(f1, f2, jk_region=jk_region))
     return cls
 
-#gg power spectra
-cls_gg={}
+
+# gg power spectra
+cls_gg = {}
 for fg in fields_ng:
-    cls_gg[fg.name]=get_power_spectrum(fg,fg)
-#yg power spectra
-cls_gy={};
+    cls_gg[fg.name] = get_power_spectrum(fg, fg)
+# yg power spectra
+cls_gy = {}
 for fy in fields_sz:
-    cls_gy[fy.name]={}
+    cls_gy[fy.name] = {}
     for fg in fields_ng:
-        cls_gy[fy.name][fg.name]=get_power_spectrum(fy,fg)
-#yy power spectrum
-cls_yy={};
+        cls_gy[fy.name][fg.name] = get_power_spectrum(fy, fg)
+# yy power spectrum
+cls_yy = {}
 for fy in fields_sz:
-    cls_yy[fy.name]=get_power_spectrum(fy,fy)
+    cls_yy[fy.name] = get_power_spectrum(fy, fy)
 
-#Generate model power spectra to compute the Gaussian covariance matrix
+# Generate model power spectra to compute the Gaussian covariance matrix
 print("Generating theory power spectra")
-def interpolate_spectra(leff,cell,ns):
-    #Create a power spectrum interpolated at all ells
-    larr=np.arange(3*ns)
-    clf=interp1d(leff,cell,bounds_error=False,fill_value=0)
-    clo=clf(larr)
-    clo[larr<=leff[0]]=cell[0]
-    clo[larr>=leff[-1]]=cell[-1]
+def interpolate_spectra(leff, cell, ns):
+    # Create a power spectrum interpolated at all ells
+    larr = np.arange(3*ns)
+    clf = interp1d(leff, cell, bounds_error=False, fill_value=0)
+    clo = clf(larr)
+    clo[larr <= leff[0]] = cell[0]
+    clo[larr >= leff[-1]] = cell[-1]
     return clo
-larr_full=np.arange(3*nside)
-cls_cov_gg_data={};
-cls_cov_gy_data={f.name:{} for f in fields_sz}
-cls_cov_gg_model={};
-cls_cov_gy_model={f.name:{} for f in fields_sz}
-prof_y=Arnaud()
+
+
+larr_full = np.arange(3*nside)
+cls_cov_gg_data = {}
+cls_cov_gy_data = {f.name: {} for f in fields_sz}
+cls_cov_gg_model = {}
+cls_cov_gy_model = {f.name: {} for f in fields_sz}
+prof_y = Arnaud()
 for fg in fields_ng:
-    print(" "+fg.name)
-    #Interpolate data
-    larr=cls_gg[fg.name].leff
-    clarr_gy={fy.name:cls_gy[fy.name][fg.name].cell for fy in fields_sz}
-    cls_cov_gg_data[fg.name]=interpolate_spectra(cls_gg[fg.name].leff,
-                                                 cls_gg[fg.name].cell,nside)
+    print(" " + fg.name)
+    # Interpolate data
+    larr = cls_gg[fg.name].leff
+    clarr_gy = {fy.name: cls_gy[fy.name][fg.name].cell
+                for fy in fields_sz}
+    cls_cov_gg_data[fg.name] = interpolate_spectra(cls_gg[fg.name].leff,
+                                                   cls_gg[fg.name].cell, nside)
     for fy in fields_sz:
-        cls_cov_gy_data[fy.name][fg.name]=interpolate_spectra(cls_gy[fy.name][fg.name].leff,
-                                                              cls_gy[fy.name][fg.name].cell,nside)
+        sp = cls_gy[fy.name][fg.name]
+        cls_cov_gy_data[fy.name][fg.name] = interpolate_spectra(sp.leff,
+                                                                sp.cell,
+                                                                nside)
 
-    #Compute with model
-    larr=np.arange(3*nside)
-    nlarr=np.mean(cls_gg[fg.name].nell)*np.ones_like(larr)
+    # Compute with model
+    larr = np.arange(3*nside)
+    nlarr = np.mean(cls_gg[fg.name].nell)*np.ones_like(larr)
     try:
-        d=np.load(p.get_outdir()+'/cl_th_'+fg.name+'.npz')
-        clgg=d['clgg']
-        clgy=d['clgy']
+        d = np.load(p.get_outdir() + '/cl_th_' + fg.name + '.npz')
+        clgg = d['clgg']
+        clgy = d['clgy']
     except:
-        prof_g=HOD(nz_file=fg.dndz)
-        clgg=hm_ang_power_spectrum(cosmo,larr,(prof_g,prof_g),
-                                   zrange=fg.zrange,zpoints=64,zlog=True,
-                                   **(models[fg.name]))*beam_hpix(larr,nside)**2
-        clgy=hm_ang_power_spectrum(cosmo,larr,(prof_g,prof_y),
-                                   zrange=fg.zrange,zpoints=64,zlog=True,
-                                   **(models[fg.name]))*beam_gaussian(larr,10.)*beam_hpix(larr,nside)**2
-        np.savez(p.get_outdir()+'/cl_th_'+fg.name+'.npz',
-                 clgg=clgg,clgy=clgy,ls=larr)
-    clgg+=nlarr
-    cls_cov_gg_model[fg.name]=clgg
+        prof_g = HOD(nz_file=fg.dndz)
+        bmh2 = beam_hpix(larr, nside)**2
+        bmy = beam_gaussian(larr, 10.)
+        clgg = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_g),
+                                     zrange=fg.zrange, zpoints=64, zlog=True,
+                                     **(models[fg.name])) * bmh2
+        clgy = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_y),
+                                     zrange=fg.zrange, zpoints=64, zlog=True,
+                                     **(models[fg.name])) * bmy * bmh2
+        np.savez(p.get_outdir() + '/cl_th_' + fg.name + '.npz',
+                 clgg=clgg, clgy=clgy, ls=larr)
+    clgg += nlarr
+    cls_cov_gg_model[fg.name] = clgg
     for fy in fields_sz:
-        cls_cov_gy_model[fy.name][fg.name]=clgy
-cls_cov_yy={}
+        cls_cov_gy_model[fy.name][fg.name] = clgy
+cls_cov_yy = {}
 for fy in fields_sz:
-    cls_cov_yy[fy.name]=interpolate_spectra(cls_yy[fy.name].leff,cls_yy[fy.name].cell,nside)
+    cls_cov_yy[fy.name] = interpolate_spectra(cls_yy[fy.name].leff,
+                                              cls_yy[fy.name].cell, nside)
 
-#Generate covariances
+# Generate covariances
 print("Computing covariances")
 
-def get_cmcm(f1,f2,f3,f4):
-    fname=p.get_fname_cmcm(f1,f2,f3,f4)
-    cmcm=nmt.NmtCovarianceWorkspace()
+def get_cmcm(f1, f2, f3, f4):
+    fname = p.get_fname_cmcm(f1, f2, f3, f4)
+    cmcm = nmt.NmtCovarianceWorkspace()
     try:
         cmcm.read_from(fname)
     except:
         print("  Computing CMCM")
-        cmcm.compute_coupling_coefficients(f1.field,f2.field,f3.field,f4.field)
+        cmcm.compute_coupling_coefficients(f1.field,
+                                           f2.field,
+                                           f3.field,
+                                           f4.field)
         cmcm.write_to(fname)
     return cmcm
-        
-def get_covariance(fa1,fa2,fb1,fb2,suffix,
-                   cla1b1,cla1b2,cla2b1,cla2b2):
-    print(" "+fa1.name+","+fa2.name+","+fb1.name+","+fb2.name)
-    fname_cov=p.get_fname_cov(fa1,fa2,fb1,fb2,suffix)
+
+def get_covariance(fa1, fa2, fb1, fb2, suffix,
+                   cla1b1, cla1b2, cla2b1, cla2b2):
+    print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
+    fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
     try:
-        cov=Covariance.from_file(fname_cov,fa1.name,fa2.name,fb1.name,fb2.name)
+        cov = Covariance.from_file(fname_cov,
+                                   fa1.name, fa2.name,
+                                   fb1.name, fb2.name)
     except:
         print("  Computing Cov")
-        mcm_a=get_mcm(fa1,fa2)
-        mcm_b=get_mcm(fb1,fb2)
-        cmcm=get_cmcm(fa1,fa2,fb1,fb2)
-        cov=Covariance.from_fields(fa1,fa2,fb1,fb2,mcm_a,mcm_b,
-                                   cla1b1,cla1b2,cla2b1,cla2b2,
-                                   cwsp=cmcm)
+        mcm_a = get_mcm(fa1, fa2)
+        mcm_b = get_mcm(fb1, fb2)
+        cmcm = get_cmcm(fa1, fa2, fb1, fb2)
+        cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
+                                     cla1b1, cla1b2, cla2b1, cla2b2,
+                                     cwsp=cmcm)
         cov.to_file(fname_cov)
     return cov
 
-#gggg
-covs_gggg_data={};
-covs_gggg_model={};
-dcov_gggg={}
-for fg in fields_ng:
-    covs_gggg_model[fg.name]=get_covariance(fg,fg,fg,fg,'model',
-                                            cls_cov_gg_model[fg.name],cls_cov_gg_model[fg.name],
-                                            cls_cov_gg_model[fg.name],cls_cov_gg_model[fg.name])
-    covs_gggg_data[fg.name]=get_covariance(fg,fg,fg,fg,'data',
-                                           cls_cov_gg_data[fg.name],cls_cov_gg_data[fg.name],
-                                           cls_cov_gg_data[fg.name],cls_cov_gg_data[fg.name])
-    fsky=np.mean(fg.mask)
-    prof_g=HOD(nz_file=fg.dndz)
-    dcov=hm_ang_1h_covariance(cosmo,fsky,cls_gg[fg.name].leff,
-                              (prof_g,prof_g),(prof_g,prof_g),
-                              zrange_a=fg.zrange,zpoints_a=64,zlog_a=True,
-                              zrange_b=fg.zrange,zpoints_b=64,zlog_b=True,**(models[fg.name]))
-    dcov_gggg[fg.name]=Covariance(fg.name,fg.name,fg.name,fg.name,dcov)
-    
-#gggy
-covs_gggy_data={};
-covs_gggy_model={};
-dcov_gggy={}
-for fy in fields_sz:
-    covs_gggy_model[fy.name]={}
-    covs_gggy_data[fy.name]={}
-    dcov_gggy[fy.name]={}
-    for fg in fields_ng:
-        covs_gggy_model[fy.name][fg.name]=get_covariance(fg,fg,fg,fy,'model',
-                                                         cls_cov_gg_model[fg.name],
-                                                         cls_cov_gy_model[fy.name][fg.name],
-                                                         cls_cov_gg_model[fg.name],
-                                                         cls_cov_gy_model[fy.name][fg.name])
-        covs_gggy_data[fy.name][fg.name]=get_covariance(fg,fg,fg,fy,'data',
-                                                        cls_cov_gg_data[fg.name],
-                                                        cls_cov_gy_data[fy.name][fg.name],
-                                                        cls_cov_gg_data[fg.name],
-                                                        cls_cov_gy_data[fy.name][fg.name])
-        fsky=np.mean(fg.mask*fy.mask)
-        prof_g=HOD(nz_file=fg.dndz)
-        dcov=hm_ang_1h_covariance(cosmo,fsky,cls_gg[fg.name].leff,
-                                  (prof_g,prof_g),(prof_g,prof_y),
-                                  zrange_a=fg.zrange,zpoints_a=64,zlog_a=True,
-                                  zrange_b=fg.zrange,zpoints_b=64,zlog_b=True,**(models[fg.name]))
-        b_hp=beam_hpix(cls_gg[fg.name].leff,nside)
-        b_y=beam_gaussian(cls_gg[fg.name].leff,10.)
-        dcov*=(b_hp**2)[:,None]*(b_hp**2*b_y)[None,:]
-        dcov_gggy[fy.name][fg.name]=Covariance(fg.name,fg.name,fg.name,fy.name,dcov)
-#gygy
-covs_gygy_data={};
-covs_gygy_model={};
-dcov_gygy={}
-for fy in fields_sz:
-    covs_gygy_model[fy.name]={}
-    covs_gygy_data[fy.name]={}
-    dcov_gygy[fy.name]={}
-    for fg in fields_ng:
-        covs_gygy_model[fy.name][fg.name]=get_covariance(fg,fy,fg,fy,'model',
-                                                         cls_cov_gg_model[fg.name],
-                                                         cls_cov_gy_model[fy.name][fg.name],
-                                                         cls_cov_gy_model[fy.name][fg.name],
-                                                         cls_cov_yy[fy.name])
-        covs_gygy_data[fy.name][fg.name]=get_covariance(fg,fy,fg,fy,'data',
-                                                        cls_cov_gg_data[fg.name],
-                                                        cls_cov_gy_data[fy.name][fg.name],
-                                                        cls_cov_gy_data[fy.name][fg.name],
-                                                        cls_cov_yy[fy.name])
-        fsky=np.mean(fg.mask*fy.mask)
-        prof_g=HOD(nz_file=fg.dndz)
-        dcov=hm_ang_1h_covariance(cosmo,fsky,cls_gg[fg.name].leff,
-                                  (prof_g,prof_y),(prof_g,prof_y),
-                                  zrange_a=fg.zrange,zpoints_a=64,zlog_a=True,
-                                  zrange_b=fg.zrange,zpoints_b=64,zlog_b=True,**(models[fg.name]))
-        b_hp=beam_hpix(cls_gg[fg.name].leff,nside)
-        b_y=beam_gaussian(cls_gg[fg.name].leff,10.)
-        dcov*=(b_hp**2*b_y)[:,None]*(b_hp**2*b_y)[None,:]
-        dcov_gygy[fy.name][fg.name]=Covariance(fg.name,fy.name,fg.name,fy.name,dcov)
 
-#Save 1-halo covariance
+# gggg
+covs_gggg_data = {}
+covs_gggg_model = {}
+dcov_gggg = {}
 for fg in fields_ng:
-    dcov_gggg[fg.name].to_file(p.get_outdir()+"/dcov_1h4pt_"+
-                               fg.name+"_"+fg.name+"_"+fg.name+"_"+fg.name+".npz")
+    clvm = cls_cov_gg_model[fg.name]
+    clvd = cls_cov_gg_data[fg.name]
+    covs_gggg_model[fg.name] = get_covariance(fg, fg, fg, fg, 'model',
+                                              clvm, clvm, clvm, clvm)
+    covs_gggg_data[fg.name] = get_covariance(fg, fg, fg, fg, 'data',
+                                             clvd, clvd, clvd, clvd)
+    fsky = np.mean(fg.mask)
+    prof_g = HOD(nz_file=fg.dndz)
+    dcov = hm_ang_1h_covariance(cosmo, fsky, cls_gg[fg.name].leff,
+                                (prof_g, prof_g), (prof_g, prof_g),
+                                zrange_a=fg.zrange, zpoints_a=64, zlog_a=True,
+                                zrange_b=fg.zrange, zpoints_b=64, zlog_b=True,
+                                **(models[fg.name]))
+    dcov_gggg[fg.name] = Covariance(fg.name, fg.name, fg.name, fg.name, dcov)
+
+# gggy
+covs_gggy_data = {}
+covs_gggy_model = {}
+dcov_gggy = {}
+for fy in fields_sz:
+    covs_gggy_model[fy.name] = {}
+    covs_gggy_data[fy.name] = {}
+    dcov_gggy[fy.name] = {}
+    for fg in fields_ng:
+        clvggm = cls_cov_gg_model[fg.name]
+        clvgym = cls_cov_gy_model[fy.name][fg.name]
+        clvggd = cls_cov_gg_data[fg.name]
+        clvgyd = cls_cov_gy_data[fy.name][fg.name]
+        covs_gggy_model[fy.name][fg.name] = get_covariance(fg, fg, fg, fy,
+                                                           'model',
+                                                           clvggm, clvgym,
+                                                           clvggm, clvgym)
+        covs_gggy_data[fy.name][fg.name] = get_covariance(fg, fg, fg, fy,
+                                                          'data',
+                                                          clvggd, clvgyd,
+                                                          clvggd, clvgyd)
+        fsky = np.mean(fg.mask*fy.mask)
+        prof_g = HOD(nz_file=fg.dndz)
+        dcov = hm_ang_1h_covariance(cosmo, fsky, cls_gg[fg.name].leff,
+                                    (prof_g, prof_g), (prof_g, prof_y),
+                                    zrange_a=fg.zrange, zpoints_a=64,
+                                    zlog_a=True,
+                                    zrange_b=fg.zrange, zpoints_b=64,
+                                    zlog_b=True, **(models[fg.name]))
+        b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
+        b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
+        dcov *= (b_hp**2)[:, None]*(b_hp**2*b_y)[None, :]
+        dcov_gggy[fy.name][fg.name] = Covariance(fg.name, fg.name,
+                                                 fg.name, fy.name, dcov)
+# gygy
+covs_gygy_data = {}
+covs_gygy_model = {}
+dcov_gygy = {}
+for fy in fields_sz:
+    covs_gygy_model[fy.name] = {}
+    covs_gygy_data[fy.name] = {}
+    dcov_gygy[fy.name] = {}
+    for fg in fields_ng:
+        clvggm = cls_cov_gg_model[fg.name]
+        clvgym = cls_cov_gy_model[fy.name][fg.name]
+        clvggd = cls_cov_gg_data[fg.name]
+        clvgyd = cls_cov_gy_data[fy.name][fg.name]
+        clvyy = cls_cov_yy[fy.name]
+        covs_gygy_model[fy.name][fg.name] = get_covariance(fg, fy, fg, fy,
+                                                           'model',
+                                                           clvggm, clvgym,
+                                                           clvgym, clvyy)
+        covs_gygy_data[fy.name][fg.name] = get_covariance(fg, fy, fg, fy,
+                                                          'data',
+                                                          clvggd, clvgyd,
+                                                          clvgyd, clvyy)
+        fsky = np.mean(fg.mask*fy.mask)
+        prof_g = HOD(nz_file=fg.dndz)
+        dcov = hm_ang_1h_covariance(cosmo, fsky, cls_gg[fg.name].leff,
+                                    (prof_g, prof_y), (prof_g, prof_y),
+                                    zrange_a=fg.zrange, zpoints_a=64,
+                                    zlog_a=True,
+                                    zrange_b=fg.zrange, zpoints_b=64,
+                                    zlog_b=True, **(models[fg.name]))
+        b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
+        b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
+        dcov *= (b_hp**2*b_y)[:, None]*(b_hp**2*b_y)[None, :]
+        dcov_gygy[fy.name][fg.name] = Covariance(fg.name, fy.name,
+                                                 fg.name, fy.name, dcov)
+
+# Save 1-halo covariance
+for fg in fields_ng:
+    dcov_gggg[fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
+                               fg.name + "_" + fg.name + "_" +
+                               fg.name + "_" + fg.name + ".npz")
     for fy in fields_sz:
-        dcov_gggy[fy.name][fg.name].to_file(p.get_outdir()+"/dcov_1h4pt_"+
-                                            fg.name+"_"+fg.name+"_"+fg.name+"_"+fy.name+".npz")
-        dcov_gygy[fy.name][fg.name].to_file(p.get_outdir()+"/dcov_1h4pt_"+
-                                            fg.name+"_"+fy.name+"_"+fg.name+"_"+fy.name+".npz")
+        dcov_gggy[fy.name][fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
+                                            fg.name + "_" + fg.name + "_" +
+                                            fg.name + "_" + fy.name + ".npz")
+        dcov_gygy[fy.name][fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
+                                            fg.name + "_" + fy.name + "_" +
+                                            fg.name + "_" + fy.name + ".npz")
 
-#Do jackknife
+# Do jackknife
 if p.do_jk():
     for jk_id in range(jk.npatches):
-        if os.path.isfile(p.get_fname_cls(fields_sz[-1],fields_sz[-1],jk_region=jk_id)):
-            print("Found %d"%(jk_id+1))
+        if os.path.isfile(p.get_fname_cls(fields_sz[-1],
+                                          fields_sz[-1],
+                                          jk_region=jk_id)):
+            print("Found %d" % (jk_id + 1))
             continue
-        print("%d-th JK sample out of %d"%(jk_id+1,jk.npatches))
-        msk=jk.get_jk_mask(jk_id)
-        #Update field
+        print("%d-th JK sample out of %d" % (jk_id + 1, jk.npatches))
+        msk = jk.get_jk_mask(jk_id)
+        # Update field
         for fg in fields_ng:
-            print(" "+fg.name)
+            print(" " + fg.name)
             fg.update_field(msk)
         for fy in fields_sz:
-            print(" "+fy.name)
+            print(" " + fy.name)
             fy.update_field(msk)
 
-        #Compute spectra
-        #gg
+        # Compute spectra
+        # gg
         for fg in fields_ng:
-            get_power_spectrum(fg,fg,jk_region=jk_id,save_windows=False)
-        #gy
+            get_power_spectrum(fg, fg, jk_region=jk_id, save_windows=False)
+        # gy
         for fy in fields_sz:
             for fg in fields_ng:
-                get_power_spectrum(fy,fg,jk_region=jk_id,save_windows=False)
-        #yy
+                get_power_spectrum(fy, fg, jk_region=jk_id, save_windows=False)
+        # yy
         for fy in fields_sz:
-            get_power_spectrum(fy,fy,jk_region=jk_id,save_windows=False)
+            get_power_spectrum(fy, fy, jk_region=jk_id, save_windows=False)
 
-        #Cleanup MCMs
+        # Cleanup MCMs
         if not p.get('jk')['store_mcm']:
-            os.system("rm "+p.get_outdir()+'/mcm_*_jk%d.mcm'%jk_id)
+            os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
 
-    #Get covariances
-    #gggg
+    # Get covariances
+    # gggg
     for fg in fields_ng:
-        fname_out=p.get_fname_cov(fg,fg,fg,fg,"jk")
+        fname_out = p.get_fname_cov(fg, fg, fg, fg, "jk")
         try:
-            cov=Covariance.from_file(fname_out,fg.name,fg.name,fg.name,fg.name)
+            cov = Covariance.from_file(fname_out, fg.name, fg.name,
+                                       fg.name, fg.name)
         except:
-            prefix1=p.get_prefix_cls(fg,fg)+"_jk"
-            prefix2=p.get_prefix_cls(fg,fg)+"_jk"
-            cov=Covariance.from_jk(jk.npatches,prefix1,prefix2,".npz",
-                                   fg.name,fg.name,fg.name,fg.name)
-        cov.to_file(fname_out,n_samples=jk.npatches)
+            prefix1 = p.get_prefix_cls(fg, fg) + "_jk"
+            prefix2 = p.get_prefix_cls(fg, fg) + "_jk"
+            cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
+                                     fg.name, fg.name, fg.name, fg.name)
+        cov.to_file(fname_out, n_samples=jk.npatches)
 
     for fy in fields_sz:
         for fg in fields_ng:
-            #gggy
-            fname_out=p.get_fname_cov(fg,fg,fg,fy,"jk")
+            # gggy
+            fname_out = p.get_fname_cov(fg, fg, fg, fy, "jk")
             try:
-                cov=Covariance.from_file(fname_out,fg.name,fg.name,fg.name,fy.name)
+                cov = Covariance.from_file(fname_out, fg.name, fg.name,
+                                           fg.name, fy.name)
             except:
-                prefix1=p.get_prefix_cls(fg,fg)+"_jk"
-                prefix2=p.get_prefix_cls(fy,fg)+"_jk"
-                cov=Covariance.from_jk(jk.npatches,prefix1,prefix2,".npz",
-                                       fg.name,fg.name,fg.name,fy.name)
-            cov.to_file(fname_out,n_samples=jk.npatches)
+                prefix1 = p.get_prefix_cls(fg, fg) + "_jk"
+                prefix2 = p.get_prefix_cls(fy, fg) + "_jk"
+                cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
+                                         fg.name, fg.name, fg.name, fy.name)
+            cov.to_file(fname_out, n_samples=jk.npatches)
 
-            #gygy
-            fname_out=p.get_fname_cov(fg,fy,fg,fy,"jk")
+            # gygy
+            fname_out = p.get_fname_cov(fg, fy, fg, fy, "jk")
             try:
-                cov=Covariance.from_file(fname_out,fg.name,fy.name,fg.name,fy.name)
+                cov = Covariance.from_file(fname_out, fg.name, fy.name,
+                                           fg.name, fy.name)
             except:
-                prefix=p.get_outdir()+'/cls_'
-                prefix1=p.get_prefix_cls(fy,fg)+"_jk"
-                prefix2=p.get_prefix_cls(fy,fg)+"_jk"
-                cov=Covariance.from_jk(jk.npatches,prefix1,prefix2,".npz",
-                                       fg.name,fy.name,fg.name,fy.name)
-            cov.to_file(fname_out,n_samples=jk.npatches)
+                prefix = p.get_outdir() + '/cls_'
+                prefix1 = p.get_prefix_cls(fy, fg) + "_jk"
+                prefix2 = p.get_prefix_cls(fy, fg) + "_jk"
+                cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
+                                         fg.name, fy.name, fg.name, fy.name)
+            cov.to_file(fname_out, n_samples=jk.npatches)
 
-    #Joint covariances
+    # Joint covariances
     for fg in fields_ng:
-        #gggg
-        cvm_gggg=Covariance(covs_gggg_model[fg.name].names[0],
-                            covs_gggg_model[fg.name].names[1],
-                            covs_gggg_model[fg.name].names[2],
-                            covs_gggg_model[fg.name].names[3],
-                            covs_gggg_model[fg.name].covar+dcov_gggg[fg.name].covar)
-        cvd_gggg=Covariance(covs_gggg_data[fg.name].names[0],
-                            covs_gggg_data[fg.name].names[1],
-                            covs_gggg_data[fg.name].names[2],
-                            covs_gggg_data[fg.name].names[3],
-                            covs_gggg_data[fg.name].covar+dcov_gggg[fg.name].covar)
-        cvj_gggg=Covariance.from_file(p.get_fname_cov(fg,fg,fg,fg,"jk"),
-                                      covs_gggg_data[fg.name].names[0],
-                                      covs_gggg_data[fg.name].names[1],
-                                      covs_gggg_data[fg.name].names[2],
-                                      covs_gggg_data[fg.name].names[3])
-        cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvm_gggg,cvm_gggg)
-        cov.to_file(p.get_fname_cov(fg,fg,fg,fg,'comb_m'))
-        cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvj_gggg,cvj_gggg)
-        cov.to_file(p.get_fname_cov(fg,fg,fg,fg,'comb_j'))
-        
-        for fy in fields_sz:
-            #gggy
-            cvm_gggy=Covariance(covs_gggy_model[fy.name][fg.name].names[0],
-                                covs_gggy_model[fy.name][fg.name].names[1],
-                                covs_gggy_model[fy.name][fg.name].names[2],
-                                covs_gggy_model[fy.name][fg.name].names[3],
-                                covs_gggy_model[fy.name][fg.name].covar+
-                                dcov_gggy[fy.name][fg.name].covar)
-            cvd_gggy=Covariance(covs_gggy_data[fy.name][fg.name].names[0],
-                                covs_gggy_data[fy.name][fg.name].names[1],
-                                covs_gggy_data[fy.name][fg.name].names[2],
-                                covs_gggy_data[fy.name][fg.name].names[3],
-                                covs_gggy_data[fy.name][fg.name].covar+
-                                dcov_gggy[fy.name][fg.name].covar)
-            cvj_gggy=Covariance.from_file(p.get_fname_cov(fg,fg,fg,fy,"jk"),
-                                          covs_gggy_data[fy.name][fg.name].names[0],
-                                          covs_gggy_data[fy.name][fg.name].names[1],
-                                          covs_gggy_data[fy.name][fg.name].names[2],
-                                          covs_gggy_data[fy.name][fg.name].names[3])
-            cvm_gygy=Covariance(covs_gygy_model[fy.name][fg.name].names[0],
-                                covs_gygy_model[fy.name][fg.name].names[1],
-                                covs_gygy_model[fy.name][fg.name].names[2],
-                                covs_gygy_model[fy.name][fg.name].names[3],
-                                covs_gygy_model[fy.name][fg.name].covar+
-                                dcov_gygy[fy.name][fg.name].covar)
-            cvd_gygy=Covariance(covs_gygy_data[fy.name][fg.name].names[0],
-                                covs_gygy_data[fy.name][fg.name].names[1],
-                                covs_gygy_data[fy.name][fg.name].names[2],
-                                covs_gygy_data[fy.name][fg.name].names[3],
-                                covs_gygy_data[fy.name][fg.name].covar+dcov_gygy[fy.name][fg.name].covar)
-            cvj_gygy=Covariance.from_file(p.get_fname_cov(fg,fy,fg,fy,"jk"),
-                                          covs_gygy_data[fy.name][fg.name].names[0],
-                                          covs_gygy_data[fy.name][fg.name].names[1],
-                                          covs_gygy_data[fy.name][fg.name].names[2],
-                                          covs_gygy_data[fy.name][fg.name].names[3])
-            cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvm_gggy,cvm_gggg,
-                                        covars2=[cvm_gygy,cvd_gygy,cvj_gygy],cov_diag2=cvm_gygy)
-            cov.to_file(p.get_fname_cov(fg,fg,fg,fy,'comb_m'))
-            cov=Covariance.from_options([cvm_gggg,cvd_gggg,cvj_gggg],cvj_gggy,cvj_gggg,
-                                        covars2=[cvm_gygy,cvd_gygy,cvj_gygy],cov_diag2=cvj_gygy)
-            cov.to_file(p.get_fname_cov(fg,fg,fg,fy,'comb_j'))
+        # gggg
+        cvm_gggg = Covariance(covs_gggg_model[fg.name].names[0],
+                              covs_gggg_model[fg.name].names[1],
+                              covs_gggg_model[fg.name].names[2],
+                              covs_gggg_model[fg.name].names[3],
+                              covs_gggg_model[fg.name].covar +
+                              dcov_gggg[fg.name].covar)
+        cvd_gggg = Covariance(covs_gggg_data[fg.name].names[0],
+                              covs_gggg_data[fg.name].names[1],
+                              covs_gggg_data[fg.name].names[2],
+                              covs_gggg_data[fg.name].names[3],
+                              covs_gggg_data[fg.name].covar +
+                              dcov_gggg[fg.name].covar)
+        cvj_gggg = Covariance.from_file(p.get_fname_cov(fg, fg, fg, fg, "jk"),
+                                        covs_gggg_data[fg.name].names[0],
+                                        covs_gggg_data[fg.name].names[1],
+                                        covs_gggg_data[fg.name].names[2],
+                                        covs_gggg_data[fg.name].names[3])
+        cov = Covariance.from_options([cvm_gggg, cvd_gggg, cvj_gggg],
+                                      cvm_gggg, cvm_gggg)
+        cov.to_file(p.get_fname_cov(fg, fg, fg, fg, 'comb_m'))
+        cov = Covariance.from_options([cvm_gggg, cvd_gggg, cvj_gggg],
+                                      cvj_gggg, cvj_gggg)
+        cov.to_file(p.get_fname_cov(fg, fg, fg, fg, 'comb_j'))
 
-            #gygy
-            cov=Covariance.from_options([cvm_gygy,cvd_gygy,cvj_gygy],cvm_gygy,cvm_gygy)
-            cov.to_file(p.get_fname_cov(fg,fy,fg,fy,'comb_m'))
-            cov=Covariance.from_options([cvm_gygy,cvd_gygy,cvj_gygy],cvj_gygy,cvj_gygy)
-            cov.to_file(p.get_fname_cov(fg,fy,fg,fy,'comb_j'))
+        for fy in fields_sz:
+            # gggy
+            nmm = covs_gggy_model[fy.name][fg.name].names
+            nmd = covs_gggy_data[fy.name][fg.name].names
+            cvm_gggy = Covariance(nmm[0], nmm[1], nmm[2], nmm[3],
+                                  covs_gggy_model[fy.name][fg.name].covar +
+                                  dcov_gggy[fy.name][fg.name].covar)
+            cvd_gggy = Covariance(nmd[0], nmd[1], nmd[2], nmd[3],
+                                  covs_gggy_data[fy.name][fg.name].covar +
+                                  dcov_gggy[fy.name][fg.name].covar)
+            f_cvj = p.get_fname_cov(fg, fg, fg, fy, "jk")
+            cvj_gggy = Covariance.from_file(f_cvj, nmd[0], nmd[1],
+                                            nmd[2], nmd[3])
+            nmm = covs_gygy_model[fy.name][fg.name].names
+            nmd = covs_gygy_data[fy.name][fg.name].names
+            cvm_gygy = Covariance(nmm[0], nmm[1], nmm[2], nmm[3],
+                                  covs_gygy_model[fy.name][fg.name].covar +
+                                  dcov_gygy[fy.name][fg.name].covar)
+            cvd_gygy = Covariance(nmd[0], nmd[1], nmd[2], nmd[3],
+                                  covs_gygy_data[fy.name][fg.name].covar +
+                                  dcov_gygy[fy.name][fg.name].covar)
+            f_cvj = p.get_fname_cov(fg, fy, fg, fy, "jk")
+            cvj_gygy = Covariance.from_file(f_cvj, nmd[0], nmd[1],
+                                            nmd[2], nmd[3])
+            cov = Covariance.from_options([cvm_gggg, cvd_gggg, cvj_gggg],
+                                          cvm_gggy, cvm_gggg,
+                                          covars2=[cvm_gygy,
+                                                   cvd_gygy,
+                                                   cvj_gygy],
+                                          cov_diag2=cvm_gygy)
+            cov.to_file(p.get_fname_cov(fg, fg, fg, fy, 'comb_m'))
+            cov = Covariance.from_options([cvm_gggg, cvd_gggg, cvj_gggg],
+                                          cvj_gggy, cvj_gggg,
+                                          covars2=[cvm_gygy,
+                                                   cvd_gygy,
+                                                   cvj_gygy],
+                                          cov_diag2=cvj_gygy)
+            cov.to_file(p.get_fname_cov(fg, fg, fg, fy, 'comb_j'))
+
+            # gygy
+            cov = Covariance.from_options([cvm_gygy, cvd_gygy, cvj_gygy],
+                                          cvm_gygy, cvm_gygy)
+            cov.to_file(p.get_fname_cov(fg, fy, fg, fy, 'comb_m'))
+            cov = Covariance.from_options([cvm_gygy, cvd_gygy, cvj_gygy],
+                                          cvj_gygy, cvj_gygy)
+            cov.to_file(p.get_fname_cov(fg, fy, fg, fy, 'comb_j'))

@@ -2,8 +2,11 @@ import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
 
-def hm_power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
-                      include_1h=True, include_2h=True, squeeze=True, **kwargs):
+
+def hm_power_spectrum(cosmo, k, a, profiles,
+                      logMrange=(6, 17), mpoints=128,
+                      include_1h=True, include_2h=True,
+                      squeeze=True, **kwargs):
     """Computes the cross power spectrum of two halo profiles."""
     # Input handling
     a, k = np.atleast_1d(a), np.atleast_2d(k)
@@ -11,8 +14,12 @@ def hm_power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     # Profile normalisations
     p1, p2 = profiles
     Unorm = p1.profnorm(cosmo, a, squeeze=False, **kwargs)
-    Vnorm = Unorm if p1.name == p2.name else p2.profnorm(cosmo, a, squeeze=False, **kwargs)
-    if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any(): return None  # zero division
+    if p1.name == p2.name:
+        Vnorm = Unorm
+    else:
+        Vnorm = p2.profnorm(cosmo, a, squeeze=False, **kwargs)
+    if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any():
+        return None  # zero division
     Unorm, Vnorm = Unorm[..., None], Vnorm[..., None]  # transform axes
 
     # Set up integration boundaries
@@ -21,7 +28,8 @@ def hm_power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
 
     # Out-of-loop optimisations
-    Pl = np.array([ccl.linear_matter_power(cosmo, k[i], a) for i, a in enumerate(a)])
+    Pl = np.array([ccl.linear_matter_power(cosmo, k[i], a)
+                   for i, a in enumerate(a)])
     Dm = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
     mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
     bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
@@ -31,12 +39,12 @@ def hm_power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
     U, UU = p1.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
     # optimise for autocorrelation (no need to recompute)
     if p1.name == p2.name:
-        V = U; UV = UU
-    else :
+        V = U
+        UV = UU
+    else:
         V, VV = p2.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
         r = kwargs["r_corr"] if "r_corr" in kwargs else 0
         UV = U*V*(1+r)
-
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
     P1h = simps(mfunc*UV, x=np.log10(M), axis=0)
@@ -57,7 +65,6 @@ def hm_power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
 
     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
     return F.squeeze() if squeeze else F
-
 
 
 def hm_ang_power_spectrum(cosmo, l, profiles,
@@ -100,7 +107,7 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
     if zlog:
         z = np.geomspace(zmin, zmax, zpoints)
         jac = z
-        x= np.log(z)
+        x = np.log(z)
     else:
         z = np.linspace(zmin, zmax, zpoints)
         jac = 1
@@ -119,8 +126,9 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
     k = (l+1/2)/chi[..., None]
     Puv = hm_power_spectrum(cosmo, k, a, profiles, logMrange, mpoints,
                             include_1h, include_2h, squeeze=False, **kwargs)
-    if type(Puv) is type(None): return None
-    I = N[..., None] * Puv
+    if Puv is None:
+        return None
+    integrand = N[..., None] * Puv
 
-    Cl = simps(I, x, axis=0)
+    Cl = simps(integrand, x, axis=0)
     return Cl

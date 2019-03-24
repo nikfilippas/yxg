@@ -7,7 +7,6 @@ import numpy as np
 import pyccl as ccl
 
 
-
 def concentration_duffy(M, a, is_D500=False, squeeze=True):
     """
     Mass-Concentration relation from 0804.2486.
@@ -34,16 +33,15 @@ def concentration_duffy(M, a, is_D500=False, squeeze=True):
     # Input handling
     M, a = np.atleast_1d(M), np.atleast_1d(a)
 
-    m_pivot=2.78164e12  # Pivot mass [M_sun]
+    m_pivot = 2.78164e12  # Pivot mass [M_sun]
 
     if is_D500:
         A, B, C = 3.67, -0.0903, -0.51
-    else: # Duffy et al. 2008 (Table 1, row 2)
+    else:  # Duffy et al. 2008 (Table 1, row 2)
         A, B, C = 5.71, -0.084, -0.47
 
     c = A * (M[..., None]/m_pivot)**B / a**C
     return c.squeeze() if squeeze else c
-
 
 
 def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True):
@@ -76,8 +74,10 @@ def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True):
     # Input handling
     M, a = np.atleast_1d(M), np.atleast_1d(a)
 
-    if is_matter: omega_factor = ccl.omega_x(cosmo, a, "matter")
-    else: omega_factor = 1
+    if is_matter:
+        omega_factor = ccl.omega_x(cosmo, a, "matter")
+    else:
+        omega_factor = 1
 
     c1 = (cosmo["h"] * ccl.h_over_h0(cosmo, a))**2
     prefac = 1.16217766e12 * Delta * omega_factor * c1

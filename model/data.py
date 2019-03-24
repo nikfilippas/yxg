@@ -1,111 +1,123 @@
 import numpy as np
 import os
 import pyccl as ccl
-from .profile2D import Arnaud,HOD
+from .profile2D import Arnaud, HOD
 from .beams import beam_gaussian, beam_hpix
 
+
 def get_profile(m):
-    if m['type']=='y':
+    if m['type'] == 'y':
         return Arnaud(name=m['name'])
-    elif m['type']=='g':
-        return HOD(name=m['name'],nz_file=m['dndz'])
+    elif m['type'] == 'g':
+        return HOD(name=m['name'], nz_file=m['dndz'])
 
 
 class Tracer(object):
-    def __init__(self,m,cosmo,kmax):
-        self.name=m['name']
-        self.type=m['type']
-        self.beam=m['beam']
-        self.dndz=m.get('dndz')
+    def __init__(self, m, cosmo, kmax):
+        self.name = m['name']
+        self.type = m['type']
+        self.beam = m['beam']
+        self.dndz = m.get('dndz')
         if self.dndz is not None:
-            z,nz=np.loadtxt(self.dndz,unpack=True)
-            z_inrange=z[nz>=0.005*np.amax(nz)]
-            self.z_range=[z_inrange[0],z_inrange[-1]]
-            zmean=np.sum(z*nz)/np.sum(nz)
-            chimean=ccl.comoving_radial_distance(cosmo,1./(1+zmean))
-            self.lmax=int(kmax*chimean-0.5)
+            z, nz = np.loadtxt(self.dndz, unpack=True)
+            z_inrange = z[nz >= 0.005*np.amax(nz)]
+            self.z_range = [z_inrange[0], z_inrange[-1]]
+            zmean = np.sum(z*nz)/np.sum(nz)
+            chimean = ccl.comoving_radial_distance(cosmo, 1./(1+zmean))
+            self.lmax = int(kmax*chimean-0.5)
         else:
-            self.z_range=[1E-6,6]
-            self.lmax=100000
-        self.profile=get_profile(m)
+            self.z_range = [1E-6, 6]
+            self.lmax = 100000
+        self.profile = get_profile(m)
 
-    def get_beam(self,ls,ns):
-        b0=beam_hpix(ls,ns)
-        #b0=np.ones_like(ls)
+    def get_beam(self, ls, ns):
+        b0 = beam_hpix(ls, ns)
+        # b0 = np.ones_like(ls)
         if self.beam:
-            b0*=beam_gaussian(ls,self.beam)
+            b0 *= beam_gaussian(ls, self.beam)
         return b0
-        
-def choose_cl_file(p,tracers):
-    for tr in [tracers,tracers[::-1]]:
-        fname=p.get_fname_cls(tr[0],tr[1])
+
+
+def choose_cl_file(p, tracers):
+    for tr in [tracers, tracers[::-1]]:
+        fname = p.get_fname_cls(tr[0], tr[1])
         if os.path.isfile(fname):
             return fname
             break
 
-    raise ValueError("Can't find Cl file for "+tracers[0].name+" and "+tracers[1].name)
+    raise ValueError("Can't find Cl file for " +
+                     tracers[0].name +
+                     " and " + tracers[1].name)
     return None
 
-def choose_cov_file(p,tracers1,tracers2,suffix):
-    for trs,transp in zip([[tracers1,tracers2],[tracers2,tracers1]],[False,True]):
-        for tr1 in [trs[0],trs[0][::-1]]:
-            for tr2 in [trs[1],trs[1][::-1]]:
-                fname=p.get_fname_cov(tr1[0],tr1[1],tr2[0],tr2[1],suffix)
-                if os.path.isfile(fname):
-                    return fname,transp
 
-    raise ValueError("Can't find Cov file for "+
-                     tracers1[0].name+", "+tracers1[1].name+", "+
+def choose_cov_file(p, tracers1, tracers2, suffix):
+    for trs, transp in zip([[tracers1, tracers2],
+                            [tracers2, tracers1]],
+                           [False, True]):
+        for tr1 in [trs[0], trs[0][::-1]]:
+            for tr2 in [trs[1], trs[1][::-1]]:
+                fname = p.get_fname_cov(tr1[0], tr1[1], tr2[0], tr2[1], suffix)
+                if os.path.isfile(fname):
+                    return fname, transp
+
+    raise ValueError("Can't find Cov file for " +
+                     tracers1[0].name+", "+tracers1[1].name+", " +
                      tracers2[0].name+", "+tracers2[1].name)
     return None
 
-class DataManager(object):
-    def __init__(self,p,v,cosmo):
-        nside=p.get_nside()
-        kmax=p.get('mcmc')['kmax']
-        tracers={m['name']:Tracer(m,cosmo,kmax) for m in p.get('maps')}
 
-        self.tracers=[]
-        self.data_vector=[]
-        self.beams=[]
-        self.ells=[]
-        mask_total=[]
+class DataManager(object):
+    def __init__(self, p, v, cosmo):
+        nside = p.get_nside()
+        kmax = p.get('mcmc')['kmax']
+        tracers = {m['name']: Tracer(m, cosmo, kmax) for m in p.get('maps')}
+
+        self.tracers = []
+        self.data_vector = []
+        self.beams = []
+        self.ells = []
+        mask_total = []
 
         for tp in v['twopoints']:
-            tr=[tracers[n] for n in tp['tracers']]
-            lmax=np.amin(np.array([tracers[n].lmax for n in tp['tracers']]))
+            tr = [tracers[n] for n in tp['tracers']]
+            lmax = np.amin(np.array([tracers[n].lmax for n in tp['tracers']]))
 
             self.tracers.append(tr)
 
-            fname_cl=choose_cl_file(p,tr)
+            fname_cl = choose_cl_file(p, tr)
             with np.load(fname_cl) as f:
-                mask=((tp['lmin'] <= f['ls']) & (f['ls'] <= lmax)) #Scale cuts
+                # Scale cuts
+                mask = ((tp['lmin'] <= f['ls']) & (f['ls'] <= lmax))
                 mask_total.append(mask)
                 self.ells.append(f['ls'][mask])
-                self.data_vector+=list((f['cls']-f['nls'])[mask])
-                bm=np.ones(np.sum(mask))
+                self.data_vector += list((f['cls']-f['nls'])[mask])
+                bm = np.ones(np.sum(mask))
                 for t in tr:
-                    bm*=t.get_beam(f['ls'][mask],nside)
+                    bm *= t.get_beam(f['ls'][mask], nside)
                 self.beams.append(bm)
 
-        self.data_vector=np.array(self.data_vector)
-        ndata_percorr=[np.sum(m) for m in mask_total]
-        ndata=np.sum(ndata_percorr)
+        self.data_vector = np.array(self.data_vector)
+        ndata_percorr = [np.sum(m) for m in mask_total]
+        ndata = np.sum(ndata_percorr)
 
-        self.covar=np.zeros([ndata,ndata])
-        nd1=0
-        for tp1,m1 in zip(v['twopoints'],mask_total):
-            tr1=[tracers[n] for n in tp1['tracers']]
-            nd1_here=np.sum(m1)
-            nd2=0
-            for tp2,m2 in zip(v['twopoints'],mask_total):
-                tr2=[tracers[n] for n in tp2['tracers']]
-                nd2_here=np.sum(m2)
-                fname_cov,trans=choose_cov_file(p,tr1,tr2,v['covar_type'])
+        self.covar = np.zeros([ndata, ndata])
+        nd1 = 0
+        for tp1, m1 in zip(v['twopoints'], mask_total):
+            tr1 = [tracers[n] for n in tp1['tracers']]
+            nd1_here = np.sum(m1)
+            nd2 = 0
+            for tp2, m2 in zip(v['twopoints'], mask_total):
+                tr2 = [tracers[n] for n in tp2['tracers']]
+                nd2_here = np.sum(m2)
+                fname_cov, trans = choose_cov_file(p, tr1, tr2,
+                                                   v['covar_type'])
                 with np.load(fname_cov) as f:
-                    cov=f['cov']
-                    if trans:
-                        cov=cov.T
-                    self.covar[nd1:nd1+nd1_here][:,nd2:nd2+nd2_here]=cov[m1][:,m2]
-                nd2+=nd2_here
-            nd1+=nd1_here
+                    cov = f['cov']
+                    if trans:  # Transpose if needed
+                        cov = cov.T
+                    cov = cov[m1][:, m2]  # Mask
+                    # Assign to block
+                    self.covar[nd1:nd1+nd1_here][:, nd2:nd2+nd2_here] = cov
+                nd2 += nd2_here
+            nd1 += nd1_here
