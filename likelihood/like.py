@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Likelihood(object):
-    def __init__(self, pars, data, covar, get_theory):
+    def __init__(self, pars, data, covar, get_theory, debug=False):
         self.p_free_names = []
         self.p_free_prior = []
         self.p_fixed = []
@@ -13,6 +13,7 @@ class Likelihood(object):
         self.cv = covar
         self.ic = np.linalg.inv(covar)
         self.cvhalf = np.linalg.cholesky(covar)
+        self.debug = debug
 
         for p in pars:
             n = p.get('name')
@@ -61,10 +62,18 @@ class Likelihood(object):
         pr = self.lnprior(par)
         if pr != -np.inf:
             pr += self.lnlike(par)
+
+        if self.debug:
+            print(par, pr)
+
         return pr
 
     def chi2(self, par):
         pr = self.lnprior(par)
         if pr != -np.inf:
             pr += self.lnlike(par)
+
+        if self.debug:
+            print(par, -2 * pr)
+
         return -2 * pr

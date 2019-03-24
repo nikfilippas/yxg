@@ -138,6 +138,7 @@ mcmc:
     kmax: 1.
     nz_points_g: 64
     z_log_sampling: True
+    debug: False
 
 params:
     - name: "M0"

@@ -18,6 +18,9 @@ class ParamRun(object):
     def get_outdir(self):
         return self.p['global']['output_dir']
 
+    def get_sampler_prefix(self):
+        return self.get_outdir()+"/sampler_"
+
     def get_bandpowers(self):
         return Bandpowers(self.p['global']['nside'],
                           self.p['bandpowers'])
