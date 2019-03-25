@@ -79,3 +79,64 @@ class Likelihood(object):
             print(par, -2 * pr)
 
         return -2 * pr
+
+    def plot_data(self, par, dvec):
+        import matplotlib.pyplot as plt
+
+        params = self.build_kwargs(par)
+        ls = np.array(dvec.ells)
+        indices = np.arange(len(ls.flatten()), dtype=int)
+        indices = indices.reshape(ls.shape)
+
+        tv = self.get_theory(params)[indices]
+        dv = self.dv[indices]
+        ev = np.sqrt(np.diag(self.cv))[indices]
+        chi2 = self.chi2(par)
+        dof = len(self.dv)
+
+        figs = []
+        ax = []
+        for ll, tt, dd, ee, tr in zip(ls, tv, dv, ev,
+                                      dvec.tracers):
+            typ_str = ''
+            for t in tr:
+                typ_str += t.type
+
+            fig = plt.figure()
+            ax1 = fig.add_axes((.1, .3, .8, .6))
+            ax1.errorbar(ll, dd, yerr=ee, fmt='r.')
+            ax1.plot(ll, tt, 'k-')
+            ax1.set_xlabel('$\\ell$', fontsize=15)
+            ax1.set_ylabel('$C^{' + typ_str +
+                           '}_\\ell$', fontsize=15)
+            ax1.set_xscale('log')
+            ax1.set_yscale('log')
+            ax1.set_xlim([ll[0]/1.1, ll[-1]*1.1])
+            ax2 = fig.add_axes((.1, .1, .8, .2))
+            ax2.set_xlim([ll[0]/1.1, ll[-1]*1.1])
+            ax2.errorbar(ll, (dd - tt) / ee, yerr=np.ones_like(dd), fmt='r.')
+            ax2.plot([ll[0]/1.1, ll[-1]*1.1], [0, 0], 'k--')
+            ax2.set_xlabel('$\\ell$', fontsize=15)
+            ax2.set_ylabel('$\\Delta_\\ell$', fontsize=15)
+            ax2.set_xscale('log')
+            ax.append(ax1)
+            ax.append(ax2)
+            figs.append(fig)
+        ax[0].text(0.7, 0.85,
+                   '$\\chi^2/{\\rm dof} = %.2lf / %d$' % (chi2, dof),
+                   transform=ax[0].transAxes)
+        return figs
+
+    def plot_chain(self, chain):
+        from getdist import MCSamples
+        from getdist import plots as gplots
+
+        nsamples = len(chain)
+        samples = MCSamples(samples=chain[nsamples//4:],
+                            names=self.p_free_names,
+                            labels=self.p_free_labels)
+        g = gplots.getSubplotPlotter()
+        g.triangle_plot([samples], filled=True)
+
+        print(dir(g))
+        return g

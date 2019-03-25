@@ -141,7 +141,7 @@ mcmc:
     z_log_sampling: True
     debug: False
     n_walkers: 200
-    n_steps: 0
+    n_steps: 1000
     continue_mcmc: True
 
 params:
