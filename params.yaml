@@ -136,7 +136,7 @@ maps:
 
 mcmc:
     kmax: 1.
-    nz_points_g: 64
+    nz_points_g: 32
     z_log_sampling: True
     debug: False
 
@@ -185,13 +185,15 @@ params:
 
 data_vectors:
     - type: 'Cl'
-      covar_type: 'comb_m'
+      name: '2mpz'
+      covar_type: 'comb_j'
       twopoints:
           - tracers: ['2mpz','2mpz']
             lmin: 0
           - tracers: ['2mpz','y_milca']
             lmin: 0
     - type: 'Cl'
+      name: 'wisc1'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc1','wisc1']
@@ -199,6 +201,7 @@ data_vectors:
           - tracers: ['wisc1','y_milca']
             lmin: 0
     - type: 'Cl'
+      name: 'wisc2'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc2','wisc2']
@@ -206,6 +209,7 @@ data_vectors:
           - tracers: ['wisc2','y_milca']
             lmin: 0
     - type: 'Cl'
+      name: 'wisc3'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc3','wisc3']
@@ -213,6 +217,7 @@ data_vectors:
           - tracers: ['wisc3','y_milca']
             lmin: 0
     - type: 'Cl'
+      name: 'wisc4'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc4','wisc4']
@@ -220,6 +225,7 @@ data_vectors:
           - tracers: ['wisc4','y_milca']
             lmin: 0
     - type: 'Cl'
+      name: 'wisc5'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc5','wisc5']

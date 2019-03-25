@@ -28,7 +28,8 @@ for v in p.get('data_vectors'):
 
     sam.get_best_fit(update_p0=True)
     cov = sam.get_covariance()
-    print(sam.p0,
+    print(v['name'],
+          sam.p0,
           np.sqrt(np.diag(cov)),
           lik.chi2(sam.p0),
           len(d.data_vector))

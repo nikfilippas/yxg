@@ -403,6 +403,8 @@ if p.do_jk():
         cov = Covariance.from_options([cvm_gggg, cvd_gggg, cvj_gggg],
                                       cvj_gggg, cvj_gggg)
         cov.to_file(p.get_fname_cov(fg, fg, fg, fg, 'comb_j'))
+        cvd_gggg.to_file(p.get_fname_cov(fg, fg, fg, fg, 'data_4pt'))
+        cvm_gggg.to_file(p.get_fname_cov(fg, fg, fg, fg, 'model_4pt'))
 
         for fy in fields_sz:
             # gggy
@@ -442,6 +444,8 @@ if p.do_jk():
                                                    cvj_gygy],
                                           cov_diag2=cvj_gygy)
             cov.to_file(p.get_fname_cov(fg, fg, fg, fy, 'comb_j'))
+            cvd_gggy.to_file(p.get_fname_cov(fg, fg, fg, fy, 'data_4pt'))
+            cvm_gggy.to_file(p.get_fname_cov(fg, fg, fg, fy, 'model_4pt'))
 
             # gygy
             cov = Covariance.from_options([cvm_gygy, cvd_gygy, cvj_gygy],
@@ -450,3 +454,5 @@ if p.do_jk():
             cov = Covariance.from_options([cvm_gygy, cvd_gygy, cvj_gygy],
                                           cvj_gygy, cvj_gygy)
             cov.to_file(p.get_fname_cov(fg, fy, fg, fy, 'comb_j'))
+            cvd_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'data_4pt'))
+            cvm_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'model_4pt'))
