@@ -135,48 +135,78 @@ maps:
       beam: 10.
 
 mcmc:
+    run_name: minimal
     kmax: 1.
     nz_points_g: 32
     z_log_sampling: True
     debug: False
+    n_walkers: 200
+    n_steps: 0
+    continue_mcmc: True
 
 params:
     - name: "M0"
+      label: "M_0"
       alias: "Mmin"
+      vary: False
+      value: 12.5
+      prior:
+          type: "TopHat"
+          values: [10.,16.]
     - name: "M1"
+      label: "M_1"
       vary: True
       value: 13.5
       prior:
           type: "TopHat"
           values: [10.,16.]
     - name: "Mmin"
+      label: "M_{\\rm min}"
       vary: True
       value: 12.
       prior:
           type: "TopHat"
           values: [10.,16.]
     - name: "fc"
+      label: "f_c"
       vary: False
       value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.,1.]
     - name: "alpha"
+      label: "\\alpha"
       vary: False
       value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.,3.]
     - name: "beta_max"
-      vary: False
-      value: 1.
+      label: "\\beta_{\\rm max}"
+      alias: "beta_gal"
     - name: "beta_gal"
+      label: "beta_g"
       vary: False
       value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.1,10.]
     - name: "sigma_lnM"
+      label: "\\sigma_{{\\rm ln}M}"
       vary: False
       value: 0.15
+      prior:
+          type: "TopHat"
+          values: [0.01,1.]
     - name: "b_hydro"
+      label: "b_H"
       vary: True
       value: 0.3
       prior:
           type: "TopHat"
           values: [0.,1.]
     - name: "r_corr"
+      label: "r_{gy}"
       vary: True
       value: 0.
       prior:

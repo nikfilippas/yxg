@@ -36,6 +36,9 @@ def get_theory(p, dm, cosmo, return_separated=False, **kwargs):
         cl = hm_ang_power_spectrum(cosmo, ls, profiles,
                                    zrange=zrange, zpoints=zpoints,
                                    zlog=use_zlog, **kwargs)
+        if cl is None:
+            return None
+
         cl *= bms  # Multiply by beams
         if return_separated:
             cls_out.append(cl)

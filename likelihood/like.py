@@ -4,6 +4,7 @@ import numpy as np
 class Likelihood(object):
     def __init__(self, pars, data, covar, get_theory, debug=False):
         self.p_free_names = []
+        self.p_free_labels = []
         self.p_free_prior = []
         self.p_fixed = []
         self.p_alias = []
@@ -23,6 +24,7 @@ class Likelihood(object):
                 self.p_fixed.append((n, p.get('value')))
             else:
                 self.p_free_names.append(n)
+                self.p_free_labels.append(p.get('label'))
                 self.p_free_prior.append(p.get('prior'))
                 self.p0.append(p.get('value'))
 

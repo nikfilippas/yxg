@@ -18,8 +18,11 @@ class ParamRun(object):
     def get_outdir(self):
         return self.p['global']['output_dir']
 
-    def get_sampler_prefix(self):
-        return self.get_outdir()+"/sampler_"
+    def get_sampler_prefix(self, data_name):
+        fname = self.get_outdir() + "/sampler_"
+        fname += self.get('mcmc')['run_name'] + "_"
+        fname += data_name + "_"
+        return fname
 
     def get_bandpowers(self):
         return Bandpowers(self.p['global']['nside'],
