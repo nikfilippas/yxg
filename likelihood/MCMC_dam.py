@@ -10,11 +10,12 @@ if len(sys.argv)!=4:
     raise ValueError("Usage: MCMC_dam.py sample_name bin_number fit_gy")
 
 prefix_cls='../analysis/out_ns512_linlog/'
-prefix_nz='../analysis/data/dndz/'
+#prefix_nz='../analysis/data/dndz/'
+prefix_nz='../../yxg/data/dndz/'
 g_sample=sys.argv[1]
 bin_no=int(sys.argv[2])
 y_sample='y_milca'
-kmax=4.
+kmax=1.
 fit_gg=True
 fit_gy=bool(int(sys.argv[3]))
 
@@ -67,7 +68,7 @@ dd_gygy=np.load(fname_dcov_gy_gy)
 #Scale cuts
 zmean=np.sum(z*nz)/np.sum(nz)
 chimean=ccl.comoving_radial_distance(cosmo,1/(1.+zmean))
-lmax=int(kmax*chimean+0.5)
+lmax=int(kmax*chimean-0.5)
 mask_gg=d_gg['leff']<lmax
 mask_gy=d_gy['leff']<lmax
 
@@ -124,9 +125,9 @@ priors={'fc':[1.,1.,1.],
         'Mmin':[12.,10.,16.],
         "M1":[13.5,10.,16.],
         "M0":"Mmin",
-        "alpha":[1.,0.0,3.],
-        "beta_max":[1.,0.1,10.],
-        "beta_gal":[1.,0.1,10.],
+        "alpha":[1.,1.,1.],
+        "beta_max":[1.,1.,1.],
+        "beta_gal":[1.,1.,1.],
         "sigma_lnM":[0.15,0.15,0.15],
         "b_hydro":[0.3,0.,1.0],
         "r_corr":[0,-1.,1.]
@@ -204,6 +205,8 @@ def lnprob(p,sign=+1):
     return sign*pr
 
 print("Minimizing")
+print(-2*lnprob([12.83276768,11.58091433,0.82283564,0.61467326]))
+exit(1)
 #res=minimize(lnprob,p0,method='Powell',args=(-1))
 #p0=res.x
 d=np.load("result_b_"+g_sample+ibin_string+"_%d%d.npz"%(int(fit_gg),int(fit_gy))); 
