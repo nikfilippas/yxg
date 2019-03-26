@@ -4,6 +4,23 @@ import healpy as hp
 
 
 class Field(object):
+    """
+    Field creator.
+
+    Args:
+        nside (int): HEALPix resolution parameter.
+        name (str): field name.
+        mask_id (str): ID for this mask.
+        fname_mask (str): path to file containing the mask.
+        fname_map (str): path to file containing the sky map.
+        fname_dndz (str): path to file containing the redshift
+            distribution for this field. Pass `None` if not
+            relevant.
+        field_mask (int): HDU in which the mask is stored.
+        field_map (int): HDU in which the map is stored.
+        is_ndens (bool): set to True if this is a number
+            density tracer.
+    """
     def __init__(self, nside, name, mask_id,
                  fname_mask, fname_map, fname_dndz,
                  field_mask=0, field_map=0, is_ndens=True):
@@ -36,4 +53,13 @@ class Field(object):
         self.field = nmt.NmtField(self.mask, [self.map])
 
     def update_field(self, new_mask=1.):
+        """
+        Updates the `NmtField` object stored in this `Field`
+        multiplying the original mask by a new one. Note that
+        this does not overwrite the original mask or
+        map stored here, only the `NmtField` object.
+
+        Args:
+            new_mask (float or array): new mask.
+        """
         self.field = nmt.NmtField(self.mask * new_mask, [self.map])

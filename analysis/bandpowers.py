@@ -3,8 +3,17 @@ import numpy as np
 
 
 class Bandpowers(object):
+    """
+    A class encoding the information about a set of bandpowers (i.e. bins
+    of multipoles ell.
+
+    Args:
+        nside (int): HEALPix resolution parameter.
+        d (dict): dictionary containing all arguments in the \'bandpowers\'
+            section of the input parameter file.
+    """
     def __init__(self, nside, d):
-        if d['type'] == 'linlog':
+        if d['type'] == 'linlog':  # Check if using hybrid binning
             # Set up linear part
             l_edges_lin = np.linspace(2, d['lsplit'],
                                       (d['lsplit']-2)//d['nlb_lin']+1)
@@ -25,7 +34,7 @@ class Bandpowers(object):
 
             # Create binning scheme
             self.bn = nmt.NmtBin(nside, ells=larr, bpws=bpws, weights=weights)
-        elif d['type'] == 'lin':
+        elif d['type'] == 'lin':  # Check if using linear binning
             # Create binning scheme
             self.bn = nmt.NmtBin(nside, nlb=d['nlb'])
         else:
