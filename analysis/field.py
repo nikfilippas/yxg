@@ -5,7 +5,7 @@ import healpy as hp
 
 class Field(object):
     """
-    Field creator.
+    Fields contain all the information about a given sky tracer.
 
     Args:
         nside (int): HEALPix resolution parameter.
@@ -28,28 +28,36 @@ class Field(object):
         self.nside = nside
         self.mask_id = mask_id
         self.fname_mask = fname_mask
-        self.is_ndens = is_ndens
+        self.is_ndens = is_ndens  # True if this is a delta_gal map
+        # Read mask
         self.mask = hp.ud_grade(hp.read_map(fname_mask, verbose=False,
                                             field=field_mask), nside_out=nside)
+        # Read map
         self.map0 = hp.ud_grade(hp.read_map(fname_map, verbose=False,
                                             field=field_map), nside_out=nside)
         mask_bn = np.ones_like(self.mask)
         mask_bn[self.mask <= 0] = 0  # Binary mask
         self.map0 *= mask_bn  # Remove masked pixels
         if is_ndens:  # Compute delta if this is a number density map
+            # Mean number of galaxies per pixel.
             mean_g = np.sum(self.map0*self.mask) / np.sum(self.mask)
+            # Transform to number density
             self.ndens = mean_g * hp.nside2npix(self.nside) / (4*np.pi)
+            # Compute delta
             self.map = self.mask*(self.map0 / mean_g - 1.)
+            # Read redshift distribution
             self.dndz = fname_dndz
             self.z, self.nz = np.loadtxt(self.dndz, unpack=True)
+            # Compute redshift range
             z_inrange = self.z[(self.nz > 0.005 * np.amax(self.nz))]
             self.zrange = np.array([z_inrange[0], z_inrange[-1]])
-        else:
+        else:  # Nothing to do otherwise
             self.ndens = 0
             self.map = self.map0
             self.z = None
             self.dndz = None
 
+        # Generate NmtField
         self.field = nmt.NmtField(self.mask, [self.map])
 
     def update_field(self, new_mask=1.):

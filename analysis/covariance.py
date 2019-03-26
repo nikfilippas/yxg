@@ -16,6 +16,9 @@ class Covariance(object):
         self.covar = covariance
 
     def diag(self):
+        """
+        return: covariance matrix diagonal.
+        """
         return np.diag(self.covar)
 
     @classmethod
@@ -45,13 +48,14 @@ class Covariance(object):
                 covariance matrix. If `None`, a new one will be
                 generated from the inputs.
         """
-        if cwsp is None:
+        if cwsp is None:  # Generate coupling coefficients if needed.
             cwsp = nmt.NmtCovarianceWorskpace()
             cwsp.compute_coupling_coefficients(field_a1.field,
                                                field_a2.field,
                                                field_b1.field,
                                                field_b2.field)
 
+        # Compute covariance matrix
         covar = nmt.gaussian_covariance(cwsp, 0, 0, 0, 0,
                                         [cla1b1], [cla1b2],
                                         [cla2b1], [cla2b2],
@@ -112,7 +116,7 @@ class Covariance(object):
             else:
                 return prefix2+"%d" % jk_id+suffix
 
-        # Initialize data
+        # Initialize data from all jackknife files
         cls1 = np.array([np.load(get_fname(1, jk_id))['cls']
                          for jk_id in range(njk)])
         cls2 = np.array([np.load(get_fname(2, jk_id))['cls']
