@@ -217,7 +217,7 @@ params:
 data_vectors:
     - type: 'Cl'
       name: '2mpz'
-      covar_type: 'comb_j'
+      covar_type: 'comb_m'
       twopoints:
           - tracers: ['2mpz','2mpz']
             lmin: 0
