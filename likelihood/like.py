@@ -138,5 +138,4 @@ class Likelihood(object):
         g = gplots.getSubplotPlotter()
         g.triangle_plot([samples], filled=True)
 
-        print(dir(g))
         return g

@@ -114,7 +114,6 @@ class Sampler(object):
         import emcee
 
         fname_chain = self.prefix_out + "chain.h5"
-        print(fname_chain)
         reader = emcee.backends.HDFBackend(fname_chain, read_only=True)
         self.chain = reader.get_chain(flat=True)
         self.probs = reader.get_log_prob(flat=True)

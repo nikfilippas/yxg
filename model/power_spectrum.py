@@ -1,12 +1,37 @@
 import numpy as np
 from scipy.integrate import simps
+from scipy.interpolate import interp2d
 import pyccl as ccl
+
+
+class HalomodCorrection(object):
+    def __init__(self, cosmo,
+                 k_range=[1E-1, 5], nlk=20,
+                 z_range=[0., 1.], nz=16):
+        lkarr = np.linspace(np.log10(k_range[0]),
+                            np.log10(k_range[1]),
+                            nlk)
+        karr = 10.**lkarr
+        zarr = np.linspace(z_range[0], z_range[1], nz)
+
+        pk_hm = np.array([ccl.halomodel_matter_power(cosmo, karr, a)
+                          for a in 1. / (1 + zarr)])
+        pk_hf = np.array([ccl.nonlin_matter_power(cosmo, karr, a)
+                          for a in 1. / (1 + zarr)])
+        ratio = pk_hf / pk_hm
+
+        self.rk_func = interp2d(lkarr, zarr, ratio,
+                                bounds_error=False, fill_value=1)
+
+    def rk_interp(self, k, a):
+        return self.rk_func(np.log10(k), a)
 
 
 def hm_power_spectrum(cosmo, k, a, profiles,
                       logMrange=(6, 17), mpoints=128,
                       include_1h=True, include_2h=True,
-                      squeeze=True, **kwargs):
+                      squeeze=True, hm_correction=None,
+                      **kwargs):
     """Computes the cross power spectrum of two halo profiles."""
     # Input handling
     a, k = np.atleast_1d(a), np.atleast_2d(k)
@@ -64,13 +89,19 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     b2h_2 += (n0_2h*V[0]).squeeze()
 
     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
+
+    if hm_correction is not None:
+        for ia, (aa, kk) in enumerate(zip(a, k)):
+            F[ia, :] *= hm_correction.rk_interp(kk, aa)
+
     return F.squeeze() if squeeze else F
 
 
 def hm_ang_power_spectrum(cosmo, l, profiles,
                           zrange=(1e-6, 6), zpoints=32, zlog=True,
                           logMrange=(6, 17), mpoints=128,
-                          include_1h=True, include_2h=True, **kwargs):
+                          include_1h=True, include_2h=True,
+                          hm_correction=None, **kwargs):
     """Computes the angular cross power spectrum of two halo profiles.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -125,7 +156,8 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
 
     k = (l+1/2)/chi[..., None]
     Puv = hm_power_spectrum(cosmo, k, a, profiles, logMrange, mpoints,
-                            include_1h, include_2h, squeeze=False, **kwargs)
+                            include_1h, include_2h, squeeze=False,
+                            hm_correction=hm_correction, **kwargs)
     if Puv is None:
         return None
     integrand = N[..., None] * Puv

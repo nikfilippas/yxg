@@ -5,6 +5,7 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
+from model.power_spectrum import HalomodCorrection
 
 try:
     fname_params = sys.argv[1]
@@ -16,6 +17,12 @@ p = ParamRun(fname_params)
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
 
+# Include halo model correction if needed
+if p.get('mcmc').get('hm_correct'):
+    hm_correction = HalomodCorrection(cosmo)
+else:
+    hm_correction = None
+
 for v in p.get('data_vectors'):
     print(v['name'])
 
@@ -24,7 +31,9 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     def th(pars):
-        return get_theory(p, d, cosmo, **pars)
+        return get_theory(p, d, cosmo,
+                          hm_correction=hm_correction,
+                          **pars)
 
     # Set up likelihood
     lik = Likelihood(p.get('params'), d.data_vector, d.covar, th,

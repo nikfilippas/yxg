@@ -2,7 +2,8 @@ import numpy as np
 from .power_spectrum import hm_ang_power_spectrum
 
 
-def get_theory(p, dm, cosmo, return_separated=False, **kwargs):
+def get_theory(p, dm, cosmo, return_separated=False,
+               hm_correction=None, **kwargs):
     nz_default = p.get('mcmc')['nz_points_g']
     use_zlog = p.get('mcmc')['z_log_sampling']
 
@@ -35,7 +36,8 @@ def get_theory(p, dm, cosmo, return_separated=False, **kwargs):
                 zpoints = nz_default
         cl = hm_ang_power_spectrum(cosmo, ls, profiles,
                                    zrange=zrange, zpoints=zpoints,
-                                   zlog=use_zlog, **kwargs)
+                                   zlog=use_zlog, hm_correction=hm_correction,
+                                   **kwargs)
         if cl is None:
             return None
 

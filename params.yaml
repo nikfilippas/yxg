@@ -135,10 +135,11 @@ maps:
       beam: 10.
 
 mcmc:
-    run_name: minimal
+    run_name: minimal_hmc
     kmax: 1.
     nz_points_g: 32
     z_log_sampling: True
+    hm_correct: True
     debug: False
     n_walkers: 200
     n_steps: 1000
