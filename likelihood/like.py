@@ -80,7 +80,7 @@ class Likelihood(object):
 
         return -2 * pr
 
-    def plot_data(self, par, dvec):
+    def plot_data(self, par, dvec, save_figures=False, prefix=None):
         import matplotlib.pyplot as plt
 
         params = self.build_kwargs(par)
@@ -125,9 +125,16 @@ class Likelihood(object):
         ax[0].text(0.7, 0.85,
                    '$\\chi^2/{\\rm dof} = %.2lf / %d$' % (chi2, dof),
                    transform=ax[0].transAxes)
+
+        if save_figures:
+            if prefix is None:
+                raise ValueError("Need a file prefix to save stuff")
+            for fig, tr in zip(figs, dvec.tracers):
+                fname = prefix+'cls_'+tr[0].name+'_'+tr[1].name+'.png'
+                fig.savefig(fname, bbox_inches='tight')
         return figs
 
-    def plot_chain(self, chain):
+    def plot_chain(self, chain, save_figure=False, prefix=None):
         from getdist import MCSamples
         from getdist import plots as gplots
 
@@ -138,4 +145,10 @@ class Likelihood(object):
         g = gplots.getSubplotPlotter()
         g.triangle_plot([samples], filled=True)
 
+        if save_figure:
+            if prefix is None:
+                raise ValueError("Need a file prefix to save stuff")
+            fname = prefix+'triangle.png'
+            print(fname)
+            g.export(fname)
         return g

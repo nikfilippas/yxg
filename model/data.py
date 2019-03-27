@@ -6,6 +6,17 @@ from .beams import beam_gaussian, beam_hpix
 
 
 def get_profile(m):
+    """
+    Assigns a profile based on a map dictionary.
+
+    Args:
+        m (dict): dictionary defining a map in the
+            param file.
+
+    Returns:
+        :obj:`Profile`: Arnaud or HOD profile.
+    """
+
     if m['type'] == 'y':
         return Arnaud(name=m['name'])
     elif m['type'] == 'g':
@@ -13,11 +24,22 @@ def get_profile(m):
 
 
 class Tracer(object):
+    """
+    Tracer object used to store information related to
+    the signal modeling.
+
+    Args:
+        m (dict): dictionary defining a map in the
+            param file.
+        cosmo (:obj:`ccl.Cosmology`): cosmology object.
+        kmax (float): maximum wavenumber in units of Mpc^-1
+    """
     def __init__(self, m, cosmo, kmax):
         self.name = m['name']
         self.type = m['type']
         self.beam = m['beam']
         self.dndz = m.get('dndz')
+        # Estimate z-range and ell-max
         if self.dndz is not None:
             z, nz = np.loadtxt(self.dndz, unpack=True)
             z_inrange = z[nz >= 0.005*np.amax(nz)]
@@ -31,6 +53,16 @@ class Tracer(object):
         self.profile = get_profile(m)
 
     def get_beam(self, ls, ns):
+        """
+        Returns beam associated with this tracer
+
+        Args:
+            ls (float or array): multipoles
+            ns (int): HEALPix resolution parameter.
+
+        Returns:
+            float or array: SHT of the beam for this tracer.
+        """
         b0 = beam_hpix(ls, ns)
         # b0 = np.ones_like(ls)
         if self.beam:
@@ -39,6 +71,18 @@ class Tracer(object):
 
 
 def choose_cl_file(p, tracers):
+    """
+    Try to find the file name containing the power spectrum
+    of two tracers.
+
+    Args:
+        p (:obj:`ParamRun`): parameters for this run.
+        tracers (list): list of two `Tracer` objects.
+
+    Returns:
+        string: file name if found.
+    """
+    # Search for file with any possible ordering
     for tr in [tracers, tracers[::-1]]:
         fname = p.get_fname_cls(tr[0], tr[1])
         if os.path.isfile(fname):
@@ -52,10 +96,25 @@ def choose_cl_file(p, tracers):
 
 
 def choose_cov_file(p, tracers1, tracers2, suffix):
+    """
+    Try to find the file name containing the covariance matrix for the
+    power spectra of two pairs of tracers.
+
+    Args:
+        p (:obj:`ParamRun`): parameters for this run.
+        tracers1, tracers2 (list): lists of two `Tracer` objects each,
+            corresponding to the tracers of the two power spectra we
+            want the covariance of.
+        suffix (str): suffix for this covariance.
+
+    Returns:
+        string: file name if found.
+    """
+    # Search for file with any possible ordering
     for trs, transp in zip([[tracers1, tracers2],
                             [tracers2, tracers1]],
                            [False, True]):
-        for tr1 in [trs[0], trs[0][::-1]]:
+        for tr1 in [trs[0], trs[0][::-1]]:  # Each pair can appear reversed
             for tr2 in [trs[1], trs[1][::-1]]:
                 fname = p.get_fname_cov(tr1[0], tr1[1], tr2[0], tr2[1], suffix)
                 if os.path.isfile(fname):
@@ -68,9 +127,19 @@ def choose_cov_file(p, tracers1, tracers2, suffix):
 
 
 class DataManager(object):
+    """
+    Takes care of loading and managing the data for a given likelihood run.
+
+    Args:
+        p (:obj:`ParamRun`): parameters for this run.
+        v (dict): dictionary containing the list of two-point functions you
+            want to analyze.
+        cosmo (:obj:`ccl.Cosmology`): cosmology object.
+    """
     def __init__(self, p, v, cosmo):
         nside = p.get_nside()
         kmax = p.get('mcmc')['kmax']
+        # Create tracers for all maps in the param file.
         tracers = {m['name']: Tracer(m, cosmo, kmax) for m in p.get('maps')}
 
         self.tracers = []
@@ -79,8 +148,14 @@ class DataManager(object):
         self.ells = []
         mask_total = []
 
+        # For each two-point function involved, store:
+        #  - Pair of tracers.
+        #  - Data vector.
+        #  - Beam factors
+        #  - Multipole values, including scale cuts.
         for tp in v['twopoints']:
             tr = [tracers[n] for n in tp['tracers']]
+            # Minimum lmax for a given pair of tracers.
             lmax = np.amin(np.array([tracers[n].lmax for n in tp['tracers']]))
 
             self.tracers.append(tr)
@@ -91,25 +166,29 @@ class DataManager(object):
                 mask = ((tp['lmin'] <= f['ls']) & (f['ls'] <= lmax))
                 mask_total.append(mask)
                 self.ells.append(f['ls'][mask])
+                # Subtract noise bias
                 self.data_vector += list((f['cls']-f['nls'])[mask])
                 bm = np.ones(np.sum(mask))
                 for t in tr:
                     bm *= t.get_beam(f['ls'][mask], nside)
                 self.beams.append(bm)
 
+        # Count number of usable elements in the data vector.
         self.data_vector = np.array(self.data_vector)
         ndata_percorr = [np.sum(m) for m in mask_total]
         ndata = np.sum(ndata_percorr)
 
+        # Now form covariance matrix in a block-wise fashion
         self.covar = np.zeros([ndata, ndata])
         nd1 = 0
         for tp1, m1 in zip(v['twopoints'], mask_total):
             tr1 = [tracers[n] for n in tp1['tracers']]
-            nd1_here = np.sum(m1)
+            nd1_here = np.sum(m1)  # Number of data points for vector 1
             nd2 = 0
             for tp2, m2 in zip(v['twopoints'], mask_total):
                 tr2 = [tracers[n] for n in tp2['tracers']]
-                nd2_here = np.sum(m2)
+                nd2_here = np.sum(m2)  # Number of points for vector 2
+                # Read covariance block
                 fname_cov, trans = choose_cov_file(p, tr1, tr2,
                                                    v['covar_type'])
                 with np.load(fname_cov) as f:
