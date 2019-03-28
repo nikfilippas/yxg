@@ -6,6 +6,20 @@ from scipy.integrate import simps
 def hm_1h_trispectrum(cosmo, k, a, profiles,
                       logMrange=(6, 17), mpoints=128,
                       **kwargs):
+    """Computes the halo model prediction for the 1-halo 3D
+    trispectrum of four quantities.
+
+    Args:
+        cosmo (:obj:`ccl.Cosmology`): cosmology.
+        k (array): array of wavenumbers in units of Mpc^-1
+        a (array): array of scale factor values
+        profiles (tuple): tuple of four profile objects (currently
+            only Arnaud and HOD are implemented) corresponding to
+            the four quantities being correlated.
+        logMrange (tuple): limits of integration in log10(M/Msun)
+        mpoints (int): number of mass samples
+        **kwargs: parameter used internally by the profiles.
+    """
     pau, pav, pbu, pbv = profiles
 
     aUnorm = pau.profnorm(cosmo, a, squeeze=False, **kwargs)
@@ -65,6 +79,47 @@ def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
                          zrange_a=(1e-6, 6), zpoints_a=32, zlog_a=True,
                          zrange_b=(1e-6, 6), zpoints_b=32, zlog_b=True,
                          logMrange=(6, 17), mpoints=128, **kwargs):
+    """Computes the 1-h trispectrum contribution to the covariance of the
+    angular cross power spectra involving two pairs of quantities.
+
+    Uses the halo model prescription for the 3D 1-h trispectrum to compute
+    the angular cross power spectrum of two profiles.
+
+    Parameters
+    ----------
+    cosmo : `pyccl.Cosmology` object
+        Cosmological parameters.
+    fsky : float
+        Sky fraction
+    l : array_like
+        The l-values (multipole number) of the cross power spectrum.
+    profiles_a : tuple of `profile2D._profile_` objects
+        The profiles for the first two quantities being correlated.
+    profiles_b : tuple of `profile2D._profile_` objects
+        The profiles for the second two quantities being correlated.
+    zrange_a : tuple
+        Minimum and maximum redshift probed for the first spectrum.
+    zpoints_a : int
+        Number or integration sampling points in redshift for the
+        first spectrum.
+    zlog_a : bool
+        Whether to use logarithmic spacing in redshifts for the first
+        spectrum.
+    zrange_b : tuple
+        Minimum and maximum redshift probed for the second spectrum.
+    zpoints : int
+        Number or integration sampling points in redshift for the 
+        first spectrum.
+    zlog_b : bool
+        Whether to use logarithmic spacing in redshifts for the
+        first spectrum
+    logMrange : tuple
+        Logarithm (base-10) of the mass integration boundaries.
+    mpoints : int
+        Number or integration sampling points.
+    **kwargs : keyword arguments
+        Parametrisation of the profiles.
+    """
 
     zrange = np.array([min(np.amin(zrange_a), np.amin(zrange_b)),
                        max(np.amax(zrange_a), np.amax(zrange_b))])

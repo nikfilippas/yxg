@@ -5,6 +5,16 @@ import pyccl as ccl
 
 
 class HalomodCorrection(object):
+    """Provides methods to estimate the correction to the halo
+    model in the 1h - 2h transition regime.
+
+    Args:
+        cosmo (:obj:`ccl.Cosmology`): cosmology.
+        k_range (list): range of k to use (in Mpc^-1).
+        nlk (int): number of samples in log(k) to use.
+        z_range (list): range of redshifts to use.
+        nz (int): number of samples in redshift to use.
+    """
     def __init__(self, cosmo,
                  k_range=[1E-1, 5], nlk=20,
                  z_range=[0., 1.], nz=16):
@@ -24,6 +34,14 @@ class HalomodCorrection(object):
                                 bounds_error=False, fill_value=1)
 
     def rk_interp(self, k, a):
+        """
+        Returns the halo model correction for an array of k
+        values at a given redshift.
+
+        Args:
+            k (float or array): wavenumbers in units of Mpc^-1.
+            a (float): value of the scale factor.
+        """
         return self.rk_func(np.log10(k), a)
 
 
@@ -32,7 +50,25 @@ def hm_power_spectrum(cosmo, k, a, profiles,
                       include_1h=True, include_2h=True,
                       squeeze=True, hm_correction=None,
                       **kwargs):
-    """Computes the cross power spectrum of two halo profiles."""
+    """Computes the halo model prediction for the 3D cross-power
+    spectrum of two quantities.
+
+    Args:
+        cosmo (:obj:`ccl.Cosmology`): cosmology.
+        k (array): array of wavenumbers in units of Mpc^-1
+        a (array): array of scale factor values
+        profiles (tuple): tuple of two profile objects (currently
+            only Arnaud and HOD are implemented) corresponding to
+            the two quantities being correlated.
+        logMrange (tuple): limits of integration in log10(M/Msun)
+        mpoints (int): number of mass samples
+        include_1h (bool): whether to include the 1-halo term.
+        include_2h (bool): whether to include the 2-halo term.
+        hm_correction (:obj:`HalomodCorrection` or None):
+            Correction to the halo model in the transition regime.
+            If `None`, no correction is applied.
+        **kwargs: parameter used internally by the profiles.
+    """
     # Input handling
     a, k = np.atleast_1d(a), np.atleast_2d(k)
 
@@ -102,7 +138,7 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
                           logMrange=(6, 17), mpoints=128,
                           include_1h=True, include_2h=True,
                           hm_correction=None, **kwargs):
-    """Computes the angular cross power spectrum of two halo profiles.
+    """Computes the angular cross power spectrum of two quantities.
 
     Uses the halo model prescription for the 3D power spectrum to compute
     the angular cross power spectrum of two profiles.
@@ -112,9 +148,9 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
     cosmo : `pyccl.Cosmology` object
         Cosmological parameters.
     l : array_like
-        The l-values (multiple number) of the cross power spectrum.
+        The l-values (multipole number) of the cross power spectrum.
     profiles : tuple of `profile2D._profile_` objects
-        The profile isntances used in the computation.
+        The profiles for the two quantities being correlated.
     zrange : tuple
         Minimum and maximum redshift probed.
     zpoints : int

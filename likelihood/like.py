@@ -41,7 +41,7 @@ class Likelihood(object):
             if pr is None:  # No prior
                 continue
             elif pr['type'] == 'Gaussian':
-                lnp += ((p - pr['values'][0]) / pr['values'][1])**2
+                lnp += -0.5 * ((p - pr['values'][0]) / pr['values'][1])**2
             else:
                 if not(pr['values'][0] <= p <= pr['values'][1]):
                     return -np.inf

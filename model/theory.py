@@ -4,6 +4,19 @@ from .power_spectrum import hm_ang_power_spectrum
 
 def get_theory(p, dm, cosmo, return_separated=False,
                hm_correction=None, **kwargs):
+    """Computes the theory prediction used in the MCMC.
+
+    Args:
+        p (:obj:`ParamRun`): parameters for this run.
+        dm (:obj:`DataManager`): data manager for this set of
+            correlations.
+        cosmo (:obj:`ccl.Cosmology`): cosmology object.
+        return_separated (bool): return output power spectra
+            in separate arrays.
+        hm_correction(:obj:`HalomodCorrection`): halo model correction
+            factor.
+        **kwargs: model parameters
+    """
     nz_default = p.get('mcmc')['nz_points_g']
     use_zlog = p.get('mcmc')['z_log_sampling']
 
