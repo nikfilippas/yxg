@@ -108,7 +108,7 @@ def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
     zrange_b : tuple
         Minimum and maximum redshift probed for the second spectrum.
     zpoints : int
-        Number or integration sampling points in redshift for the 
+        Number or integration sampling points in redshift for the
         first spectrum.
     zlog_b : bool
         Whether to use logarithmic spacing in redshifts for the
