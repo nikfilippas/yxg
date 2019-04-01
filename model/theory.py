@@ -3,6 +3,7 @@ from .power_spectrum import hm_ang_power_spectrum
 
 
 def get_theory(p, dm, cosmo, return_separated=False,
+               include_1h=True, include_2h=True,
                hm_correction=None, **kwargs):
     """Computes the theory prediction used in the MCMC.
 
@@ -50,6 +51,8 @@ def get_theory(p, dm, cosmo, return_separated=False,
         cl = hm_ang_power_spectrum(cosmo, ls, profiles,
                                    zrange=zrange, zpoints=zpoints,
                                    zlog=use_zlog, hm_correction=hm_correction,
+                                   include_1h=include_1h,
+                                   include_2h=include_2h,
                                    **kwargs)
         if cl is None:
             return None

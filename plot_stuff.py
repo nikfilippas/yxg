@@ -36,6 +36,18 @@ for v in p.get('data_vectors'):
                           hm_correction=hm_correction,
                           **pars)
 
+    def th1h(pars):
+        return get_theory(p, d, cosmo, return_separated=False,
+                          hm_correction=hm_correction,
+                          include_2h=False, include_1h=True,
+                          **pars)
+
+    def th2h(pars):
+        return get_theory(p, d, cosmo, return_separated=False,
+                          hm_correction=hm_correction,
+                          include_2h=True, include_1h=False,
+                          **pars)
+
     # Set up likelihood
     lik = Likelihood(p.get('params'), d.data_vector, d.covar, th,
                      debug=p.get('mcmc')['debug'])
@@ -51,7 +63,8 @@ for v in p.get('data_vectors'):
 
     # Plot power spectra
     figs_cl = lik.plot_data(sam.p0, d, save_figures=True,
-                            prefix=p.get_sampler_prefix(v['name']))
+                            prefix=p.get_sampler_prefix(v['name']),
+                            get_theory_1h=th1h, get_theory_2h=th2h)
 
     # Plot likelihood
     figs_ch = lik.plot_chain(sam.chain, save_figure=True,

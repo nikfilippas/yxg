@@ -151,7 +151,8 @@ class Likelihood(object):
 
         return -2 * pr
 
-    def plot_data(self, par, dvec, save_figures=False, prefix=None):
+    def plot_data(self, par, dvec, save_figures=False, prefix=None,
+                  get_theory_1h=None, get_theory_2h=None):
         """
         Produces a plot of the different data power spectra with
         error bars and the theory prediction corresponding to a set
@@ -168,6 +169,10 @@ class Likelihood(object):
                 where tracer1 and tracer2 are the names of the two
                 tracers contributing to a given power spectrum.
             prefix (str): output prefix.
+            get_theory_1h (function): function returning the 1-halo
+                contribution.
+            get_theory_2h (function): function returning the 2-halo
+                contribution.
 
         Returns:
             array of figure objects.
@@ -184,6 +189,15 @@ class Likelihood(object):
         # Compute theory prediction and reshape to
         # [n_correlations,n_ells]
         tv = self.get_theory(params)[indices]
+        # Compute 1-h and 2-h if needed:
+        if get_theory_1h is not None:
+            tv1h = get_theory_1h(params)[indices]
+        else:
+            tv1h = None
+        if get_theory_2h is not None:
+            tv2h = get_theory_2h(params)[indices]
+        else:
+            tv2h = None
         # Reshape data vector
         dv = self.dv[indices]
         # Compute error bars and reshape
@@ -195,8 +209,8 @@ class Likelihood(object):
         # Loop through each correlation and produce a figure
         figs = []
         ax = []
-        for ll, tt, dd, ee, tr in zip(ls, tv, dv, ev,
-                                      dvec.tracers):
+        for ic, (ll, tt, dd, ee, tr) in enumerate(zip(ls, tv, dv, ev,
+                                                      dvec.tracers)):
             typ_str = ''
             for t in tr:
                 typ_str += t.type
@@ -213,6 +227,10 @@ class Likelihood(object):
             ax1.set_xscale('log')
             ax1.set_yscale('log')
             ax1.set_xlim([ll[0]/1.1, ll[-1]*1.1])
+            if tv1h is not None:
+                ax1.plot(ll, tv1h[ic], 'k-.')
+            if tv2h is not None:
+                ax1.plot(ll, tv2h[ic], 'k--')
             ax2 = fig.add_axes((.1, .1, .8, .2))
             ax2.set_xlim([ll[0]/1.1, ll[-1]*1.1])
             # Normalized residuals

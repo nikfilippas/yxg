@@ -104,8 +104,8 @@ The halo model prediction for the cross-power spectrum $P_{UV}$ then consists of
 \end{equation}
 Each of these can be estimated in terms of the Fourier-space profiles as:
 \begin{align}
-  &P^{1h}_{UV}(k)=\int dM\,\frac{dn}{dM}\,U(k|M)\,V(k|M)\\
-  &P^{2h}_{UV}(k)=P_L(k)\,\left[\int dM\frac{dn}{dM}\,b_h(M)\,U(k|M)\right]\,\left[\int dM\frac{dn}{dM}\,b_h(M)\,V(k|M)\right].
+  &P^{1h}_{UV}(k)=\int dM\,\frac{dn}{dM}\,\langle U(k|M)\,V(k|M)\rangle\\
+  &P^{2h}_{UV}(k)=P_L(k)\,\left[\int dM\frac{dn}{dM}\,b_h(M)\,\langle U(k|M)\rangle\right]\,\left[\int dM\frac{dn}{dM}\,b_h(M)\,\langle V(k|M)\rangle\right].
 \end{align}
 Here, $P_L(k)$ is the linear matter power spectrum, $dn/dM$ is the halo mass function and $b_h(M)$ is the halo bias.
 
@@ -173,6 +173,14 @@ We will use prescriptions for the halo profiles from the following references:
 
   Finally, for simplicity we will assume that the satellites follow the matter distribution: $u_s(k|M)=u_m(k|M)$.
 
+\item 1-halo covariance: note that different halo properties are not perfectly correlated due to e.g. hidden variables (age, merger history, environment etc.). I.e. in almost all cases
+  \begin{equation}
+    \langle U(k|M) V(k|M)\rangle\neq\langle U(k|M)\rangle\langle V(k|M)\rangle.
+  \end{equation}
+  In the particular case of the cross-correlation between tSZ flux and galaxy overdensity, we will model the scatter between both quantities by introducing one additional parameter $\rho_{yg}$:
+  \begin{equation}
+    \langle u_g(k) u_y(k)\rangle = (1+\rho_{yg})\langle u_g(k)\rangle \langle u_y(k)\rangle.
+  \end{equation}
 \end{itemize}
 We will start by implementing these as defined in the papers, and then decide which parameters of them to free up (an obvious one is $1-b$, but we may want to be more general than that).
 
