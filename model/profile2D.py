@@ -254,7 +254,8 @@ class HOD(object):
         Ns = self.n_sat(M, **kwargs)    # satellites
         Nc, Ns = Nc[..., None, None], Ns[..., None, None]
 
-        H, _ = NFW().fourier_profiles(cosmo, k, M, a, **kwargs)
+        H, _ = NFW().fourier_profiles(cosmo, k, M, a, squeeze=False,
+                                      **kwargs)
 
         F, F2 = Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)
         return (F.squeeze(), F2.squeeze()) if squeeze else F, F2
