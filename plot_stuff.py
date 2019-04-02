@@ -24,11 +24,20 @@ if p.get('mcmc').get('hm_correct'):
 else:
     hm_correction = None
 
+zmeans=[]
+szmeans=[]
+bmeans=[]
+sbmeans=[]
 for v in p.get('data_vectors'):
     print(v['name'])
 
     # Construct data vector and covariance
     d = DataManager(p, v, cosmo)
+    z, nz = np.loadtxt(d.tracers[0][0].dndz, unpack=True)
+    zmean=np.sum(nz * z) / np.sum(nz)
+    sigz=np.sqrt(np.sum(nz * (z - zmean)**2) / np.sum(nz))
+    zmeans.append(zmean)
+    szmeans.append(sigz)
 
     # Theory predictor wrapper
     def th(pars):
@@ -73,6 +82,16 @@ for v in p.get('data_vectors'):
     print(" Best-fit parameters:")
     for nn,vv,ss in zip(sam.parnames, sam.p0, np.std(sam.chain,axis=0)):
         print("  " + nn + " : %.3lE +- %.3lE" %(vv,ss))
+        if nn == 'b_hydro':
+            bmeans.append(vv)
+            sbmeans.append(ss)
+        chain = sam.chain
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
+
+plt.figure()
+plt.errorbar(zmeans,1-np.array(bmeans),xerr=szmeans,yerr=sbmeans,fmt='ro')
+plt.xlabel('$z$',fontsize=15)
+plt.ylabel('$1-b$',fontsize=15)
+plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',bbox_inches='tight')
 plt.show()

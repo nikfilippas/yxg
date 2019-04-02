@@ -152,7 +152,7 @@ class Likelihood(object):
         return -2 * pr
 
     def plot_data(self, par, dvec, save_figures=False, prefix=None,
-                  get_theory_1h=None, get_theory_2h=None):
+                  get_theory_1h=None, get_theory_2h=None, extension='pdf'):
         """
         Produces a plot of the different data power spectra with
         error bars and the theory prediction corresponding to a set
@@ -165,7 +165,7 @@ class Likelihood(object):
                 the data vector.
             save_figures (bool): if true, figures will be saved to
                 file. File names will take the form:
-                <`prefix`>cls_<tracer1>_<tracer2>.png
+                <`prefix`>cls_<tracer1>_<tracer2>.<`extension`>
                 where tracer1 and tracer2 are the names of the two
                 tracers contributing to a given power spectrum.
             prefix (str): output prefix.
@@ -173,6 +173,7 @@ class Likelihood(object):
                 contribution.
             get_theory_2h (function): function returning the 2-halo
                 contribution.
+            extension (str): plot extension (pdf, pdf etc.).
 
         Returns:
             array of figure objects.
@@ -251,11 +252,12 @@ class Likelihood(object):
             if prefix is None:
                 raise ValueError("Need a file prefix to save stuff")
             for fig, tr in zip(figs, dvec.tracers):
-                fname = prefix+'cls_'+tr[0].name+'_'+tr[1].name+'.png'
+                fname = prefix+'cls_'+tr[0].name+'_'+tr[1].name+'.'+extension
                 fig.savefig(fname, bbox_inches='tight')
         return figs
 
-    def plot_chain(self, chain, save_figure=False, prefix=None):
+    def plot_chain(self, chain, save_figure=False, prefix=None,
+                   extension='pdf'):
         """
         Produces a triangle plot from a chain, which can be
         saved to file automatically.
@@ -267,8 +269,9 @@ class Likelihood(object):
                 for this likelihood run.
             save_figures (bool): if true, figures will be saved to
                 file. File names will take the form:
-                <`prefix`>triangle.png
+                <`prefix`>triangle.<`extension`>
             prefix (str): output prefix.
+            extension (str): plot extension (pdf, pdf etc.).
 
         Returns:
             figure object
@@ -288,7 +291,6 @@ class Likelihood(object):
         if save_figure:
             if prefix is None:
                 raise ValueError("Need a file prefix to save stuff")
-            fname = prefix+'triangle.png'
-            print(fname)
+            fname = prefix+'triangle.'+extension
             g.export(fname)
         return g

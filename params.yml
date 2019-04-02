@@ -249,7 +249,7 @@ params:
           type: "TopHat"
           values: [0.,1.]
     - name: "r_corr"
-      label: "r_{gy}"
+      label: "\\rho_{gy}"
       vary: True
       value: 0.
       prior:
