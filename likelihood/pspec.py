@@ -36,11 +36,8 @@ def power_spectrum(cosmo, k, a, profiles, logMrange=(6, 17), mpoints=128,
         V = U; UV = UU
     else :
         V, VV = p2.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
-        if 'r_corr' in kwargs:
-            r=kwargs['r_corr']
-        else:
-            r=0
         
+        r = kwargs["r_corr"] if "r_corr" in kwargs else 0
         UV = U*V*(1+r)
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)

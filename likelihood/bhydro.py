@@ -5,19 +5,15 @@ from matplotlib.cm import copper
 
 
 
-# MCMC results: 50, 16, 84 quantiles
-bh = np.array([[0.22159627, 0.28700594, 0.16940808, 0.14136074, 0.34945891, 0.59129961],
-               [0.07129987, 0.13041275, 0.04213337, 0.03056129, 0.11163703, 0.05378206],
-               [0.09937876, 0.17312259, 0.17563861, 0.26303459, 0.17669672, 0.11982896]])
-
-
-
 dir1 = "../analysis/data/dndz/"
 
 # g-surveys
 wisc = ["wisc_b%d" % i for i in range(1, 6)]
 surveys = ["2mpz"] + wisc
 
+# MCMC results: 50, 16, 84 quantiles
+vals = [np.load("fit_vals/%s.npy" % sur) for sur in surveys]
+bh = np.array([[val[i, 1] for val in vals] for i in range(3)])
 
 z_avg = np.zeros((3, len(surveys)))
 z, N = [[[] for j in surveys] for i in range(2)]
@@ -39,7 +35,7 @@ z, N = map(lambda x: [np.array(y) for y in x], [z, N])
 
 
 
-# Plots #
+# PLOT #
 col = [copper(i) for i in np.linspace(0, 1, len(surveys))]
 
 fig, (hist, ax) = plt.subplots(2, 1, sharex=True, figsize=(10, 10),
@@ -65,4 +61,5 @@ markers, caps, bars = ax.errorbar(z_avg[0], bh[0],
 [cap.set_alpha(0.5) for cap in caps]
 
 hist.legend(loc="lower center", bbox_to_anchor=[0.5, 1], ncol=len(surveys), fontsize=12, fancybox=True)
-#fig.savefig("../images/b_hydro.pdf", dpi=1000, bbox_inches="tight")
+fig.show()
+fig.savefig("../images/b_hydro.pdf", bbox_inches="tight")
