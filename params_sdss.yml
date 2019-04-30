@@ -1,0 +1,303 @@
+# Global parameters
+global:
+    # Healpix resolution
+    nside: 512
+    # Output directory
+    output_dir: 'output_sdss'
+
+jk:
+    # Do you want to do jackknives?
+    do: True
+    # Healpix resolution defining the jackknife regions
+    nside: 8
+    # Should we store the mode-coupling matrix?
+    store_mcm: True
+
+# Information about ell bandpowers
+bandpowers:
+    # Bandpower mode
+    type: "linlog"
+    # Constant width
+    nlb: 20
+    # Threshold between linear and logarithmic
+    lsplit: 52
+    # Width of linar part
+    nlb_lin: 10
+    # Number of logarithmic bins
+    nb_log: 20
+
+# Masks
+# Add an entry for each mask used in the analysis
+masks:
+    # Given each mask a unique name (key)
+    mask_lowz: "data/maps/mask_v3.fits"
+    mask_tsz: "data/maps/mask_planck60.fits"
+
+# Maps
+maps:
+    - name: "sdss1"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_1photoz0_15_rLess21_512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/SDSS_bin1.txt"
+      beam: False
+      model:
+          M0:  11.80
+          M1:  13.16
+          Mmin:  11.80
+          alpha:  1.0
+          b_hydro:  0.4
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.561
+          sigma_lnM:  0.15
+    - name: "sdss2"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_2photoz0_25_rLess21_512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/SDSS_bin2.txt"
+      beam: False
+      model:
+          M0:  11.80
+          M1:  13.16
+          Mmin:  11.80
+          alpha:  1.0
+          b_hydro:  0.4
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.561
+          sigma_lnM:  0.15
+    - name: "sdss3"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_3photoz0_35_rLess21_512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/SDSS_bin3.txt"
+      beam: False
+      model:
+          M0:  11.80
+          M1:  13.16
+          Mmin:  11.80
+          alpha:  1.0
+          b_hydro:  0.4
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.561
+          sigma_lnM:  0.15
+    - name: "sdss4"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_4photoz0_5_rLess21_512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/SDSS_bin4.txt"
+      beam: False
+      model:
+          M0:  11.80
+          M1:  13.16
+          Mmin:  11.80
+          alpha:  1.0
+          b_hydro:  0.4
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.561
+          sigma_lnM:  0.15
+    - name: "sdss5"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_5photoz0_6_rLess21_512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/SDSS_bin5.txt"
+      beam: False
+      model:
+          M0:  11.80
+          M1:  13.16
+          Mmin:  11.80
+          alpha:  1.0
+          b_hydro:  0.4
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.561
+          sigma_lnM:  0.15
+    - name: "sdss6"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_6photoz0_7_rLess21_512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/SDSS_bin6.txt"
+      beam: False
+      model:
+          M0:  11.80
+          M1:  13.16
+          Mmin:  11.80
+          alpha:  1.0
+          b_hydro:  0.4
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.561
+          sigma_lnM:  0.15
+    - name: "y_milca"
+      type: "y"
+      map: "data/maps/milca_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+
+
+# MCMC
+mcmc:
+    # Name for this run
+    run_name: minimal_hmc
+    # Maximum wavenumber in units of 1/Mpc
+    kmax: 1.
+    # Number of samples in redshift for each bin
+    nz_points_g: 32
+    # Use logarithmic sampling in redshift?
+    z_log_sampling: True
+    # Correct the halo model in the transition regime?
+    hm_correct: True
+    # Print debug information?
+    debug: False
+    # Emcee parameters
+    n_walkers: 200
+    n_steps: 1000
+    # Continue MCMC from previous iteration?
+    continue_mcmc: True
+
+# Model parameters
+params:
+    # Each item here corresponds to one of the parameters
+    # used in our model
+    - name: "M0"
+      # Label for plotting
+      label: "M_0"
+      # Is this the same as another parameter? If so, put its name here.
+      alias: "Mmin"
+      # Is this a free parameter?
+      vary: False
+      # Fiducial value
+      value: 12.5
+      # Prior
+      prior:
+          # Allowed: "Gaussian" or "TopHat"
+          type: "TopHat"
+          # If "TopHat", put edges here.
+          # If "Gaussian", put [mean,sigma].
+          values: [10.,16.]
+    - name: "M1"
+      label: "M_1"
+      vary: True
+      value: 13.5
+      prior:
+          type: "TopHat"
+          values: [10.,16.]
+    - name: "Mmin"
+      label: "M_{\\rm min}"
+      vary: True
+      value: 12.
+      prior:
+          type: "TopHat"
+          values: [10.,16.]
+    - name: "fc"
+      label: "f_c"
+      vary: False
+      value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.,1.]
+    - name: "alpha"
+      label: "\\alpha"
+      vary: False
+      value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.,3.]
+    - name: "beta_max"
+      label: "\\beta_{\\rm max}"
+      alias: "beta_gal"
+    - name: "beta_gal"
+      label: "beta_g"
+      vary: False
+      value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.1,10.]
+    - name: "sigma_lnM"
+      label: "\\sigma_{{\\rm ln}M}"
+      vary: False
+      value: 0.15
+      prior:
+          type: "TopHat"
+          values: [0.01,1.]
+    - name: "b_hydro"
+      label: "b_H"
+      vary: True
+      value: 0.3
+      prior:
+          type: "TopHat"
+          values: [0.,1.]
+    - name: "r_corr"
+      label: "\\rho_{gy}"
+      vary: True
+      value: 0.
+      prior:
+          type: "TopHat"
+          values: [-1.,1.]
+
+# List all the different combinations of
+# power spectra you want to analyze
+data_vectors:
+    - type: 'Cl'
+      # Give each element a different name
+      name: 'sdss1'
+      # Type of covariance matrix to be used.
+      covar_type: 'comb_m'
+      # List here the different power spectrum
+      # combinations you want to use
+      twopoints:
+          # Names of the two tracers (maps) going into this C_ell
+          - tracers: ['sdss1','sdss1']
+            # Minimum multipole to use in the analysis
+            lmin: 10
+          - tracers: ['sdss1','y_milca']
+            lmin: 10
+    - type: 'Cl'
+      name: 'sdss2'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss2','sdss2']
+            lmin: 10
+          - tracers: ['sdss2','y_milca']
+            lmin: 10
+    - type: 'Cl'
+      name: 'sdss3'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss3','sdss3']
+            lmin: 10
+          - tracers: ['sdss3','y_milca']
+            lmin: 10
+    - type: 'Cl'
+      name: 'sdss4'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss4','sdss4']
+            lmin: 10
+          - tracers: ['sdss4','y_milca']
+            lmin: 10
+    - type: 'Cl'
+      name: 'sdss5'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss5','sdss5']
+            lmin: 10
+          - tracers: ['sdss5','y_milca']
+            lmin: 10
+    - type: 'Cl'
+      name: 'sdss6'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss6','sdss6']
+            lmin: 10
+          - tracers: ['sdss6','y_milca']
+            lmin: 10

@@ -10,9 +10,9 @@ cd data/maps/
 if [ ! -f milca_ymaps.fits ] ; then
     echo " Downloading Y maps"
     wget irsa.ipac.caltech.edu/data/Planck/release_2/all-sky-maps/maps/component-maps/foregrounds/COM_CompMap_YSZ_R2.00.fits.tgz
-    tar -xvf COM_CompMap_YSZ_R2.00.fits.tgz
+    tar -xvf COM_CompMap_YSZ_R2.00.fits.tgz --exclude="MILCA_Csz_*" --exclude="nilc_weights_*"
+    mv COM_CompMap_YSZ_R2.00.fits/* .
     rm COM_CompMap_YSZ_R2.00.fits.tgz
-    rm MILCA_Csz_* nilc_weights_*
 fi
 
 #Masks
