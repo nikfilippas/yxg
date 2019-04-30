@@ -119,7 +119,7 @@ def choose_cov_file(p, tracers1, tracers2, suffix):
                 fname = p.get_fname_cov(tr1[0], tr1[1], tr2[0], tr2[1], suffix)
                 if os.path.isfile(fname):
                     return fname, transp
-
+    print(fname)
     raise ValueError("Can't find Cov file for " +
                      tracers1[0].name+", "+tracers1[1].name+", " +
                      tracers2[0].name+", "+tracers2[1].name)
