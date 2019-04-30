@@ -107,4 +107,3 @@ plt.xlabel('$z$', fontsize=15)
 plt.ylabel('$1-b$', fontsize=15)
 plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
             bbox_inches='tight')
-plt.show()
