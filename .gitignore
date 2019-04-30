@@ -7,4 +7,5 @@ data/
 # File extensions
 *.npz
 *.mcm
+*.cmcm
 *.h5
