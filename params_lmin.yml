@@ -257,7 +257,7 @@ params:
           values: [-1.,1.]
 
 # List all the different combinations of
-# power spectra you want to analize
+# power spectra you want to analyze
 data_vectors:
     - type: 'Cl'
       # Give each element a different name
@@ -270,7 +270,7 @@ data_vectors:
           # Names of the two tracers (maps) going into this C_ell
           - tracers: ['2mpz','2mpz']
             # Minimum multipole to use in the analysis
-            lmin: 0
+            lmin: 10
           - tracers: ['2mpz','y_milca']
             lmin: 0
     - type: 'Cl'
@@ -280,7 +280,7 @@ data_vectors:
           - tracers: ['wisc1','wisc1']
             lmin: 10
           - tracers: ['wisc1','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'wisc2'
       covar_type: 'comb_m'
@@ -288,7 +288,7 @@ data_vectors:
           - tracers: ['wisc2','wisc2']
             lmin: 10
           - tracers: ['wisc2','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'wisc3'
       covar_type: 'comb_m'
@@ -296,7 +296,7 @@ data_vectors:
           - tracers: ['wisc3','wisc3']
             lmin: 10
           - tracers: ['wisc3','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'wisc4'
       covar_type: 'comb_m'
@@ -304,7 +304,7 @@ data_vectors:
           - tracers: ['wisc4','wisc4']
             lmin: 10
           - tracers: ['wisc4','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'wisc5'
       covar_type: 'comb_m'
@@ -312,4 +312,4 @@ data_vectors:
           - tracers: ['wisc5','wisc5']
             lmin: 10
           - tracers: ['wisc5','y_milca']
-            lmin: 10
+            lmin: 0

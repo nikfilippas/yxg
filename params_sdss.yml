@@ -299,7 +299,7 @@ params:
           values: [-1.,1.]
 
 # List all the different combinations of
-# power spectra you want to analize
+# power spectra you want to analyze
 data_vectors:
     - type: 'Cl'
       # Give each element a different name
