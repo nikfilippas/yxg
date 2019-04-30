@@ -1,17 +1,8 @@
 # Directories
 __pycache__/
+images/
+data/
 
-# I can't remove this file because I'm no sudo :(
-likelihood/.nfs000000000040143a000002d8
 
-# Unused data files
-analysis/out_ns512_linlog/*.dat
-analysis/out_ns512_linlog/*.npz
-analysis/out_ns512_nb20/*.dat
-analysis/out_ns512_nb20/*.npz
-
-# covars
-images/clgg.pdf
-images/clyg_milca.pdf
-images/covar_gg.pdf
-images/covar_yg_milca.pdf
+# File extensions
+output_*/*.npz
