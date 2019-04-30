@@ -5,6 +5,6 @@ data/
 
 
 # File extensions
-*.npz  # data arrays
-*.mcm  # mode coupling matrices
-*.h5   # samplers
+*.npz
+*.mcm
+*.h5
