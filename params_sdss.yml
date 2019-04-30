@@ -11,7 +11,7 @@ jk:
     # Healpix resolution defining the jackknife regions
     nside: 8
     # Should we store the mode-coupling matrix?
-    store_mcm: True
+    store_mcm: False
 
 # Information about ell bandpowers
 bandpowers:
@@ -30,119 +30,173 @@ bandpowers:
 # Add an entry for each mask used in the analysis
 masks:
     # Given each mask a unique name (key)
-    mask_lowz: "data/maps/mask_v3.fits"
+    mask_sdss: "data/maps/BOSS_dr12_mask256_v2.fits"
     mask_tsz: "data/maps/mask_planck60.fits"
 
 # Maps
 maps:
+    # Each item here corresponds to one sky map
     - name: "sdss1"
+      # 'g' for galaxies, 'y' for tSZ
       type: "g"
+      # Path to map
       map: "data/maps/SDSS.DR12.0_1photoz0_15_rLess21_512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/SDSS_bin1.txt"
+      # Name of mask (should correspond to one of the keys in the previous section)
+      mask: "mask_sdss"
+      # dndz file
+      dndz: "data/dndz/SDSS_bin1_v3.txt"
+      # Is there a beam associated with this map?
       beam: False
+      # Best-fit model parameters describing this map
       model:
-          M0:  11.80
-          M1:  13.16
-          Mmin:  11.80
+          # HOD and tSZ parameters
+          M0:  11.819296066010548
+          M1:  13.08953452582468
+          Mmin:  11.819296066010548
           alpha:  1.0
-          b_hydro:  0.4
+          b_hydro:  0.3664729231819921
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.561
+          r_corr:  -0.2190961041633896
           sigma_lnM:  0.15
     - name: "sdss2"
       type: "g"
-      map: "data/maps/SDSS.DR12.0_2photoz0_25_rLess21_512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/SDSS_bin2.txt"
+      map: "data/maps/SDSS.DR12.0_15photoz0_2_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin2_v3.txt"
       beam: False
+      # Names of systematics to deproject at the C_ell or map level
+      syst: False
       model:
-          M0:  11.80
-          M1:  13.16
-          Mmin:  11.80
+          M0:  12.127579700404691
+          M1:  13.470002326394642
+          Mmin:  12.127579700404691
           alpha:  1.0
-          b_hydro:  0.4
+          b_hydro:  0.4206032405310551
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.561
+          r_corr:  -0.48205884075500993
           sigma_lnM:  0.15
     - name: "sdss3"
       type: "g"
-      map: "data/maps/SDSS.DR12.0_3photoz0_35_rLess21_512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/SDSS_bin3.txt"
+      map: "data/maps/SDSS.DR12.0_2photoz0_25_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin3_v3.txt"
       beam: False
+      syst: False
       model:
-          M0:  11.80
-          M1:  13.16
-          Mmin:  11.80
+          M0:  12.063309910969627
+          M1:  13.35186889632406
+          Mmin:  12.063309910969627
           alpha:  1.0
-          b_hydro:  0.4
+          b_hydro:  0.42936987420799055
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.561
+          r_corr:  -0.5119147997822887
           sigma_lnM:  0.15
     - name: "sdss4"
       type: "g"
-      map: "data/maps/SDSS.DR12.0_4photoz0_5_rLess21_512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/SDSS_bin4.txt"
+      map: "data/maps/SDSS.DR12.0_25photoz0_3_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin4_v3.txt"
       beam: False
+      syst: False
       model:
-          M0:  11.80
-          M1:  13.16
-          Mmin:  11.80
+          M0:  11.919767524955585
+          M1:  13.139743499087519
+          Mmin:  11.919767524955585
           alpha:  1.0
-          b_hydro:  0.4
+          b_hydro:  0.4392974224108877
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.561
+          r_corr:  -0.5527964171093198
           sigma_lnM:  0.15
     - name: "sdss5"
       type: "g"
-      map: "data/maps/SDSS.DR12.0_5photoz0_6_rLess21_512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/SDSS_bin5.txt"
+      map: "data/maps/SDSS.DR12.0_3photoz0_35_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin5_v3.txt"
       beam: False
+      syst: False
       model:
-          M0:  11.80
-          M1:  13.16
-          Mmin:  11.80
+          M0:  11.93656331307651
+          M1:  13.126517875739742
+          Mmin:  11.93656331307651
           alpha:  1.0
-          b_hydro:  0.4
+          b_hydro:  0.4879808227067266
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.561
+          r_corr:  -0.54574470592155
           sigma_lnM:  0.15
     - name: "sdss6"
       type: "g"
-      map: "data/maps/SDSS.DR12.0_6photoz0_7_rLess21_512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/SDSS_bin6.txt"
+      map: "data/maps/SDSS.DR12.0_35photoz0_4_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin6_v3.txt"
       beam: False
+      syst: False
       model:
-          M0:  11.80
-          M1:  13.16
-          Mmin:  11.80
+          M0:  12.442928720307966
+          M1:  13.303037401959886
+          Mmin:  12.442928720307966
           alpha:  1.0
-          b_hydro:  0.4
+          b_hydro:  0.5047829367573827
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.561
+          r_corr:  -0.6590293057265538
+          sigma_lnM:  0.15
+    - name: "sdss7"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_4photoz0_5_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin7_v3.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.442928720307966
+          M1:  13.303037401959886
+          Mmin:  12.442928720307966
+          alpha:  1.0
+          b_hydro:  0.5047829367573827
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.6590293057265538
+          sigma_lnM:  0.15
+    - name: "sdss8"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_5photoz0_6_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin8_v3.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.442928720307966
+          M1:  13.303037401959886
+          Mmin:  12.442928720307966
+          alpha:  1.0
+          b_hydro:  0.5047829367573827
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.6590293057265538
           sigma_lnM:  0.15
     - name: "y_milca"
       type: "y"
       map: "data/maps/milca_ymaps.fits"
       mask: "mask_tsz"
       beam: 10.
-
+    - name: "y_nilc"
+      type: "y"
+      map: "data/maps/nilc_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
 
 # MCMC
 mcmc:
@@ -245,7 +299,7 @@ params:
           values: [-1.,1.]
 
 # List all the different combinations of
-# power spectra you want to analyze
+# power spectra you want to analize
 data_vectors:
     - type: 'Cl'
       # Give each element a different name
@@ -258,46 +312,62 @@ data_vectors:
           # Names of the two tracers (maps) going into this C_ell
           - tracers: ['sdss1','sdss1']
             # Minimum multipole to use in the analysis
-            lmin: 10
+            lmin: 0
           - tracers: ['sdss1','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'sdss2'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['sdss2','sdss2']
-            lmin: 10
+            lmin: 0
           - tracers: ['sdss2','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'sdss3'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['sdss3','sdss3']
-            lmin: 10
+            lmin: 0
           - tracers: ['sdss3','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'sdss4'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['sdss4','sdss4']
-            lmin: 10
+            lmin: 0
           - tracers: ['sdss4','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'sdss5'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['sdss5','sdss5']
-            lmin: 10
+            lmin: 0
           - tracers: ['sdss5','y_milca']
-            lmin: 10
+            lmin: 0
     - type: 'Cl'
       name: 'sdss6'
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['sdss6','sdss6']
-            lmin: 10
+            lmin: 0
           - tracers: ['sdss6','y_milca']
-            lmin: 10
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss7'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss7','sdss7']
+            lmin: 0
+          - tracers: ['sdss7','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss8'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss8','sdss8']
+            lmin: 0
+          - tracers: ['sdss8','y_milca']
+            lmin: 0
