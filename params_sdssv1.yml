@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_sdss'
+    output_dir: 'output_sdssv1'
 
 jk:
     # Do you want to do jackknives?
@@ -44,148 +44,148 @@ maps:
       # Name of mask (should correspond to one of the keys in the previous section)
       mask: "mask_sdss"
       # dndz file
-      dndz: "data/dndz/SDSS_bin1.txt"
+      dndz: "data/dndz/SDSS_bin1_v1.txt"
       # Is there a beam associated with this map?
       beam: False
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  10.51
-          M1:  11.86
-          Mmin:  10.51
+          M0:  12.08
+          M1:  13.55
+          Mmin:  12.08
           alpha:  1.0
-          b_hydro:  0.2878
+          b_hydro:  0.4660
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6728
+          r_corr:  -0.6454
           sigma_lnM:  0.15
     - name: "sdss2"
       type: "g"
       map: "data/maps/SDSS.DR12.0_15photoz0_2_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin2.txt"
+      dndz: "data/dndz/SDSS_bin2_v1.txt"
       beam: False
       # Names of systematics to deproject at the C_ell or map level
       syst: False
       model:
-          M0:  10.26
-          M1:  11.64
-          Mmin:  10.26
+          M0:  12.14
+          M1:  13.55
+          Mmin:  12.14
           alpha:  1.0
-          b_hydro:  0.2554
+          b_hydro:  0.5368
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6857
+          r_corr:  -0.5647
           sigma_lnM:  0.15
     - name: "sdss3"
       type: "g"
       map: "data/maps/SDSS.DR12.0_2photoz0_25_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin3.txt"
+      dndz: "data/dndz/SDSS_bin3_v1.txt"
       beam: False
       syst: False
       model:
-          M0:  10.00
-          M1:  11.32
-          Mmin:  10.00
+          M0:  12.26
+          M1:  13.59
+          Mmin:  12.26
           alpha:  1.0
-          b_hydro:  0.1674
+          b_hydro:  0.5273
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6750
+          r_corr:  -0.5608
           sigma_lnM:  0.15
     - name: "sdss4"
       type: "g"
       map: "data/maps/SDSS.DR12.0_25photoz0_3_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin4.txt"
+      dndz: "data/dndz/SDSS_bin4_v1.txt"
       beam: False
       syst: False
       model:
-          M0:  10.00
-          M1:  11.29
-          Mmin:  10.00
+          M0:  12.29
+          M1:  13.52
+          Mmin:  12.29
           alpha:  1.0
-          b_hydro:  0.1970
+          b_hydro:  0.5812
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6040
+          r_corr:  -0.4874
           sigma_lnM:  0.15
     - name: "sdss5"
       type: "g"
       map: "data/maps/SDSS.DR12.0_3photoz0_35_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin5.txt"
+      dndz: "data/dndz/SDSS_bin5_v1.txt"
       beam: False
       syst: False
       model:
-          M0:  10.00
-          M1:  11.28
-          Mmin:  10.00
+          M0:  12.18
+          M1:  13.35
+          Mmin:  12.18
           alpha:  1.0
-          b_hydro:  0.2339
+          b_hydro:  0.5842
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5362
+          r_corr:  -0.4536
           sigma_lnM:  0.15
     - name: "sdss6"
       type: "g"
       map: "data/maps/SDSS.DR12.0_35photoz0_4_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin6.txt"
+      dndz: "data/dndz/SDSS_bin6_v1.txt"
       beam: False
       syst: False
       model:
-          M0:  10.00
-          M1:  11.12
+          M0:  12.19
+          M1:  13.29
           Mmin:  10.00
           alpha:  1.0
-          b_hydro:  0.3217
+          b_hydro:  0.5907
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5107
+          r_corr:  -0.4305
           sigma_lnM:  0.15
     - name: "sdss7"
       type: "g"
       map: "data/maps/SDSS.DR12.0_4photoz0_5_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin7.txt"
+      dndz: "data/dndz/SDSS_bin7_v1.txt"
       beam: False
       syst: False
       model:
-          M0:  10.00
-          M1:  11.13
-          Mmin:  10.00
+          M0:  12.01
+          M1:  13.10
+          Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.4364
+          b_hydro:  0.6212
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6235
+          r_corr:  -0.5937
           sigma_lnM:  0.15
     - name: "sdss8"
       type: "g"
       map: "data/maps/SDSS.DR12.0_5photoz0_6_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin8.txt"
+      dndz: "data/dndz/SDSS_bin8_v1.txt"
       beam: False
       syst: False
       model:
-          M0:  11.13
-          M1:  12.03
-          Mmin:  11.13
+          M0:  12.53
+          M1:  13.61
+          Mmin:  12.53
           alpha:  1.0
-          b_hydro:  0.5539
+          b_hydro:  0.6929
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.7369
+          r_corr:  -0.7216
           sigma_lnM:  0.15
     - name: "y_milca"
       type: "y"

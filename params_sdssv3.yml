@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_sdss'
+    output_dir: 'output_sdssv3'
 
 jk:
     # Do you want to do jackknives?
@@ -44,7 +44,7 @@ maps:
       # Name of mask (should correspond to one of the keys in the previous section)
       mask: "mask_sdss"
       # dndz file
-      dndz: "data/dndz/SDSS_bin1.txt"
+      dndz: "data/dndz/SDSS_bin1_v3.txt"
       # Is there a beam associated with this map?
       beam: False
       # Best-fit model parameters describing this map
@@ -64,7 +64,7 @@ maps:
       type: "g"
       map: "data/maps/SDSS.DR12.0_15photoz0_2_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin2.txt"
+      dndz: "data/dndz/SDSS_bin2_v3.txt"
       beam: False
       # Names of systematics to deproject at the C_ell or map level
       syst: False
@@ -83,7 +83,7 @@ maps:
       type: "g"
       map: "data/maps/SDSS.DR12.0_2photoz0_25_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin3.txt"
+      dndz: "data/dndz/SDSS_bin3_v3.txt"
       beam: False
       syst: False
       model:
@@ -101,7 +101,7 @@ maps:
       type: "g"
       map: "data/maps/SDSS.DR12.0_25photoz0_3_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin4.txt"
+      dndz: "data/dndz/SDSS_bin4_v3.txt"
       beam: False
       syst: False
       model:
@@ -119,7 +119,7 @@ maps:
       type: "g"
       map: "data/maps/SDSS.DR12.0_3photoz0_35_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin5.txt"
+      dndz: "data/dndz/SDSS_bin5_v3.txt"
       beam: False
       syst: False
       model:
@@ -137,7 +137,7 @@ maps:
       type: "g"
       map: "data/maps/SDSS.DR12.0_35photoz0_4_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin6.txt"
+      dndz: "data/dndz/SDSS_bin6_v3.txt"
       beam: False
       syst: False
       model:
@@ -155,7 +155,7 @@ maps:
       type: "g"
       map: "data/maps/SDSS.DR12.0_4photoz0_5_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin7.txt"
+      dndz: "data/dndz/SDSS_bin7_v3.txt"
       beam: False
       syst: False
       model:
@@ -173,7 +173,7 @@ maps:
       type: "g"
       map: "data/maps/SDSS.DR12.0_5photoz0_6_rLess21_512.fits"
       mask: "mask_sdss"
-      dndz: "data/dndz/SDSS_bin8.txt"
+      dndz: "data/dndz/SDSS_bin8_v3.txt"
       beam: False
       syst: False
       model:
