@@ -27,7 +27,7 @@ else:
 zmeans = []
 szmeans = []
 bmeans = []
-sbmeans = []
+sbmeans = [[],[]]  # max and min error bar
 for v in p.get('data_vectors'):
     print(v['name'])
 
@@ -89,21 +89,31 @@ for v in p.get('data_vectors'):
                              prefix=p.get_sampler_prefix(v['name']))
 
     print(" Best-fit parameters:")
-    for nn, vv, ss in zip(sam.parnames, sam.p0, np.std(sam.chain, axis=0)):
-        print("  " + nn + " : %.3lE +- %.3lE" % (vv, ss))
+
+    for i, nn, in enumerate(sam.parnames):
+        CHAIN = sam.chain[:, i]
+        vmin, vv, vmax = np.percentile(CHAIN, [16, 50, 84])
+        errmin, errmax = vv-vmin, vmax-vv
+        print("  " + nn + " : %.3lE +/- (%.3lE %.3lE)" % (vv, errmax, errmin))
         if nn == 'b_hydro':
-            bmeans.append(vv)
-            sbmeans.append(ss)
+            bmeans.append(vv)      # median
+            sbmeans[0].append(errmin)  # min errorbar
+            sbmeans[1].append(errmax)  # max errorbar
         chain = sam.chain
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
     print(" b_g = %lf" % bg)
     print(" b_y = %.2lE" % by)
 
+bmeans = np.array(bmeans)    # b_hydro measurements`
+sbmeans = np.array(sbmeans)  # (2,N): min,max
+
 plt.figure()
 plt.errorbar(zmeans, 1-np.array(bmeans),
-             xerr=szmeans, yerr=sbmeans, fmt='ro')
+             xerr=szmeans, yerr=np.flip(sbmeans), fmt='ro')
 plt.xlabel('$z$', fontsize=15)
 plt.ylabel('$1-b$', fontsize=15)
 plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
             bbox_inches='tight')
+
+np.save("bH_%s" % p.get_outdir(), np.vstack((zmeans, 1-bmeans, szmeans, sbmeans)))

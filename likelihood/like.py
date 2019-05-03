@@ -185,7 +185,7 @@ class Likelihood(object):
         ls = np.array(dvec.ells)
         # Indices used in the analysis
         def unequal_enumerate(a):
-        """Returns indices of all elements in nested arrays."""
+            """Returns indices of all elements in nested arrays."""
             indices = []
             ind0 = 0
             for l in ls:
