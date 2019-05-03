@@ -195,22 +195,33 @@ class Likelihood(object):
             return np.array(indices)
 
         indices = unequal_enumerate(ls)
+
         # Compute theory prediction and reshape to
         # [n_correlations,n_ells]
-        tv = self.get_theory(params)[indices]
+        def unwrap(arr):
+            arr_out = []
+            for i in indices:
+                arr_out.append(arr[i])
+            return arr_out
+
+        def eval_and_unwrap(pars, func):
+            v = func(pars)
+            return unwrap(func(pars))
+        tv = eval_and_unwrap(params, self.get_theory)
         # Compute 1-h and 2-h if needed:
         if get_theory_1h is not None:
-            tv1h = get_theory_1h(params)[indices]
+            tv1h = eval_and_unwrap(params, get_theory_1h)
         else:
             tv1h = None
         if get_theory_2h is not None:
-            tv2h = get_theory_2h(params)[indices]
+            tv2h = eval_and_unwrap(params, get_theory_2h)
         else:
             tv2h = None
         # Reshape data vector
-        dv = self.dv[indices]
+        dv = unwrap(self.dv)
+
         # Compute error bars and reshape
-        ev = np.sqrt(np.diag(self.cv))[indices]
+        ev = unwrap(np.sqrt(np.diag(self.cv)))
         # Compute chi^2
         chi2 = self.chi2(par)
         dof = len(self.dv)
