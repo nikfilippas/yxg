@@ -4,6 +4,7 @@ import sys
 import os
 import pymaster as nmt
 import healpy as hp
+from tqdm import tqdm
 from scipy.interpolate import interp1d
 from analysis.field import Field
 from analysis.spectra import Spectrum
@@ -43,16 +44,16 @@ cosmo = p.get_cosmo()
 os.system('mkdir -p ' + p.get_outdir())
 
 # Generate bandpowers
-print("Generating bandpowers")
+print("Generating bandpowers...", end="")
 bpw = p.get_bandpowers()
+print("OK")
 
 # Generate all fields
-print("Reading fields")
 models = p.get_models()
 fields_ng = []
 fields_sz = []
-for d in p.get('maps'):
-    print(" " + d['name'])
+for d in tqdm(p.get('maps'), desc="Reading fields"):
+#    print(" " + d['name'])
     f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
               d['map'], d.get('dndz'), is_ndens=d['type'] == 'g')
     if f.is_ndens:
@@ -61,25 +62,25 @@ for d in p.get('maps'):
         fields_sz.append(f)
 
 # Compute power spectra
-print("Computing power spectra")
+print("Computing power spectra...", end="")
 def get_mcm(f1, f2, jk_region=None):
     fname = p.get_fname_mcm(f1, f2, jk_region=jk_region)
     mcm = nmt.NmtWorkspace()
     try:
         mcm.read_from(fname)
     except:
-        print("  Computing MCM")
+#        print("  Computing MCM")
         mcm.compute_coupling_matrix(f1.field, f2.field, bpw.bn)
         mcm.write_to(fname)
     return mcm
 
 def get_power_spectrum(f1, f2, jk_region=None, save_windows=True):
-    print(" " + f1.name + "," + f2.name)
+#    print(" " + f1.name + "," + f2.name)
     try:
         fname = p.get_fname_cls(f1, f2, jk_region=jk_region)
         cls = Spectrum.from_file(fname, f1.name, f2.name)
     except:
-        print("  Computing Cl")
+#        print("  Computing Cl")
         wsp = get_mcm(f1, f2, jk_region=jk_region)
         cls = Spectrum.from_fields(f1, f2, bpw, wsp=wsp,
                                    save_windows=save_windows)
@@ -101,9 +102,10 @@ for fy in fields_sz:
 cls_yy = {}
 for fy in fields_sz:
     cls_yy[fy.name] = get_power_spectrum(fy, fy)
+print("OK")
 
 # Generate model power spectra to compute the Gaussian covariance matrix
-print("Generating theory power spectra")
+#print("Generating theory power spectra")
 def interpolate_spectra(leff, cell, ns):
     # Create a power spectrum interpolated at all ells
     larr = np.arange(3*ns)
@@ -120,8 +122,8 @@ cls_cov_gy_data = {f.name: {} for f in fields_sz}
 cls_cov_gg_model = {}
 cls_cov_gy_model = {f.name: {} for f in fields_sz}
 prof_y = Arnaud()
-for fg in fields_ng:
-    print(" " + fg.name)
+for fg in tqdm(fields_ng, desc="Generating theory power spectra"):
+#    print(" " + fg.name)
     # Interpolate data
     larr = cls_gg[fg.name].leff
     clarr_gy = {fy.name: cls_gy[fy.name][fg.name].cell
@@ -163,7 +165,7 @@ for fy in fields_sz:
                                               cls_yy[fy.name].cell, nside)
 
 # Generate covariances
-print("Computing covariances")
+print("Computing covariances...")
 
 def get_cmcm(f1, f2, f3, f4):
     fname = p.get_fname_cmcm(f1, f2, f3, f4)
@@ -171,7 +173,7 @@ def get_cmcm(f1, f2, f3, f4):
     try:
         cmcm.read_from(fname)
     except:
-        print("  Computing CMCM")
+#        print("  Computing CMCM")
         cmcm.compute_coupling_coefficients(f1.field,
                                            f2.field,
                                            f3.field,
@@ -181,14 +183,14 @@ def get_cmcm(f1, f2, f3, f4):
 
 def get_covariance(fa1, fa2, fb1, fb2, suffix,
                    cla1b1, cla1b2, cla2b1, cla2b2):
-    print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
+#    print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
     fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
     try:
         cov = Covariance.from_file(fname_cov,
                                    fa1.name, fa2.name,
                                    fb1.name, fb2.name)
     except:
-        print("  Computing Cov")
+#        print("  Computing Cov")
         mcm_a = get_mcm(fa1, fa2)
         mcm_b = get_mcm(fb1, fb2)
         cmcm = get_cmcm(fa1, fa2, fb1, fb2)
@@ -200,6 +202,7 @@ def get_covariance(fa1, fa2, fb1, fb2, suffix,
 
 
 # gggg
+print("  gggg")
 covs_gggg_data = {}
 covs_gggg_model = {}
 dcov_gggg = {}
@@ -220,6 +223,7 @@ for fg in fields_ng:
     dcov_gggg[fg.name] = Covariance(fg.name, fg.name, fg.name, fg.name, dcov)
 
 # gggy
+print("  gggy")
 covs_gggy_data = {}
 covs_gggy_model = {}
 dcov_gggy = {}
@@ -254,6 +258,7 @@ for fy in fields_sz:
         dcov_gggy[fy.name][fg.name] = Covariance(fg.name, fg.name,
                                                  fg.name, fy.name, dcov)
 # gygy
+print("  gygy")
 covs_gygy_data = {}
 covs_gygy_model = {}
 dcov_gygy = {}
@@ -290,6 +295,7 @@ for fy in fields_sz:
                                                  fg.name, fy.name, dcov)
 
 # Save 1-halo covariance
+print("Saving 1-halo covariances...", end="")
 for fg in fields_ng:
     dcov_gggg[fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
                                fg.name + "_" + fg.name + "_" +
@@ -301,23 +307,24 @@ for fg in fields_ng:
         dcov_gygy[fy.name][fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
                                             fg.name + "_" + fy.name + "_" +
                                             fg.name + "_" + fy.name + ".npz")
+print("OK")
 
 # Do jackknife
 if p.do_jk():
-    for jk_id in range(jk.npatches):
+    for jk_id in tqdm(range(jk.npatches), desc="Jackknives"):
         if os.path.isfile(p.get_fname_cls(fields_sz[-1],
                                           fields_sz[-1],
                                           jk_region=jk_id)):
-            print("Found %d" % (jk_id + 1))
+#            print("Found %d" % (jk_id + 1))
             continue
-        print("%d-th JK sample out of %d" % (jk_id + 1, jk.npatches))
+#        print("%d-th JK sample out of %d" % (jk_id + 1, jk.npatches))
         msk = jk.get_jk_mask(jk_id)
         # Update field
         for fg in fields_ng:
-            print(" " + fg.name)
+#            print(" " + fg.name)
             fg.update_field(msk)
         for fy in fields_sz:
-            print(" " + fy.name)
+#            print(" " + fy.name)
             fy.update_field(msk)
 
         # Compute spectra
@@ -338,7 +345,8 @@ if p.do_jk():
 
     # Get covariances
     # gggg
-    for fg in fields_ng:
+    print("Getting covariances...", end="")
+    for fg in fields_ng):
         fname_out = p.get_fname_cov(fg, fg, fg, fg, "jk")
         try:
             cov = Covariance.from_file(fname_out, fg.name, fg.name,
@@ -376,8 +384,10 @@ if p.do_jk():
                 cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
                                          fg.name, fy.name, fg.name, fy.name)
             cov.to_file(fname_out, n_samples=jk.npatches)
+    print("OK")
 
     # Joint covariances
+    print("Joint covariances...", end="")
     for fg in fields_ng:
         # gggg
         cvm_gggg = Covariance(covs_gggg_model[fg.name].names[0],
@@ -456,3 +466,4 @@ if p.do_jk():
             cov.to_file(p.get_fname_cov(fg, fy, fg, fy, 'comb_j'))
             cvd_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'data_4pt'))
             cvm_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'model_4pt'))
+    print("OK")
