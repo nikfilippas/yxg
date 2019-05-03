@@ -193,11 +193,7 @@ class Likelihood(object):
                 indices.append(sub)
                 ind0 += len(l)
             return np.array(indices)
-
-        indices = unequal_enumerate(ls)
-
-        # Compute theory prediction and reshape to
-        # [n_correlations,n_ells]
+        
         def unwrap(arr):
             arr_out = []
             for i in indices:
@@ -207,6 +203,10 @@ class Likelihood(object):
         def eval_and_unwrap(pars, func):
             v = func(pars)
             return unwrap(func(pars))
+
+        # Compute theory prediction and reshape to
+        # [n_correlations,n_ells]
+        indices = unequal_enumerate(ls)
         tv = eval_and_unwrap(params, self.get_theory)
         # Compute 1-h and 2-h if needed:
         if get_theory_1h is not None:
