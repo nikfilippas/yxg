@@ -2,6 +2,7 @@
 __pycache__/
 images/
 data/
+legacy/
 
 
 # File extensions
