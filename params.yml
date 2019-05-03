@@ -4,6 +4,8 @@ global:
     nside: 512
     # Output directory
     output_dir: 'output_test'
+    # Cosmological mass function
+    mfunc: 'tinker10'
 
 jk:
     # Do you want to do jackknives?

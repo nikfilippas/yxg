@@ -14,15 +14,23 @@ class ParamRun(object):
         with open(fname) as f:
             self.p = yaml.safe_load(f)
 
+    def get_massfunc(self):
+        """
+        Get preferred mass function
+        """
+        return self.p['global']['mfunc']
+
     def get_cosmo(self):
         """
         Get default cosmology
         """
+        mfunc = self.get_massfunc()
         return ccl.Cosmology(Omega_c=0.26066676,
                              Omega_b=0.048974682,
                              h=0.6766,
                              sigma8=0.8102,
-                             n_s=0.9665)
+                             n_s=0.9665,
+                             mass_function=mfunc)
 
     def get_outdir(self):
         """
