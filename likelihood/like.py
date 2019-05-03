@@ -173,7 +173,7 @@ class Likelihood(object):
                 contribution.
             get_theory_2h (function): function returning the 2-halo
                 contribution.
-            extension (str): plot extension (pdf, pdf etc.).
+            extension (str): plot extension (pdf, jpg etc.).
 
         Returns:
             array of figure objects.
@@ -184,9 +184,17 @@ class Likelihood(object):
         # Array of multipoles
         ls = np.array(dvec.ells)
         # Indices used in the analysis
-        indices = np.arange(len(ls.flatten()), dtype=int)
-        indices = indices.reshape(ls.shape)
+        def unequal_enumerate(a):
+        """Returns indices of all elements in nested arrays."""
+            indices = []
+            ind0 = 0
+            for l in ls:
+                sub = [x for x in range(ind0, ind0+len(l))]
+                indices.append(sub)
+                ind0 += len(l)
+            return np.array(indices)
 
+        indices = unequal_enumerate(ls)
         # Compute theory prediction and reshape to
         # [n_correlations,n_ells]
         tv = self.get_theory(params)[indices]
