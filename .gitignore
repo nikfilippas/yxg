@@ -1,6 +1,6 @@
 # Directories
 __pycache__/
-images/
+#images/
 data/
 legacy/
 
