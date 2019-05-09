@@ -59,9 +59,31 @@
     \item Conversely, gain info on HOD properties (?)
     \item Pressure-galaxy relation (?)
   \end{itemize}
+  \TODO{Define tSZ}
 
 \section{Theory}\label{sec:theory}
   \subsection{Projected fields and angular power spectra}\label{ssec:theory.cls}
+    Our study will focus on the cross-correlation of the 2D galaxy overdensity in tomographic redshift bins $\delta_g$ and maps of the tSZ Compton-$y$ parameter. Both of these observables can be described as a projected quantity $u(\nv)$, where $\nv$ is a unit vector on the sphere, related to a three-dimensional field $U({\bf r})$ $V({\bf r})$ through some radial kernel $W_u(\chi)$:
+    \begin{equation}
+      u(\nv)=\int d\chi\,W_u(\chi)\,U(\chi\nv).
+    \end{equation}
+    Any projected quantity can be decomposed into its spherical harmonic coefficients $u_{\ell m}$, the covariance of which is the so-called angular power spectrum $\langle u_{\ell m}v^*_{\ell' m'}\rangle\equiv C^{uv}_\ell\delta_{\ell\ell'}\delta_{mm'}$.
+
+    The angular power spectrum can be related to the 3D power spectrum of the associated 3D fields $P_{UV}$ as:
+    \begin{equation}
+      C_\ell^{uv} = \int d\chi \frac{W_u(z)W_v(z)}{\chi^2(z)}\,P_{UV}\left( z, k=\frac{\ell+1/2}{\chi(z)} \right).
+    \end{equation}
+    Here, the 3D power spectrum is analogously defined as the variance of the Fourier-space 3D quantities:
+    \begin{equation}
+      \left\langle U({\bf k})V^*({\bf k}')\right\rangle = (2\pi)^3\,\delta({\bf k}-{\bf k}')\,P_{UV}(k).
+    \end{equation}
+
+    In this formalism, the 3D quantities associated to $\delta_g(\nv)$ and $y(\nv)$ are the 3D galaxy overdensity $\Delta_g({\bf x})=n_g({\bf x})/\bar{n}_g-1$ and the electron pressure $P_e({\bf x})$ respectively, where $n_g$ is the galaxy number density. The associated radial kernels are:
+    \begin{equation}
+      W_g(\chi)=\frac{H(z)}{c}\,\phi_g(z),\hspace{12pt}W_y(\chi)=\frac{\sigma_T}{m_ec^2}\frac{1}{1+z},
+    \end{equation}
+    where $\phi_g(z)$ is the normalized galaxy redshift distribution, $H(z)$ is the expansion rate, $\sigma_T$ is the Thomson scattering cross-section, and $m_e$ is the electron mass.
+
   \subsection{Halo model predictions}\label{ssec:theory.hm}
 
 \section{Data}\label{sec:data}
