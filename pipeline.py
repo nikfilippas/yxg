@@ -346,7 +346,7 @@ if p.do_jk():
     # Get covariances
     # gggg
     print("Getting covariances...", end="")
-    for fg in fields_ng):
+    for fg in fields_ng:
         fname_out = p.get_fname_cov(fg, fg, fg, fg, "jk")
         try:
             cov = Covariance.from_file(fname_out, fg.name, fg.name,
