@@ -1,0 +1,113 @@
+\documentclass[useAMS,usenatbib]{mn2e}
+\bibliographystyle{mn2e}
+\pdfoutput=1
+\pdfminorversion=5
+
+%\usepackage{widetext}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{amssymb,amsmath,bm}  
+\usepackage{color}
+\usepackage[colorlinks,linkcolor=red,citecolor=blue,urlcolor=blue ]{hyperref}
+\usepackage{multirow}
+\usepackage[utf8]{inputenc}
+\usepackage{balance}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\newcommand{\nv}{\hat{\bf n}}
+\newcommand{\TODO}[1]{{\bf TODO:} #1}
+\newcommand{\kalo}{Karhunen-Lo\`{e}ve\,}
+\newcommand{\jcap}{JCAP}
+\newcommand{\mnras}{MNRAS}
+\newcommand{\aap}{A\&A}
+\newcommand{\aaps}{A\&AS}
+\newcommand{\apjs}{ApJS}
+\newcommand{\apj}{ApJ}
+\newcommand{\apjl}{ApJL}
+\newcommand{\prd}{Phys.~Rev.~D}
+\newcommand{\aj}{Astron. Journal}
+\newcommand{\pasp}{Publications of the ASP}
+\newcommand{\nar}{New Astronomy Review}
+\newcommand{\procspie}{Proceedings of the SPIE}
+\newcommand{\physrep}{Physics Reports}
+
+\title[Tomographic measurement of the gas pressure through galaxy-tSZ cross-correlations]{Tomographic measurement of the gas pressure through galaxy-tSZ cross-correlations}
+\author[David Alonso]{David Alonso$^1$, Maciej Bilicki$^2$, Nick Koukoufilippas$^1$, John A. Peacock$^3$\\
+                      $^{1}$Department of Physics, University of Oxford, Keble Road, Oxford, OX1 3RH, UK\\
+                      $^{2}$Center for Theoretical Physics, Polish Academy of Sciences, al. Lotnik\'ow 32/46, 02-668, Warsaw, Poland\\
+                      $^{3}$Institute for Astronomy, University of Edinburgh, Royal Observatory, Edinburgh EH9 3HJ, United Kingdom
+                      }
+
+\begin{document}
+  \date{\today}
+  \pagerange{1--18} \pubyear{2018}
+  \maketitle
+
+\begin{abstract}
+  \lipsum[1]
+\end{abstract}
+
+\begin{keywords}
+  cosmology: large-scale structure of the Universe -- methods: data analysis
+\end{keywords}
+
+\section{Introduction}\label{sec:intro}
+  \TODO{Motivation:}
+  \begin{itemize}
+    \item Measure $\langle P_e\rangle(z)$ or $(1-b_H)(z)$.
+    \item Conversely, gain info on HOD properties (?)
+    \item Pressure-galaxy relation (?)
+  \end{itemize}
+
+\section{Theory}\label{sec:theory}
+  \subsection{Projected fields and angular power spectra}\label{ssec:theory.cls}
+  \subsection{Halo model predictions}\label{ssec:theory.hm}
+
+\section{Data}\label{sec:data}
+  \subsection{The Compton-$y$ map}\label{ssec:data.y}
+    \TODO{Discuss MILCA and NILC maps, as well as associated masks.}
+  \subsection{2MPZ and WI$\times$SC}\label{ssec:data.g1}
+    \TODO{Discuss the catalogs briefly and note the systematics contamination in WISC}
+  \subsection{The SDSS DR12 photometric sample}\label{ssec:data.g2}
+    \TODO{Same as above}
+
+\section{Methods}\label{sec:methods}
+  \subsection{Estimating power spectra}\label{ssec:methods.cls}
+    \TODO{Describe pseudo-$C_\ell$ method.}
+  \subsection{Covariance matrices}\label{ssec:methods.cov}
+    \TODO{Describe hybrid covariance matrix used (Jackknife $+$ analytic $+$ trispectrum.}
+  \subsection{Likelihood}\label{ssec:methods.like}
+    \TODO{Describe likelihood, free parameters etc.}
+
+\section{Results}\label{sec:results}
+  \subsection{Fiducial results}\label{ssec:results.fid}
+    \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
+    \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
+
+  \subsection{Systematics analysis}\label{ssec:results.syst}
+    \subsubsection{Large-scale galaxy clustering systematics}\label{sssec:results.syst.gg}
+      \TODO{Describe different efforts to understand/mitigate/remove systematics in WISC (removing first point, fitting for $C_\ell$ template, template deprojection of stars and other stuff).}
+      \TODO{Compare with SDSS results if available}
+    \subsubsection{Photometric redshift systematics}\label{sssec:results.syst.pz}
+      \TODO{Compare results with different $N(z)$ choices.}
+    \subsubsection{tSZ contamination}\label{sssec:results.syst.y}
+      \TODO{Compare results with NILC map}
+      \TODO{Quantify CIB contamination}
+
+\section{Discussion}\label{sec:discussion}
+  \lipsum[2]
+
+\section*{Acknowledgements}
+  We thank Thor the almighty and the Beach Boys for useful comments and discussions. DA acknowledges support from the Beecroft trust and from the Science and Technology Facilities Council (STFC) through an Ernest Rutherford Fellowship, grant reference ST/P004474/1.
+  
+\setlength{\bibhang}{2.0em}
+\setlength\labelwidth{0.0em}
+\bibliography{paper}
+
+\appendix
+%\onecolumngrid
+\section{An appendix}\label{app:app}
+  \lipsum[3]
+
+\end{document}
