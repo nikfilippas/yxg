@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 cosmo08 = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766, sigma8=0.8102, n_s=0.9665, mass_function="tinker")
 cosmo10 = ccl.Cosmology(Omega_c=0.26066676, Omega_b=0.048974682, h=0.6766, sigma8=0.8102, n_s=0.9665, mass_function="tinker10")
 
-M = np.logspace(11, 14, 7)
-z = np.linspace(0.001, 0.5, 1000)
+M = np.logspace(8, 16, 128)
+z = np.linspace(0.0, 2., 25)
 a = 1/(1+z)
 
 
@@ -16,22 +16,25 @@ for i, dist in enumerate(a):
     mfunc10[i] = list(ccl.massfunc(cosmo10, M, dist))
 
 
-mfunc08 = np.array(mfunc08).T
-mfunc10 = np.array(mfunc10).T
+mfunc08 = np.array(mfunc08)#.T
+mfunc10 = np.array(mfunc10)#.T
 
 
-alphas = np.linspace(1, 0.2, len(M))
+alphas = np.linspace(1, 0.2, len(z))
 
 fig, ax1 = plt.subplots()
-for i, _ in enumerate(M):
-    ax1.loglog(z, mfunc08[i], "r", lw=3, alpha=alphas[i])
-    ax1.loglog(z, mfunc10[i], "b", lw=3, alpha=alphas[i])
+for i, _ in enumerate(z):
+    ax1.plot(M, mfunc08[i]/mfunc10[i], "r", lw=3, alpha=alphas[i])
+    #ax1.loglog(M, mfunc10[i], "b", lw=3, alpha=alphas[i])
 
-plt.ylim(1e-5,)
-plt.legend(["Tinker10", "Tinker08"], ncol=2, loc="lower center", fontsize=12)
-plt.xlabel("z", fontsize=14)
-plt.ylabel("$dn/dM$", fontsize=14)
-plt.savefig("dndM.pdf")
+plt.xlim([10**11.5,10**15])
+plt.xscale('log')
+#plt.ylim(1e-5,)
+#plt.legend(["Tinker10", "Tinker08"], ncol=2, loc="lower center", fontsize=12)
+#plt.xlabel("z", fontsize=14)
+#plt.ylabel("$dn/dM$", fontsize=14)
+#plt.savefig("dndM.pdf")
+plt.show(); exit(1)
 ##############################################################################
 
 #from matplotlib.colors import Normalize
