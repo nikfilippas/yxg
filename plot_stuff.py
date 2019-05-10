@@ -116,4 +116,5 @@ plt.ylabel('$1-b$', fontsize=15)
 plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
             bbox_inches='tight')
 
-np.save("%s/bH_%s" % p.get_outdir(), np.vstack((zmeans, 1-bmeans, szmeans, sbmeans)))
+D = np.vstack((zmeans, 1-bmeans, szmeans, sbmeans))
+np.save("%s/bH_%s" % (p.get_outdir(), p.get_outdir()), D)
