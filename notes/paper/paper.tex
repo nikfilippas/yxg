@@ -59,10 +59,104 @@
     \item Conversely, gain info on HOD properties (?)
     \item Pressure-galaxy relation (?)
   \end{itemize}
+  \TODO{Define tSZ}
 
 \section{Theory}\label{sec:theory}
   \subsection{Projected fields and angular power spectra}\label{ssec:theory.cls}
+    Our study will focus on the cross-correlation of the 2D galaxy overdensity in tomographic redshift bins $\delta_g$ and maps of the tSZ Compton-$y$ parameter. Both of these observables can be described as a projected quantity $u(\nv)$, where $\nv$ is a unit vector on the sphere, related to a three-dimensional field $U({\bf r})$ $V({\bf r})$ through some radial kernel $W_u(\chi)$:
+    \begin{equation}
+      u(\nv)=\int d\chi\,W_u(\chi)\,U(\chi\nv).
+    \end{equation}
+    Any projected quantity can be decomposed into its spherical harmonic coefficients $u_{\ell m}$, the covariance of which is the so-called angular power spectrum $\langle u_{\ell m}v^*_{\ell' m'}\rangle\equiv C^{uv}_\ell\delta_{\ell\ell'}\delta_{mm'}$.
+
+    The angular power spectrum can be related to the 3D power spectrum of the associated 3D fields $P_{UV}$ as:
+    \begin{equation}
+      C_\ell^{uv} = \int d\chi \frac{W_u(z)W_v(z)}{\chi^2(z)}\,P_{UV}\left( z, k=\frac{\ell+1/2}{\chi(z)} \right).
+    \end{equation}
+    Here, the 3D power spectrum is analogously defined as the variance of the Fourier-space 3D quantities:
+    \begin{equation}
+      \left\langle U({\bf k})V^*({\bf k}')\right\rangle = (2\pi)^3\,\delta({\bf k}-{\bf k}')\,P_{UV}(k).
+    \end{equation}
+    We will model the 3D power spectrum using the halo model described in \ref{ssec:theory.hm} below.
+
+    In this formalism, the 3D quantities associated to $\delta_g(\nv)$ and $y(\nv)$ are the 3D galaxy overdensity $\Delta_g({\bf x})=n_g({\bf x})/\bar{n}_g-1$ and the electron pressure $P_e({\bf x})$ respectively, where $n_g$ is the galaxy number density. The associated radial kernels are:
+    \begin{equation}
+      W_g(\chi)=\frac{H(z)}{c}\,\phi_g(z),\hspace{12pt}W_y(\chi)=\frac{\sigma_T}{m_ec^2}\frac{1}{1+z},
+    \end{equation}
+    where $\phi_g(z)$ is the normalized galaxy redshift distribution, $H(z)$ is the expansion rate, $\sigma_T$ is the Thomson scattering cross-section, and $m_e$ is the electron mass.
+
   \subsection{Halo model predictions}\label{ssec:theory.hm}
+    The halo model \TODO{cite} describes the spatial fluctuations of any quantity in terms of the contributions to them of all dark matter haloes, under the assumption that all the matter in the Universe is contained in those haloes. We will only quote here the final results regarding the halo model prediction for power spectra, and refer the reader to \TODO{cite} for further details.
+    
+    Let $U(r|M)$ be the profile of a given quantity as a function of the comoving distance $r$ to the centre of a halo of mass $M$, and let $U(k|M)$ be its Fourier transform:
+    \begin{equation}
+      U(k|M)\equiv4\pi \int_0^\infty dr\,r^2\,\frac{\sin(kr)}{kr}U(r|M).
+    \end{equation}
+
+    The halo model prediction for the cross-power spectrum $P_{UV}$ then consists of two contributions, from the so-called 1-halo term and 2-halo term:
+    \begin{equation}
+      P_{UV}(k)=P^{1h}_{UV}(k)+P^{2h}_{UV}(k).
+    \end{equation}
+    Each of these can be estimated in terms of the Fourier-space profiles as:
+    \begin{align}
+      &P^{1h}_{UV}(k)=\int dM\,\frac{dn}{dM}\,\langle U(k|M)\,V(k|M)\rangle,\\
+      &P^{2h}_{UV}(k)=b_U(k)\,b_V(k)\,P_L(k),\\
+      &b_U(k)\equiv\int dM\frac{dn}{dM}\,b_h(M)\,\langle U(k|M)\rangle.
+    \end{align}
+    Here, $P_L(k)$ is the linear matter power spectrum, $dn/dM$ is the halo mass function and $b_h(M)$ is the halo bias \TODO{cites}. %Further details are discussed in Appendix \ref{app:hm}.
+    
+    \subsubsection{Galaxies and the halo occupation distribution}\label{sssec:theory.hm.hod}
+      To model the galaxy overdensity $\Delta_g$ we will use a Halo Occupation Distribution (HOD) model as prescribed by \TODO{cite}. The HOD models the galaxy content of dark matter halos as being made up of central and satellite galaxies. Centrals lie at the center of the halo, while satellites are distributed according to a profile $u_s(r|M)$. Halos can have zero or one central, and the mean number of centrals for a halo of mass $M$ is modelled as a smoothed step function
+      \begin{equation}
+        \langle N_c(M)\rangle=\frac{1}{2}\left[1+{\rm erf}\left(\frac{\log(M/M_{\rm min})}{\sigma_{\rm lnM}}\right)\right].
+      \end{equation}
+      We then assume that satellites can only be formed if a halo has a central and has a mass larger than some threshold $M_0$. In that case, average number of satellites is a power law of the form:
+      \begin{equation}
+        \langle N_s(M)\rangle=\Theta(M-M_0)\,\left(\frac{M-M_0}{M_1'}\right)^{\alpha}.
+      \end{equation}
+      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1$.
+      
+      Besides their mean values, we also need to specify the statistics of $N_c$ and $N_s$. Following the standard practice \TODO{cite}, we assume $N_c$ to have a binomial distribution with probability $p=\langle N_c\rangle$, and $N_s$ to be Poisson-distributed.
+
+      Putting everything together, the moments of the galaxy overdensity Fourier profile are \TODO{cite}:
+      \begin{align}
+        &\langle u_g(k)\rangle=\bar{n}_g^{-1}\langle N_c\rangle\left[1+\langle N_s\rangle\,u_s(k)\right],\\
+        &\langle |u_g(k)|^2\rangle=\bar{n}_g^{-2}\langle N_c\rangle\left[\langle N_s\rangle^2u_s^2(k)+2\langle N_s\rangle u_s(k)\right],
+      \end{align}
+      where the mean number density $\bar{n}_g$ is
+      \begin{equation}
+        \bar{n}_g\equiv\int dM\,\frac{dn}{dM}\langle N_c\rangle\left[1+\langle N_s\rangle\right],
+      \end{equation} 
+      and we have suppressed the mass dependence of all quantities for simplicity.
+
+      Finally, we will assume that the satellites follow the matter distribution, and therefore $u_s(k|M)$ is given by a truncated Navarro-Frenk and White profile \TODO{cite}:
+      \begin{align}
+        u_s(k|M)=&\left[\log(1+c_\Delta)-\frac{c_\Delta}{(1+c_\Delta)}\right]^{-1}\\
+               &\left[\cos(q)\left({\rm Ci}((1+c_\Delta)q)-{\rm Ci}(q)\right)\right.\\\nonumber
+               &\left.+\sin(q)\left({\rm Si}((1+c_\Delta)q)-{\rm Si}(q)\right)\right.\\&\left.-\sin(c_\Delta q)/(1+c_\Delta q)\right]
+      \end{align}
+      where $q\equiv kr_\Delta/c_\Delta$, $r_\Delta$ and $c_\Delta$ are the halo radius and concentration defined in Section \ref{sssec:theory.hm.cm}, and $\{{\rm Ci}, {\rm Si}\}$ are the cosine and sine integrals.
+      
+    \subsubsection{tSZ and pressure profiles}\label{sssec:theory.hm.pe}
+      In order to describe the electron pressure in a halo, we use the generalized NFW profile (GNFW) described in \cite{2010A&A...517A..92A} and used in the Planck tSZ cluster analysis \cite{2016A&A...594A..24P}. This profile takes the form:
+      \begin{equation}
+        P_e(r)=P_*\,p(r/r_{500c}),
+      \end{equation}
+      where $r_{R00c}$ is the cluster radius enclosing an overdensity of 500 times the critical density (see Section \ref{sssec:theory.hm.cm}). The normalization $P_*$ is given by
+      \begin{equation}
+        P_*=6.41\,\left(1.65 {\rm eV}\,{\rm cm}^{-3}\right)\left(\frac{h}{0.7}\right)^{8/3}\left(\frac{(h/0.7)(1-b)M_{500c}}{3\times10^{14}M_\odot}\right)^{2/3+0.12}
+      \end{equation}
+      and the form factor is
+      \begin{equation}
+        p(x)=(c_{500}x)^{-\gamma}\left[1+(c_{500}x)^\alpha\right]^{(\gamma-\beta)/\alpha},\hspace{12pt}(\alpha,\beta,\gamma,c_{500})=(1.33,4.13,0.31,1.81).
+      \end{equation}
+      
+      \TODO{describe variance and covariance with g}
+              
+      
+    \subsubsection{Concentration-mass relation}\label{sssec:theory.hm.cm}
+      \TODO{describe how we homogenize $c(M)$.}
+
 
 \section{Data}\label{sec:data}
   \subsection{The Compton-$y$ map}\label{ssec:data.y}
