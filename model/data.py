@@ -51,6 +51,7 @@ class Tracer(object):
             self.z_range = [1E-6, 6]
             self.lmax = 100000
         self.profile = get_profile(m)
+        self.syst = m.get('systematics')
 
     def get_beam(self, ls, ns):
         """
@@ -125,6 +126,9 @@ def choose_cov_file(p, tracers1, tracers2, suffix):
                      tracers2[0].name+", "+tracers2[1].name)
     return None
 
+def window_plates(l, lplate_deg):
+    lp = np.radians(lplate_deg)
+    return np.exp(-(l * lp)**2 / 12)
 
 class DataManager(object):
     """
@@ -146,6 +150,7 @@ class DataManager(object):
         self.data_vector = []
         self.beams = []
         self.ells = []
+        self.templates = []
         mask_total = []
 
         # For each two-point function involved, store:
@@ -168,15 +173,29 @@ class DataManager(object):
                 self.ells.append(f['ls'][mask])
                 # Subtract noise bias
                 self.data_vector += list((f['cls']-f['nls'])[mask])
+                # Beam
                 bm = np.ones(np.sum(mask))
                 for t in tr:
                     bm *= t.get_beam(f['ls'][mask], nside)
                 self.beams.append(bm)
+                # Contaminant templates
+                # Currently only supercosmos plate variations needed
+                temp=np.zeros(len(f['ls']))
+                if tr[0].name == tr[1].name: # Auto-correlation
+                    if tr[0].syst is not None:
+                        if 'scos_plates' in tr[0].syst:
+                            # 5-degree plate size
+                            temp = window_plates(f['ls'], 5.)
+                self.templates += list(temp[mask])
 
         # Count number of usable elements in the data vector.
         self.data_vector = np.array(self.data_vector)
         ndata_percorr = [np.sum(m) for m in mask_total]
         ndata = np.sum(ndata_percorr)
+        # Set template to none if all are zero
+        self.templates = np.array(self.templates)
+        if (self.templates == 0).all():
+            self.templates = None
 
         # Now form covariance matrix in a block-wise fashion
         self.covar = np.zeros([ndata, ndata])

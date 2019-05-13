@@ -37,7 +37,7 @@ for v in p.get('data_vectors'):
 
     # Set up likelihood
     lik = Likelihood(p.get('params'), d.data_vector, d.covar, th,
-                     debug=p.get('mcmc')['debug'])
+                     template=d.templates, debug=p.get('mcmc')['debug'])
 
     # Set up sampler
     sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,

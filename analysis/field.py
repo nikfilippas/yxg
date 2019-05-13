@@ -1,6 +1,7 @@
 import pymaster as nmt
 import numpy as np
 import healpy as hp
+import os
 
 
 class Field(object):
@@ -20,10 +21,12 @@ class Field(object):
         field_map (int): HDU in which the map is stored.
         is_ndens (bool): set to True if this is a number
             density tracer.
+        syst_list (list): list of systematic maps.
     """
     def __init__(self, nside, name, mask_id,
                  fname_mask, fname_map, fname_dndz,
-                 field_mask=0, field_map=0, is_ndens=True):
+                 field_mask=0, field_map=0, is_ndens=True,
+                 syst_list=None):
         self.name = name
         self.nside = nside
         self.mask_id = mask_id
@@ -57,8 +60,21 @@ class Field(object):
             self.z = None
             self.dndz = None
 
+        # Load contaminant templates
+        self.temp = None
+        if syst_list is not None:
+            for sname in syst_list:
+                if os.path.isfile(sname):
+                    if self.temp is None:
+                        self.temp = []
+                    t = hp.ud_grade(hp.read_map(sname, verbose=False),
+                                    nside_out=nside)
+                    t_mean = np.sum(t * self.mask)/np.sum(self.mask)
+                    self.temp.append([mask_bn * (t- t_mean)])
+
         # Generate NmtField
-        self.field = nmt.NmtField(self.mask, [self.map])
+        self.field = nmt.NmtField(self.mask, [self.map],
+                                  templates=self.temp)
 
     def update_field(self, new_mask=1.):
         """
@@ -70,4 +86,5 @@ class Field(object):
         Args:
             new_mask (float or array): new mask.
         """
-        self.field = nmt.NmtField(self.mask * new_mask, [self.map])
+        self.field = nmt.NmtField(self.mask * new_mask, [self.map],
+                                  templates=self.temp)
