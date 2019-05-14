@@ -26,7 +26,6 @@ class Likelihood(object):
         self.get_theory = get_theory
         self.dv = data
         if template is not None:
-            print(template)
             ic = np.linalg.inv(covar)
             ict = np.dot(ic, template)
             sigma2 = 1./np.dot(template, ict)

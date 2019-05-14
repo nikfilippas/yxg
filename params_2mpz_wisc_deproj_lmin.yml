@@ -205,7 +205,7 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 200
-    n_steps: 1000
+    n_steps: 0
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Cosmological mass function
