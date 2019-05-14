@@ -191,6 +191,17 @@
 
 \section{Methods}\label{sec:methods}
   \subsection{Estimating power spectra}\label{ssec:methods.cls}
+    We measure all auto- and cross-power spectra between the different redshift bins and the $y$ maps through the pseudo-$C_\ell$ approach \TODO{cites} as implemented in \TODO{cite}. Details about the method can be found in \TODO{cite}, but we provide a brief description here for completeness. For an incomplete sky coverage, a given field observed on the sphere, $\tilde{u}(\nv)$, can be modelled as a product of the true underlying field $u$, and a sky mask $w$
+    \begin{equation}
+      \tilde{u}^{\rm obs}(\nv) = w(\nv)\,u(\nv).
+    \end{equation}
+    In the simplest scenario, the mask $w$ is simply a binary map ($w=0$ or 1) selecting the pixels in the sky that have been observed. More generally, $w$ can be designed to optimally up- or downweight different regions in an inverse-variance-weighted manner. Through the convolution theorem, the spherical harmonic transform of the observed field is a convolution of the harmonic transforms of the true field and the mask. This then translates into a similar result for the ensemble average of the observed power spectra $\tilde{C}^{uv}_\ell$:
+    \begin{equation}
+      \tilde{C}^{uv}_\ell = \sum_{\ell'}\,M^{uv}_{\ell \ell'}\, C^{uv}_{\ell'},
+    \end{equation}
+    where $C^{uv}_\ell$ is the true underlying power spectrum. $M^{uv}_{\ell \ell'}$ is the so-called mode-coupling matrix, which depends solely on the masks of both fields, and which can be computed analytically. The pseudo-$C_\ell$ approach is then based on 
+
+
     \TODO{Describe pseudo-$C_\ell$ method.}
   \subsection{Covariance matrices}\label{ssec:methods.cov}
     \TODO{Describe hybrid covariance matrix used (Jackknife $+$ analytic $+$ trispectrum.}
