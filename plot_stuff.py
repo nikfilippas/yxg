@@ -110,7 +110,7 @@ sbmeans = np.array(sbmeans)  # (2,N): min,max
 
 plt.figure()
 plt.errorbar(zmeans, 1-np.array(bmeans),
-             xerr=szmeans, yerr=np.flip(sbmeans), fmt='ro')
+             xerr=szmeans, yerr=np.flip(sbmeans, 0), fmt='ro')
 plt.xlabel('$z$', fontsize=15)
 plt.ylabel('$1-b$', fontsize=15)
 plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
