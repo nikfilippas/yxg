@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_lmin_ymilca'
+    output_dir: 'output_dndz_lmin_ymilca'
     # Cosmological mass function
     mfunc: 'tinker10'
 
@@ -46,7 +46,7 @@ maps:
       # Name of mask (should correspond to one of the keys in the previous section)
       mask: "mask_lowz"
       # dndz file
-      dndz: "data/dndz/2MPZ_bin1.txt"
+      dndz: "data/dndz/2MPZ_v2_bin1.txt"
       # Is there a beam associated with this map?
       beam: False
       # Best-fit model parameters describing this map
@@ -66,7 +66,7 @@ maps:
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
       mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin1.txt"
+      dndz: "data/dndz/WISC_v2_bin1.txt"
       beam: False
       model:
           M0:  11.78
@@ -83,7 +83,7 @@ maps:
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
       mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin2.txt"
+      dndz: "data/dndz/WISC_v2_bin2.txt"
       beam: False
       model:
           M0:  11.66
@@ -100,7 +100,7 @@ maps:
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
       mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin3.txt"
+      dndz: "data/dndz/WISC_v2_bin3.txt"
       beam: False
       model:
           M0:  11.50
@@ -117,7 +117,7 @@ maps:
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
       mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin4.txt"
+      dndz: "data/dndz/WISC_v2_bin4.txt"
       beam: False
       model:
           M0:  11.52
@@ -134,7 +134,7 @@ maps:
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
       mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin5.txt"
+      dndz: "data/dndz/WISC_v2_bin5.txt"
       beam: False
       model:
           M0:  12.02
