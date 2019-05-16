@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_mfunc_lmin'
+    output_dir: 'output_mfunc_lmin_ynilc'
     # Cosmological mass function
     mfunc: 'tinker'
 
@@ -52,15 +52,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.54
-          M1:  12.91
-          Mmin:  11.54
+          M0:  11.56
+          M1:  12.94
+          Mmin:  11.56
           alpha:  1.0
-          b_hydro:  0.5833
+          b_hydro:  0.4590
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.1260
+          r_corr:  -0.2940
           sigma_lnM:  0.15
     - name: "wisc1"
       type: "g"
@@ -70,14 +70,14 @@ maps:
       beam: False
       model:
           M0:  11.90
-          M1:  13.32
+          M1:  13.33
           Mmin:  11.94
           alpha:  1.0
-          b_hydro:  0.3511
+          b_hydro:  0.3900
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5755
+          r_corr:  -0.5596
           sigma_lnM:  0.15
     - name: "wisc2"
       type: "g"
@@ -86,15 +86,15 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.83
-          M1:  13.18
-          Mmin:  11.83
+          M0:  11.82
+          M1:  13.17
+          Mmin:  11.82
           alpha:  1.0
-          b_hydro:  0.3756
+          b_hydro:  0.4175
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5711
+          r_corr:  -0.5453
           sigma_lnM:  0.15
     - name: "wisc3"
       type: "g"
@@ -104,14 +104,14 @@ maps:
       beam: False
       model:
           M0:  11.73
-          M1:  13.00
+          M1:  13.01
           Mmin:  11.73
           alpha:  1.0
-          b_hydro:  0.3558
+          b_hydro:  0.3951
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6038
+          r_corr:  -0.5776
           sigma_lnM:  0.15
     - name: "wisc4"
       type: "g"
@@ -122,13 +122,13 @@ maps:
       model:
           M0:  11.76
           M1:  12.99
-          Mmin:  11.77
+          Mmin:  11.76
           alpha:  1.0
-          b_hydro:  0.4002
+          b_hydro:  0.4194
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5897
+          r_corr:  -0.5773
           sigma_lnM:  0.15
     - name: "wisc5"
       type: "g"
@@ -141,15 +141,15 @@ maps:
           M1:  13.24
           Mmin:  12.35
           alpha:  1.0
-          b_hydro:  0.4016
+          b_hydro:  0.4182
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6789
+          r_corr:  -0.6698
           sigma_lnM:  0.15
-    - name: "y_milca"
+    - name: "y_nilc"
       type: "y"
-      map: "data/maps/milca_ymaps.fits"
+      map: "data/maps/nilc_ymaps.fits"
       mask: "mask_tsz"
       beam: 10.
 
@@ -258,18 +258,12 @@ params:
 # power spectra you want to analyze
 data_vectors:
     - type: 'Cl'
-      # Give each element a different name
       name: '2mpz'
-      # Type of covariance matrix to be used.
       covar_type: 'comb_m'
-      # List here the different power spectrum
-      # combinations you want to use
       twopoints:
-          # Names of the two tracers (maps) going into this C_ell
           - tracers: ['2mpz','2mpz']
-            # Minimum multipole to use in the analysis
             lmin: 10
-          - tracers: ['2mpz','y_milca']
+          - tracers: ['2mpz','y_nilc']
             lmin: 0
     - type: 'Cl'
       name: 'wisc1'
@@ -277,7 +271,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc1','wisc1']
             lmin: 10
-          - tracers: ['wisc1','y_milca']
+          - tracers: ['wisc1','y_nilc']
             lmin: 0
     - type: 'Cl'
       name: 'wisc2'
@@ -285,7 +279,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc2','wisc2']
             lmin: 10
-          - tracers: ['wisc2','y_milca']
+          - tracers: ['wisc2','y_nilc']
             lmin: 0
     - type: 'Cl'
       name: 'wisc3'
@@ -293,7 +287,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc3','wisc3']
             lmin: 10
-          - tracers: ['wisc3','y_milca']
+          - tracers: ['wisc3','y_nilc']
             lmin: 0
     - type: 'Cl'
       name: 'wisc4'
@@ -301,7 +295,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc4','wisc4']
             lmin: 10
-          - tracers: ['wisc4','y_milca']
+          - tracers: ['wisc4','y_nilc']
             lmin: 0
     - type: 'Cl'
       name: 'wisc5'
@@ -309,5 +303,5 @@ data_vectors:
       twopoints:
           - tracers: ['wisc5','wisc5']
             lmin: 10
-          - tracers: ['wisc5','y_milca']
+          - tracers: ['wisc5','y_nilc']
             lmin: 0
