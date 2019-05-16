@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_masked'
+    output_dir: 'output_masked_lmin_ymilca'
     # Cosmological mass function
     mfunc: 'tinker10'
 
@@ -52,15 +52,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.42
-          M1:  12.71
-          Mmin:  11.42
+          M0:  11.55
+          M1:  12.87
+          Mmin:  11.55
           alpha:  1.0
-          b_hydro:  0.903
+          b_hydro:  0.7720
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.2814
+          r_corr:  -0.5163
           sigma_lnM:  0.15
     - name: "wisc1"
       type: "g"
@@ -73,11 +73,11 @@ maps:
           M1:  13.14
           Mmin:  11.80
           alpha:  1.0
-          b_hydro:  0.6537
+          b_hydro:  0.6669
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6790
+          r_corr:  -0.6567
           sigma_lnM:  0.15
     - name: "wisc2"
       type: "g"
@@ -86,15 +86,15 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.66
-          M1:  12.91
-          Mmin:  11.66
+          M0:  11.65
+          M1:  12.90
+          Mmin:  11.65
           alpha:  1.0
-          b_hydro:  0.6212
+          b_hydro:  0.6222
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6393
+          r_corr:  -0.6388
           sigma_lnM:  0.15
     - name: "wisc3"
       type: "g"
@@ -104,14 +104,14 @@ maps:
       beam: False
       model:
           M0:  11.51
-          M1:  12.69
+          M1:  12.68
           Mmin:  11.51
           alpha:  1.0
-          b_hydro:  0.5797
+          b_hydro:  0.5804
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6700
+          r_corr:  -0.6681
           sigma_lnM:  0.15
     - name: "wisc4"
       type: "g"
@@ -120,15 +120,15 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.53
-          M1:  12.65
+          M0:  11.52
+          M1:  12.64
           Mmin:  11.53
           alpha:  1.0
-          b_hydro:  0.6133
+          b_hydro:  0.6147
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6367
+          r_corr:  -0.6349
           sigma_lnM:  0.15
     - name: "wisc5"
       type: "g"
@@ -137,15 +137,15 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  12.03
-          M1:  12.71
-          Mmin:  12.03
+          M0:  12.04
+          M1:  12.72
+          Mmin:  12.04
           alpha:  1.0
-          b_hydro:  0.6261
+          b_hydro:  0.6242
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6925
+          r_corr:  -0.6936
           sigma_lnM:  0.15
     - name: "y_milca"
       type: "y"
@@ -268,7 +268,7 @@ data_vectors:
           # Names of the two tracers (maps) going into this C_ell
           - tracers: ['2mpz','2mpz']
             # Minimum multipole to use in the analysis
-            lmin: 0
+            lmin: 10
           - tracers: ['2mpz','y_milca']
             lmin: 0
     - type: 'Cl'
@@ -284,7 +284,7 @@ data_vectors:
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc2','wisc2']
-            lmin: 0
+            lmin: 10
           - tracers: ['wisc2','y_milca']
             lmin: 0
     - type: 'Cl'
@@ -292,7 +292,7 @@ data_vectors:
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc3','wisc3']
-            lmin: 0
+            lmin: 10
           - tracers: ['wisc3','y_milca']
             lmin: 0
     - type: 'Cl'
@@ -300,7 +300,7 @@ data_vectors:
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc4','wisc4']
-            lmin: 0
+            lmin: 10
           - tracers: ['wisc4','y_milca']
             lmin: 0
     - type: 'Cl'
@@ -308,54 +308,6 @@ data_vectors:
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc5','wisc5']
-            lmin: 0
+            lmin: 10
           - tracers: ['wisc5','y_milca']
-            lmin: 0
-    - type: 'Cl'
-      name: '2mpz'
-      covar_type: 'comb_m'
-      twopoints:
-          - tracers: ['2mpz','2mpz']
-            lmin: 10
-          - tracers: ['2mpz','y_nilc']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc1'
-      covar_type: 'comb_m'
-      twopoints:
-          - tracers: ['wisc1','wisc1']
-            lmin: 10
-          - tracers: ['wisc1','y_nilc']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc2'
-      covar_type: 'comb_m'
-      twopoints:
-          - tracers: ['wisc2','wisc2']
-            lmin: 10
-          - tracers: ['wisc2','y_nilc']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc3'
-      covar_type: 'comb_m'
-      twopoints:
-          - tracers: ['wisc3','wisc3']
-            lmin: 10
-          - tracers: ['wisc3','y_nilc']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc4'
-      covar_type: 'comb_m'
-      twopoints:
-          - tracers: ['wisc4','wisc4']
-            lmin: 10
-          - tracers: ['wisc4','y_nilc']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc5'
-      covar_type: 'comb_m'
-      twopoints:
-          - tracers: ['wisc5','wisc5']
-            lmin: 10
-          - tracers: ['wisc5','y_nilc']
-            lmin: 0
+            lmin : 0
