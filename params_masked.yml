@@ -311,3 +311,51 @@ data_vectors:
             lmin: 0
           - tracers: ['wisc5','y_milca']
             lmin: 0
+    - type: 'Cl'
+      name: '2mpz'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['2mpz','2mpz']
+            lmin: 10
+          - tracers: ['2mpz','y_nilc']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc1'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc1','wisc1']
+            lmin: 10
+          - tracers: ['wisc1','y_nilc']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc2'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc2','wisc2']
+            lmin: 10
+          - tracers: ['wisc2','y_nilc']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc3'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc3','wisc3']
+            lmin: 10
+          - tracers: ['wisc3','y_nilc']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc4'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc4','wisc4']
+            lmin: 10
+          - tracers: ['wisc4','y_nilc']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc5'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc5','wisc5']
+            lmin: 10
+          - tracers: ['wisc5','y_nilc']
+            lmin: 0
