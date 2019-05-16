@@ -105,6 +105,8 @@
     \end{align}
     Here, $P_L(k)$ is the linear matter power spectrum, $dn/dM$ is the halo mass function and $b_h(M)$ is the halo bias \TODO{cites}. %Further details are discussed in Appendix \ref{app:hm}.
     
+    \TODO{describe $1h$-$2h$ transition correction.}
+    
     \subsubsection{Galaxies and the halo occupation distribution}\label{sssec:theory.hm.hod}
       To model the galaxy overdensity $\Delta_g$ we will use a Halo Occupation Distribution (HOD) model as prescribed by \TODO{cite}. The HOD models the galaxy content of dark matter halos as being made up of central and satellite galaxies. Centrals lie at the center of the halo, while satellites are distributed according to a profile $u_s(r|M)$. Halos can have zero or one central, and the mean number of centrals for a halo of mass $M$ is modelled as a smoothed step function
       \begin{equation}
@@ -112,9 +114,9 @@
       \end{equation}
       We then assume that satellites can only be formed if a halo has a central and has a mass larger than some threshold $M_0$. In that case, average number of satellites is a power law of the form:
       \begin{equation}
-        \langle N_s(M)\rangle=\Theta(M-M_0)\,\left(\frac{M-M_0}{M_1'}\right)^{\alpha}.
+        \langle N_s(M)\rangle=\Theta(M-M_0)\,\left(\frac{M-M_0}{M_1'}\right)^{\alpha_s}.
       \end{equation}
-      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1$.
+      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1$.
       
       Besides their mean values, we also need to specify the statistics of $N_c$ and $N_s$. Following the standard practice \TODO{cite}, we assume $N_c$ to have a binomial distribution with probability $p=\langle N_c\rangle$, and $N_s$ to be Poisson-distributed.
 
@@ -133,7 +135,7 @@
       \begin{align}
         u_s(k|M)=&\left[\log(1+c_\Delta)-\frac{c_\Delta}{(1+c_\Delta)}\right]^{-1}\\
                &\left[\cos(q)\left({\rm Ci}((1+c_\Delta)q)-{\rm Ci}(q)\right)\right.\\\nonumber
-               &\left.+\sin(q)\left({\rm Si}((1+c_\Delta)q)-{\rm Si}(q)\right)\right.\\&\left.-\sin(c_\Delta q)/(1+c_\Delta q)\right]
+               &\left.+\sin(q)\left({\rm Si}((1+c_\Delta)q)-{\rm Si}(q)\right)\right.\\&\left.-\sin(c_\Delta q)/(1+c_\Delta q)\right],
       \end{align}
       where $q\equiv kr_\Delta/c_\Delta$, $r_\Delta$ and $c_\Delta$ are the halo radius and concentration defined in Section \ref{sssec:theory.hm.cm}, and $\{{\rm Ci}, {\rm Si}\}$ are the cosine and sine integrals.
       
@@ -142,21 +144,42 @@
       \begin{equation}
         P_e(r)=P_*\,p(r/r_{500c}),
       \end{equation}
-      where $r_{R00c}$ is the cluster radius enclosing an overdensity of 500 times the critical density (see Section \ref{sssec:theory.hm.cm}). The normalization $P_*$ is given by
+      where $r_{500c}$ is the cluster radius enclosing an overdensity of 500 times the critical density (see Section \ref{sssec:theory.hm.cm}). The normalization $P_*$ is given by
       \begin{equation}
-        P_*=6.41\,\left(1.65 {\rm eV}\,{\rm cm}^{-3}\right)\left(\frac{h}{0.7}\right)^{8/3}\left(\frac{(h/0.7)(1-b)M_{500c}}{3\times10^{14}M_\odot}\right)^{2/3+0.12}
+        P_*=6.41\,\left(1.65 {\rm eV}\,{\rm cm}^{-3}\right)h_{70}^{8/3}
+        \left(\frac{h_{70}(1-b_H)M_{500c}}{3\times10^{14}M_\odot}\right)^{0.79},
       \end{equation}
-      and the form factor is
+      where $h_{70}=H_0/(70 {\rm km}\,{\rm s}^{-1}\,{\rm Mpc}^{-1}$, and $(1-b_H)$ is the so-called hydrostatic bias parameter. The GNFW form factor is
       \begin{equation}
-        p(x)=(c_{500}x)^{-\gamma}\left[1+(c_{500}x)^\alpha\right]^{(\gamma-\beta)/\alpha},\hspace{12pt}(\alpha,\beta,\gamma,c_{500})=(1.33,4.13,0.31,1.81).
+        p(x)=(c_P x)^{-\gamma}\left[1+(c_P x)^\alpha\right]^{(\gamma-\beta)/\alpha},
       \end{equation}
+      with $(\alpha,\beta,\gamma,c_P)=(1.33,4.13,0.31,1.81)$.
       
-      \TODO{describe variance and covariance with g}
-              
+      \TODO{Blah about $(1-b_H)$}. Other pressure profiles have been proposed in the literature (e.g. \TODO{cite}), but we chose this parametrisation in order to be able to relate our measurement of $(1-b_H)$ to the results of \cite{2016A&A...594A..24P}.
       
-    \subsubsection{Concentration-mass relation}\label{sssec:theory.hm.cm}
-      \TODO{describe how we homogenize $c(M)$.}
+      Within the halo model description, and assuming a log-normal $y$-mass relation, the pressure profile cumulants are given by:
+      \begin{align}
+        &\langle u_y(k|M)\rangle=P_e(k),\\
+        &\langle u_y^2(k|M)\rangle=P_e^2(k)\,e^{\sigma_{\ln Y}^2},
+      \end{align}
+      where $P_e(k)$ is the Fourier transform of the GNFW profile and $\sigma_{\ln Y}=0.173\pm0.023$ is the intrinsic logarithmic scatter in the $y$-mass relation \cite{2016A&A...594A..24P}. Note that, since we do not make use of the tSZ auto-correlation, we will not use the second order cumulant of the pressure profile in our analysis. However, since we analyse the galaxy-tSZ correlation, we need to model the covariance between the galaxy overdensity and pressure profiles. For simplicity, we adopt a simple parametrization:
+      \begin{equation}
+        \langle u_y(k|M) u_g(k|M)\rangle = (1+\rho_{yg})\langle u_g(k|M)\rangle \langle u_y(k|M)\rangle,
+      \end{equation}
+      where $\rho_{yg}$ is a free parameter that determines the sign of the correlation between galaxy abundance and pressure. Marginalising over this parameter has the added advantage of reducing the sensitivity of our final constraints on $1-b_H$ on the details of the cross-spectrum model in the 1-halo regime, where both parameters are completely degenerate.              
+      
+    \subsubsection{Concentration-mass relation and mass definitions}\label{sssec:theory.hm.cm}
+      Halo radii $r_\Delta$ are usually defined as the size of the sphere containing a given mass $M_\Delta$:
+      \begin{equation}
+        M_\Delta = \frac{4\pi}{3}\rho_*(z)\Delta r^3_\Delta.
+      \end{equation}
+      Common choices for $\rho_*$ are the critical density $\rho_c=3H^2(z)/4\pi G$ and the matter density $\rho_M(z)$. The spherical overdensity parameter $\Delta$ is usually chosen within the range $\sim(200,500)$ and sometimes defined as the quantity yielding the virial radius in the spherical top-hat collapse model $\Delta_v$ \cite{1998ApJ...495...80B} \TODO{more refs?}.
 
+      Ideally we would like to use the same mass definition (i.e. choice of $\Delta$ and $\rho_*$) for the mass function, the mass-concentration relation $c_\Delta(M)$ and the calibrated pressure profile. Unfortunately while the GNFW profile is calibrated to $\Delta_{500c}$ (where $c$ denotes critical density), the mass functions of \cite{2008ApJ...688..709T,2010ApJ...724..878T} are only provided for $\rho_M$-based mass definitions, and the concentration-mass relation of \cite{2008MNRAS.390L..64D} was only estimated for $\Delta=200$ (for critical and matter densities) and for $\Delta=\Delta_v$. To overcome this issue, we follow the procedure used by \cite{2016A&A...594A..24P} and \cite{2018MNRAS.477.4957B}: our baseline mass definition is $\rho_c$-based with $\Delta=500$, as used by \cite{2010A&A...517A..92A}. At each redshift, we translate this into a $\Delta$ value for a $\rho_M$-based definition, which we use to compute the mass function from the parametrizations of \cite{2008ApJ...688..709T,2010ApJ...724..878T}. We also rederive the concentration-mass relation of \cite{2008MNRAS.390L..64D} for a $\rho_c$-based $\Delta=500$ from their $\Delta=200$ parametrization by integrating the NFW profile to the corresponding halo radius. Within the redshifts covered by our analysis we find that this is well fit by:
+      \begin{equation}
+        c_{500c}(M,z)= A\,(M/M_{\rm pivot})^B\,(1+z)^C,
+      \end{equation}
+      with $M_{\rm pivot}=2.7\times10^{12}\,M_\odot$ and $(A,B,C)=(3.67,\,-0.0903,\,-0.51)$.
 
 \section{Data}\label{sec:data}
   \subsection{The Compton-$y$ map}\label{ssec:data.y}
@@ -168,6 +191,17 @@
 
 \section{Methods}\label{sec:methods}
   \subsection{Estimating power spectra}\label{ssec:methods.cls}
+    We measure all auto- and cross-power spectra between the different redshift bins and the $y$ maps through the pseudo-$C_\ell$ approach \TODO{cites} as implemented in \TODO{cite}. Details about the method can be found in \TODO{cite}, but we provide a brief description here for completeness. For an incomplete sky coverage, a given field observed on the sphere, $\tilde{u}(\nv)$, can be modelled as a product of the true underlying field $u$, and a sky mask $w$
+    \begin{equation}
+      \tilde{u}^{\rm obs}(\nv) = w(\nv)\,u(\nv).
+    \end{equation}
+    In the simplest scenario, the mask $w$ is simply a binary map ($w=0$ or 1) selecting the pixels in the sky that have been observed. More generally, $w$ can be designed to optimally up- or downweight different regions in an inverse-variance-weighted manner. Through the convolution theorem, the spherical harmonic transform of the observed field is a convolution of the harmonic transforms of the true field and the mask. This then translates into a similar result for the ensemble average of the observed power spectra $\tilde{C}^{uv}_\ell$:
+    \begin{equation}
+      \tilde{C}^{uv}_\ell = \sum_{\ell'}\,M^{uv}_{\ell \ell'}\, C^{uv}_{\ell'},
+    \end{equation}
+    where $C^{uv}_\ell$ is the true underlying power spectrum. $M^{uv}_{\ell \ell'}$ is the so-called mode-coupling matrix, which depends solely on the masks of both fields, and which can be computed analytically. The pseudo-$C_\ell$ approach is then based on 
+
+
     \TODO{Describe pseudo-$C_\ell$ method.}
   \subsection{Covariance matrices}\label{ssec:methods.cov}
     \TODO{Describe hybrid covariance matrix used (Jackknife $+$ analytic $+$ trispectrum.}
