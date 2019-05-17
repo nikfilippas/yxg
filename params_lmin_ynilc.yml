@@ -52,15 +52,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.41
-          M1:  12.70
-          Mmin:  11.41
+          M0:  11.33
+          M1:  12.62
+          Mmin:  11.33
           alpha:  1.0
-          b_hydro:  0.3615
+          b_hydro:  0.5444
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.3678
+          r_corr:  -0.2114
           sigma_lnM:  0.15
     - name: "wisc1"
       type: "g"
@@ -69,15 +69,15 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  11.77
+          M0:  11.78
           M1:  13.10
-          Mmin:  11.77
+          Mmin:  11.78
           alpha:  1.0
-          b_hydro:  0.4955
+          b_hydro:  0.4911
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5042
+          r_corr:  -0.5119
           sigma_lnM:  0.15
     - name: "wisc2"
       type: "g"
@@ -90,11 +90,11 @@ maps:
           M1:  12.90
           Mmin:  11.66
           alpha:  1.0
-          b_hydro:  0.5316
+          b_hydro:  0.5314
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.4914
+          r_corr:  -0.4930
           sigma_lnM:  0.15
     - name: "wisc3"
       type: "g"
@@ -107,11 +107,11 @@ maps:
           M1:  12.68
           Mmin:  11.51
           alpha:  1.0
-          b_hydro:  0.5254
+          b_hydro:  0.5240
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5256
+          r_corr:  -0.5278
           sigma_lnM:  0.15
     - name: "wisc4"
       type: "g"
@@ -128,7 +128,7 @@ maps:
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5245
+          r_corr:  -0.5243
           sigma_lnM:  0.15
     - name: "wisc5"
       type: "g"
@@ -138,14 +138,14 @@ maps:
       beam: False
       model:
           M0:  12.03
-          M1:  12.71
+          M1:  12.72
           Mmin:  12.03
           alpha:  1.0
-          b_hydro:  0.5665
+          b_hydro:  0.5661
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6217
+          r_corr:  -0.6218
           sigma_lnM:  0.15
     - name: "y_nilc"
       type: "y"

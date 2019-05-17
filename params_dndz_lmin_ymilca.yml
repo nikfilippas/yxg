@@ -52,15 +52,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.80
-          M1:  13.16
-          Mmin:  11.80
+          M0:  11.30
+          M1:  12.59
+          Mmin:  11.30
           alpha:  1.0
-          b_hydro:  0.4
+          b_hydro:  0.4705
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.561
+          r_corr:  -0.2757
           sigma_lnM:  0.15
     - name: "wisc1"
       type: "g"
@@ -69,15 +69,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin1.txt"
       beam: False
       model:
-          M0:  11.78
-          M1:  13.11
-          Mmin:  11.78
+          M0:  11.42
+          M1:  12.73
+          Mmin:  11.42
           alpha:  1.0
-          b_hydro:  0.4421
+          b_hydro:  0.3903
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5470
+          r_corr:  -0.5764
           sigma_lnM:  0.15
     - name: "wisc2"
       type: "g"
@@ -86,15 +86,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin2.txt"
       beam: False
       model:
-          M0:  11.66
-          M1:  12.90
-          Mmin:  11.66
+          M0:  11.32
+          M1:  12.56
+          Mmin:  11.32
           alpha:  1.0
-          b_hydro:  0.4871
+          b_hydro:  0.4364
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5277
+          r_corr:  -0.5586
           sigma_lnM:  0.15
     - name: "wisc3"
       type: "g"
@@ -103,15 +103,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin3.txt"
       beam: False
       model:
-          M0:  11.50
-          M1:  12.68
-          Mmin:  11.50
+          M0:  11.13
+          M1:  12.31
+          Mmin:  11.13
           alpha:  1.0
-          b_hydro:  0.4909
+          b_hydro:  0.4435
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5577
+          r_corr:  -0.5811
           sigma_lnM:  0.15
     - name: "wisc4"
       type: "g"
@@ -120,15 +120,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin4.txt"
       beam: False
       model:
-          M0:  11.52
-          M1:  12.64
-          Mmin:  11.52
+          M0:  11.13
+          M1:  12.24
+          Mmin:  11.13
           alpha:  1.0
-          b_hydro:  0.4909
+          b_hydro:  0.4971
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5577
+          r_corr:  -0.5608
           sigma_lnM:  0.15
     - name: "wisc5"
       type: "g"
@@ -137,15 +137,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin5.txt"
       beam: False
       model:
-          M0:  12.02
-          M1:  12.71
-          Mmin:  12.02
+          M0:  11.54
+          M1:  12.15
+          Mmin:  11.54
           alpha:  1.0
-          b_hydro:  0.5513
+          b_hydro:  0.5206
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6347
+          r_corr:  -0.6486
           sigma_lnM:  0.15
     - name: "y_milca"
       type: "y"
