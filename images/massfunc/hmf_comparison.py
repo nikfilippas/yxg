@@ -34,7 +34,7 @@ for f in os.listdir(datadir):
 
         plt.loglog(x*h, y/h**3, "b-", lw=3)
         plt.loglog(M, massfunc, "r-", lw=3)
-        plt.xlabel("$M/h$", fontsize=16)
-        plt.ylabel(r"$\frac{dn}{d \ \log_{10}(M)} \ h^3$", fontsize=16)
+        plt.xlabel(r"$M_{\odot}$", fontsize=16)
+        plt.ylabel(r"$\frac{dn}{d \ \log_{10}(M_{\odot})}$", fontsize=16)
         plt.savefig(datadir + "plots/" + f[8:-5] + ".pdf", bbox_inches="tight")
         plt.close()
