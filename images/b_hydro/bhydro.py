@@ -40,4 +40,4 @@ for a, c, fmt, alpha, lbl in zip(data, colours, fmts, alphas, lbls):
 plt.legend(loc="lower right", fontsize=10, ncol=2)
 plt.xlabel("z", fontsize=14)
 plt.ylabel(r"$\mathrm{b_{hydro}}$", fontsize=14)
-#plt.savefig("bhydro.pdf")
+plt.savefig("bhydro.pdf")
