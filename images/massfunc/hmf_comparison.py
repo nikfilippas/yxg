@@ -32,7 +32,7 @@ for f in os.listdir(datadir):
         z = int(f[-8: -5]) / 100
         massfunc = ccl.massfunc(cosmo, M, 1/(1+z), overdensity=500)
 
-        plt.loglog(x*h, y/h**3, "b-", lw=3)
+        plt.loglog(x/h, y*h**3, "b-", lw=3)
         plt.loglog(M, massfunc, "r-", lw=3)
         plt.xlabel(r"$M_{\odot}$", fontsize=16)
         plt.ylabel(r"$\frac{dn}{d \ \log_{10}(M_{\odot})}$", fontsize=16)
