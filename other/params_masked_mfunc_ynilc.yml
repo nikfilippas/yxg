@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_masked_lmin_ynilc'
+    output_dir: 'output_masked_mfunc_ynilc'
     # Cosmological mass function
     mfunc: 'tinker10'
 
