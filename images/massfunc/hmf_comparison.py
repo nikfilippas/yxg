@@ -6,13 +6,21 @@ import itertools
 import os
 
 
+h = 0.704
 M = np.logspace(10, 15, 100)
-cosmo = ccl.Cosmology(Omega_c=0.2678,
-                      Omega_b=0.049,
-                      h=0.6704,
-                      sigma8=0.8347,
-                      n_s=0.9619)
-h = cosmo["h"]
+cosmo1 = ccl.Cosmology(Omega_c=0.226,
+                      Omega_b=0.0455,
+                      h=0.704,
+                      sigma8=0.81,
+                      n_s=0.967,
+                      mass_function="tinker")
+
+cosmo2 = ccl.Cosmology(Omega_c=0.226,
+                      Omega_b=0.0455,
+                      h=0.704,
+                      sigma8=0.81,
+                      n_s=0.967,
+                      mass_function="tinker10")
 
 datadir = "mfuncs/"
 num1 = ["08", "10"]
@@ -30,10 +38,12 @@ for f in os.listdir(datadir):
         x, y = data.T
 
         z = int(f[-8: -5]) / 100
-        massfunc = ccl.massfunc(cosmo, M, 1/(1+z), overdensity=500)
+        massfunc = ccl.massfunc(
+                    (cosmo1 if "T08" in f else cosmo2),
+                    M, 1/(1+z), overdensity=500)
 
         plt.loglog(x/h, y*h**3, "b-", lw=3)
-        plt.loglog(M, massfunc, "r-", lw=3)
+        plt.loglog(M, massfunc, "r--", lw=2)
         plt.xlabel(r"$M_{\odot}$", fontsize=16)
         plt.ylabel(r"$\frac{dn}{d \ \log_{10}(M_{\odot})}$", fontsize=16)
         plt.savefig(datadir + "plots/" + f[8:-5] + ".pdf", bbox_inches="tight")
