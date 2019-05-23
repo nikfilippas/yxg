@@ -80,7 +80,7 @@ for v in p.get('data_vectors'):
                          **(lik.build_kwargs(sam.p0))))
 
     # Plot power spectra
-    figs_cl = lik.plot_data(sam.p0, d, save_figures=True,
+    figs_cl = lik.plot_data(sam.p0, d, save_figures=True, save_data=True,
                             prefix=p.get_sampler_prefix(v['name']),
                             get_theory_1h=th1h, get_theory_2h=th2h)
 
