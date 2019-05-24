@@ -18,7 +18,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     return new_cmap
 
 
-z = np.linspace(0.01, 2, 20)
+z = np.linspace(0.01, 0.5, 20)
 a = 1/(1+z)
 
 
@@ -60,7 +60,7 @@ cbar.set_ticks(ticks[::-1])
 
 ax.set_xlabel(r"$M \mathrm{/ M_{\odot}}$", fontsize=17)
 ax.set_ylabel(r"$\xi_{\mathrm{T}08} / \xi_{\mathrm{T}10}$", fontsize=17)
-ax.tick_params(which="both", labelsize="large", is_latex=True)
+ax.tick_params(which="both", labelsize="large")
 
 cbar.set_label("$z$", rotation=0, labelpad=15, fontsize=17)
 cbar.ax.tick_params(labelsize="large")
