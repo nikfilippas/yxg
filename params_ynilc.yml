@@ -262,7 +262,7 @@ data_vectors:
       covar_type: 'comb_m'
       twopoints:
           - tracers: ['2mpz','2mpz']
-            lmin: 10
+            lmin: 0
           - tracers: ['2mpz','y_nilc']
             lmin: 0
     - type: 'Cl'

@@ -268,7 +268,7 @@ data_vectors:
           # Names of the two tracers (maps) going into this C_ell
           - tracers: ['2mpz','2mpz']
             # Minimum multipole to use in the analysis
-            lmin: 10
+            lmin: 0
           - tracers: ['2mpz','y_milca']
             lmin: 0
     - type: 'Cl'
