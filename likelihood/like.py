@@ -263,23 +263,23 @@ class Likelihood(object):
             ax.append(ax2)
             figs.append(fig)
 
-            if save_data:
-                if prefix is None:
-                    raise ValueError("Need a file prefix to save stuff")
-                else:
-                    A = np.vstack((ll, dd, ee, tt))
-                    if tv1h is not None:
-                        A = np.vstack((A, tv1h[ic]))
-                    if tv2h is not None:
-                        A = np.vstack((A, tv2h[ic]))
-
-                    c2 = chi2*np.ones_like(A[0])
-                    do = dof*np.ones_like(A[0])
-                    A = np.vstack((A, c2, do))
-
-                    fname = prefix+'cls_'+tr[0].name+'_'+tr[1].name
-                    print(fname)
-                    np.save(fname, A)
+#            if save_data:
+#                if prefix is None:
+#                    raise ValueError("Need a file prefix to save stuff")
+#                else:
+#                    A = np.vstack((ll, dd, ee, tt))
+#                    if tv1h is not None:
+#                        A = np.vstack((A, tv1h[ic]))
+#                    if tv2h is not None:
+#                        A = np.vstack((A, tv2h[ic]))
+#
+#                    c2 = chi2*np.ones_like(A[0])
+#                    do = dof*np.ones_like(A[0])
+#                    A = np.vstack((A, c2, do))
+#
+#                    fname = prefix+'cls_'+tr[0].name+'_'+tr[1].name
+#                    print(fname)
+#                    np.save(fname, A)
 
         # Print the chi^2 value in the first plot
         ax[0].text(0.7, 0.85,

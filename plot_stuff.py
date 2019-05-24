@@ -89,17 +89,22 @@ for v in p.get('data_vectors'):
                              prefix=p.get_sampler_prefix(v['name']))
 
     print(" Best-fit parameters:")
-
+    pars = []
     for i, nn, in enumerate(sam.parnames):
         CHAIN = sam.chain[:, i]
         vmin, vv, vmax = np.percentile(CHAIN, [16, 50, 84])
+        pars.append(vv)
         errmin, errmax = vv-vmin, vmax-vv
         print("  " + nn + " : %.3lE +/- (%.3lE %.3lE)" % (vv, errmax, errmin))
         if nn == 'b_hydro':
-            bmeans.append(vv)      # median
+            bmeans.append(vv)          # median
             sbmeans[0].append(errmin)  # min errorbar
             sbmeans[1].append(errmax)  # max errorbar
         chain = sam.chain
+    pars.append(lik.chi2(sam.p0))
+    pars.append(len(d.data_vector))
+    np.save(p.get_outdir()+"/best_fit_params_"+v["name"]+".npy",
+            np.array(pars))
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
     print(" b_g = %lf" % bg)
