@@ -204,6 +204,14 @@
     For the galaxy auto-correlation, the pseudo-$C_\ell$ method requires an additional step of subtracting the shot noise bias. We do so analytically following the approach described in Section 2.4.2 of \TODO{cite} with a local noise variance given by $\sigma_n^2=1/\bar{n}_\Omega$, where $\bar{n}_\Omega$ is the mean surface number density in units of ${\rm sr}^{-2}$.
 
   \subsection{Covariance matrices}\label{ssec:methods.cov}
+    We combine two different methods to estimate the power spectrum covariance matrix. 
+    
+    We make a first estimate of the covariance using the jackknife resampling method. We divide the common footprint covered by the masks of both the galaxy overdensity and Compton-$y$ maps into $N_{\rm JK}$ regions with roughly equal area. We mask out each region in turn and compute the power spectrum  using the remaining available footprint. The covariance matrix is then estimated as:
+    \begin{equation}
+      {\rm Cov}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\frac{N_{\rm JK}-1}{N_{\rm JK}}\sum_{n=1}^{N_{\rm JK}}\Delta C^{uv,(n)}_\ell\,\Delta C^{wz,(n)}_{\ell'},
+    \end{equation}
+    where $\Delta C^{uv,(n)}_\ell$ is the difference between the power spectrum estimated when removing the $n$-th jackknife region and the power spectrum averaged over all jackknife regions. We use 461 jackknife regions defined as {\tt HEALPix} pixels with resolution $N_{\rm side}=8$.
+
     \TODO{Describe hybrid covariance matrix used (Jackknife $+$ analytic $+$ trispectrum.}
 
   \subsection{Likelihood}\label{ssec:methods.like}
