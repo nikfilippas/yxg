@@ -161,8 +161,9 @@ class Likelihood(object):
 
         return -2 * pr
 
-    def plot_data(self, par, dvec, save_figures=False, prefix=None,
-                  get_theory_1h=None, get_theory_2h=None, extension='pdf'):
+    def plot_data(self, par, dvec, save_figures=False, save_data=False,
+                  prefix=None, get_theory_1h=None, get_theory_2h=None,
+                  extension='pdf'):
         """
         Produces a plot of the different data power spectra with
         error bars and the theory prediction corresponding to a set
@@ -203,7 +204,7 @@ class Likelihood(object):
                 indices.append(sub)
                 ind0 += len(l)
             return np.array(indices)
-        
+
         def unwrap(arr):
             arr_out = []
             for i in indices:
@@ -211,7 +212,6 @@ class Likelihood(object):
             return arr_out
 
         def eval_and_unwrap(pars, func):
-            v = func(pars)
             return unwrap(func(pars))
 
         # Compute theory prediction and reshape to
@@ -272,6 +272,25 @@ class Likelihood(object):
             ax.append(ax1)
             ax.append(ax2)
             figs.append(fig)
+
+#            if save_data:
+#                if prefix is None:
+#                    raise ValueError("Need a file prefix to save stuff")
+#                else:
+#                    A = np.vstack((ll, dd, ee, tt))
+#                    if tv1h is not None:
+#                        A = np.vstack((A, tv1h[ic]))
+#                    if tv2h is not None:
+#                        A = np.vstack((A, tv2h[ic]))
+#
+#                    c2 = chi2*np.ones_like(A[0])
+#                    do = dof*np.ones_like(A[0])
+#                    A = np.vstack((A, c2, do))
+#
+#                    fname = prefix+'cls_'+tr[0].name+'_'+tr[1].name
+#                    print(fname)
+#                    np.save(fname, A)
+
         # Print the chi^2 value in the first plot
         ax[0].text(0.7, 0.85,
                    '$\\chi^2/{\\rm dof} = %.2lf / %d$' % (chi2, dof),

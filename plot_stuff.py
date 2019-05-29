@@ -80,7 +80,7 @@ for v in p.get('data_vectors'):
                          **(lik.build_kwargs(sam.p0))))
 
     # Plot power spectra
-    figs_cl = lik.plot_data(sam.p0, d, save_figures=True,
+    figs_cl = lik.plot_data(sam.p0, d, save_figures=True, save_data=True,
                             prefix=p.get_sampler_prefix(v['name']),
                             get_theory_1h=th1h, get_theory_2h=th2h)
 
@@ -89,17 +89,22 @@ for v in p.get('data_vectors'):
                              prefix=p.get_sampler_prefix(v['name']))
 
     print(" Best-fit parameters:")
-
+    pars = []
     for i, nn, in enumerate(sam.parnames):
         CHAIN = sam.chain[:, i]
         vmin, vv, vmax = np.percentile(CHAIN, [16, 50, 84])
+        pars.append(vv)
         errmin, errmax = vv-vmin, vmax-vv
         print("  " + nn + " : %.3lE +/- (%.3lE %.3lE)" % (vv, errmax, errmin))
         if nn == 'b_hydro':
-            bmeans.append(vv)      # median
+            bmeans.append(vv)          # median
             sbmeans[0].append(errmin)  # min errorbar
             sbmeans[1].append(errmax)  # max errorbar
         chain = sam.chain
+    pars.append(lik.chi2(sam.p0))
+    pars.append(len(d.data_vector))
+    np.save(p.get_outdir()+"/best_fit_params_"+v["name"]+".npy",
+            np.array(pars))
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
     print(" b_g = %lf" % bg)
@@ -110,7 +115,7 @@ sbmeans = np.array(sbmeans)  # (2,N): min,max
 
 plt.figure()
 plt.errorbar(zmeans, 1-np.array(bmeans),
-             xerr=szmeans, yerr=np.flip(sbmeans), fmt='ro')
+             xerr=szmeans, yerr=np.flip(sbmeans, 0), fmt='ro')
 plt.xlabel('$z$', fontsize=15)
 plt.ylabel('$1-b$', fontsize=15)
 plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',

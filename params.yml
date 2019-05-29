@@ -51,15 +51,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.819296066010548
-          M1:  13.08953452582468
-          Mmin:  11.819296066010548
+          M0:  11.54
+          M1:  12.91
+          Mmin:  11.54
           alpha:  1.0
-          b_hydro:  0.3664729231819921
+          b_hydro:  0.5833
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.2190961041633896
+          r_corr:  -0.1260
           sigma_lnM:  0.15
       # List of systematics
       systematics:
@@ -71,15 +71,15 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  12.127579700404691
-          M1:  13.470002326394642
-          Mmin:  12.127579700404691
+          M0:  11.90
+          M1:  13.32
+          Mmin:  11.94
           alpha:  1.0
-          b_hydro:  0.4206032405310551
+          b_hydro:  0.3511
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.48205884075500993
+          r_corr:  -0.5755
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -92,15 +92,15 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  12.063309910969627
-          M1:  13.35186889632406
-          Mmin:  12.063309910969627
+          M0:  11.83
+          M1:  13.18
+          Mmin:  11.83
           alpha:  1.0
-          b_hydro:  0.42936987420799055
+          b_hydro:  0.3756
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5119147997822887
+          r_corr:  -0.5711
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -113,15 +113,15 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.919767524955585
-          M1:  13.139743499087519
-          Mmin:  11.919767524955585
+          M0:  11.73
+          M1:  13.00
+          Mmin:  11.73
           alpha:  1.0
-          b_hydro:  0.4392974224108877
+          b_hydro:  0.3558
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5527964171093198
+          r_corr:  -0.6038
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -134,15 +134,15 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.93656331307651
-          M1:  13.126517875739742
-          Mmin:  11.93656331307651
+          M0:  11.76
+          M1:  12.99
+          Mmin:  11.77
           alpha:  1.0
-          b_hydro:  0.4879808227067266
+          b_hydro:  0.4002
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.54574470592155
+          r_corr:  -0.5897
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -155,15 +155,15 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  12.442928720307966
-          M1:  13.303037401959886
-          Mmin:  12.442928720307966
+          M0:  12.35
+          M1:  13.24
+          Mmin:  12.35
           alpha:  1.0
-          b_hydro:  0.5047829367573827
+          b_hydro:  0.4016
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6590293057265538
+          r_corr:  -0.6789
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'

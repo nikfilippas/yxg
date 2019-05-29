@@ -71,7 +71,7 @@
 
     The angular power spectrum can be related to the 3D power spectrum of the associated 3D fields $P_{UV}$ as:
     \begin{equation}
-      C_\ell^{uv} = \int d\chi \frac{W_u(z)W_v(z)}{\chi^2(z)}\,P_{UV}\left( z, k=\frac{\ell+1/2}{\chi(z)} \right).
+      C_\ell^{uv} = \int d\chi \frac{W_u(\chi)W_v(\chi)}{\chi^2}\,P_{UV}\left( z, k=\frac{\ell+1/2}{\chi} \right).
     \end{equation}
     Here, the 3D power spectrum is analogously defined as the variance of the Fourier-space 3D quantities:
     \begin{equation}
@@ -116,7 +116,7 @@
       \begin{equation}
         \langle N_s(M)\rangle=\Theta(M-M_0)\,\left(\frac{M-M_0}{M_1'}\right)^{\alpha_s}.
       \end{equation}
-      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1$.
+      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1'$.
       
       Besides their mean values, we also need to specify the statistics of $N_c$ and $N_s$. Following the standard practice \TODO{cite}, we assume $N_c$ to have a binomial distribution with probability $p=\langle N_c\rangle$, and $N_s$ to be Poisson-distributed.
 
@@ -191,11 +191,69 @@
 
 \section{Methods}\label{sec:methods}
   \subsection{Estimating power spectra}\label{ssec:methods.cls}
-    \TODO{Describe pseudo-$C_\ell$ method.}
+    We measure all auto- and cross-power spectra between the different redshift bins and the $y$ maps using the pseudo-$C_\ell$ estimator \TODO{cites} as implemented in \TODO{cite}. Details about the method can be found in \TODO{cite}, but we provide a brief description here for completeness. For an incomplete sky coverage, a given field observed on the sphere, $\tilde{u}(\nv)$, can be modelled as a product of the true underlying field $u$, and a sky mask $w$
+    \begin{equation}
+      \tilde{u}^{\rm obs}(\nv) = w(\nv)\,u(\nv).
+    \end{equation}
+    In the simplest scenario, the mask $w$ is simply a binary map ($w=0$ or 1) selecting the pixels in the sky that have been observed. More generally, $w$ can be designed to optimally up- or downweight different regions in an inverse-variance manner. Through the convolution theorem, the spherical harmonic transform of the observed field is a convolution of the harmonic transforms of the true field and the mask. This then translates into a similar result for the ensemble average of the observed power spectra $\tilde{C}^{uv}_\ell$:
+    \begin{equation}
+      \tilde{C}^{uv}_\ell = \sum_{\ell'}\,M^{uv}_{\ell \ell'}\, C^{uv}_{\ell'},
+    \end{equation}
+    where $C^{uv}_\ell$ is the true underlying power spectrum. $M^{uv}_{\ell \ell'}$ is the so-called mode-coupling matrix, which depends solely on the masks of both fields, and which can be computed analytically. Roughly speaking, the pseudo-$C_\ell$ approach is then based on estimating $M^{uv}$ and inverting it to yield an unbiased estimate of the power spectrum.
+    
+    For the galaxy auto-correlation, the pseudo-$C_\ell$ method requires an additional step of subtracting the shot noise bias. We do so analytically following the approach described in Section 2.4.2 of \TODO{cite} with a local noise variance given by $\sigma_n^2=1/\bar{n}_\Omega$, where $\bar{n}_\Omega$ is the mean surface number density in units of ${\rm sr}^{-2}$.
+
   \subsection{Covariance matrices}\label{ssec:methods.cov}
-    \TODO{Describe hybrid covariance matrix used (Jackknife $+$ analytic $+$ trispectrum.}
+    We combine two different methods to estimate the power spectrum covariance matrix. 
+    
+    We make a first estimate of the covariance using the jackknife resampling method. We divide the common footprint covered by the masks of both the galaxy overdensity and Compton-$y$ maps into $N_{\rm JK}$ regions with roughly equal area. We mask out each region in turn and compute the power spectrum  using the remaining available footprint. The covariance matrix is then estimated as:
+    \begin{equation}
+      {\rm Cov}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\frac{N_{\rm JK}-1}{N_{\rm JK}}\sum_{n=1}^{N_{\rm JK}}\Delta C^{uv,(n)}_\ell\,\Delta C^{wz,(n)}_{\ell'},
+    \end{equation}
+    where $\Delta C^{uv,(n)}_\ell$ is the difference between the power spectrum estimated when removing the $n$-th jackknife region and the power spectrum averaged over all jackknife regions. We use 461 jackknife regions defined as {\tt HEALPix} pixels with resolution $N_{\rm side}=8$.
+
+    Although the jackknife method is able to provide an estimate of the size of the power spectrum uncertainties in a model independent way, it also has its drawbacks. There are only so many jackknife regions that can be selected with a reasonable size, and therefore the estimated covariance is noisy at some level. Furthermore, since the footprint associated with the removal of each jackknife region is different from the overall footprint, the method is also not able to recover the mode-coupling associated with the map geometry by construction. In order to verify and improve our estimate of the covariance matrix, we make use of a second analytical estimator.
+
+    We compute the analytical covariance matrix following the methods outlined in \TODO{cite}. The covariance receives two main additive contributions, from the so-called {\sl disconnected} and {\sl connected} trispectra. The disconnected part is essentially the covariance matrix estimated under the assumption that all fields are Gaussianly distributed. In the absence of sky masks, it is given by
+    \begin{equation}
+      {\rm Cov}^{\rm G}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\delta_{\ell\ell'}\frac{C^{uw}_\ell C^{vz}_\ell+C^{uz}_\ell C^{vw}_\ell}{2\ell+1}.
+    \end{equation}
+    A sky mask introduces non-zero coupling between different $\ell$ modes. To account for these, we use the  method introduced in \TODO{cite}, which has been shown to be an excellent approximation for large-scale structure data \TODO{cite}.
+
+    We compute the connected (i.e. non-Gaussian) contribution to the covariance matrix using the halo model as the 1-halo trispectrum \TODO{cite}, given by:
+    \begin{align}\nonumber
+      {\rm Cov}^{\rm NG}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\int &d\chi\,\frac{W_u(\chi)W_v(\chi)W_w(\chi)W_z(\chi)}{4\pi f_{\rm sky}\,\chi^6}\times\\
+      &T^{1h}_{uvwz}\left(k=\frac{\ell+1/2}{\chi}\right),
+    \end{align}
+    where
+    \begin{equation}\nonumber
+      T^{1h}_{uvwz}(k)\equiv\int dM\frac{dn}{dM}\langle U(k|M) V(k|M) W(k|M) Z(k|M)\rangle.
+    \end{equation}
+    Here we have used the notation introduced in Section \ref{ssec:theory.cls} for the radial kernels ($W_u(\chi)$) and Fourier-space halo profiles ($U(k|M)$) of the different projected fields. The total covariance matrix is simply given by ${\rm Cov}={\rm Cov}^{\rm G}+{\rm Cov}^{\rm NG}$. Note that estimating the connected term requires the use of the best-fit halo model parameters that we do not know a priori. In order to circumvent this issue we proceed as in \TODO{cite} and estimate the covariance matrix in a two-step process, where we first obtain best-fit parameters by minimizing a $\chi^2$ that uses only the Gaussian covariance with power spectra computed directly from the data, and we then use those parameters to calculate the non-Gaussian contribution (as well as to recalculate the Gaussian part using the best-fit prediction for the power spectra).
+
+    Figure  \TODO{make figure} shows the diagonal of the covariance matrix for one of the tSZ-galaxy power spectra estimated using these two methods. We find that both estimators are in good agreement with each other. We construct our final fiducial covariance matrix as a hybrid of both estimators: in order to ensure that we recover realistic error bar sizes, we use the variance estimated from the jackknifes. We then combine this with the correlation matrix estimated with our analytical method. This ensures that our estimator accounts for the coupling between different modes caused by survey geometry and non-Gaussianities while avoiding the the statistical noise in the jackknife estimator. The final covariance is therefore:
+    \begin{equation}
+      {\rm Cov}_{ij} = {\rm Cov}^{\rm ana}_{ij} \sqrt{\frac{{\rm Cov}^{\rm JK}_{ii}\,{\rm Cov}^{\rm JK}_{jj}}{{\rm Cov}^{\rm ana}_{ii}\,{\rm Cov}^{\rm ana}_{jj}}},
+    \end{equation}
+    where ${\rm Cov}^{\rm JK}$ and ${\rm Cov}^{\rm ana}$ are the jackknife and analytical covariance matrices respectively.
+
   \subsection{Likelihood}\label{ssec:methods.like}
-    \TODO{Describe likelihood, free parameters etc.}
+    In order to connect our measurements with the posterior distribution of the model parameters $\vec{\theta}$, we assume that the measured power spectra follow a Gaussian likelihood:
+    \begin{equation}
+      -2\log p({\bf d}|\vec{\theta}) = \chi^2\equiv ({\bf d}-{\bf t}(\vec{\theta}))^T {\sf C}^{-1} ({\bf d}-{\bf t}(\vec{\theta})),
+    \end{equation}
+    where ${\bf d}$ is a vector of power spectrum measurements, ${\bf t}(\vec{\theta})$ is the theory prediction for ${\bf d}$ with parameters $\vec{\theta}$ and ${\sf Cov}$ is the covariance matrix described in the previous section.
+
+    We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \TODO{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
+
+    For each redshift bin, our theory model has four free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$ and $\rho_{yg}$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while the last two are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following non-informative top-hat priors on the free parameters:
+    \begin{align}
+      &10\le\log_{10}M_{\rm min}/M_\odot\le16,\\
+      &10\le\log_{10}M_1'/M_\odot\le16,\\
+      &0\le(1-b_H)\le0.99,\\
+      &-1\le\rho_{yg}\le1.
+    \end{align}
+    We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \TODO{add footnote}.
 
 \section{Results}\label{sec:results}
   \subsection{Fiducial results}\label{ssec:results.fid}

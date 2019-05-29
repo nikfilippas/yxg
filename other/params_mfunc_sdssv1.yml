@@ -1,0 +1,370 @@
+# Global parameters
+global:
+    # Healpix resolution
+    nside: 512
+    # Output directory
+    output_dir: 'output_mfunc_sdssv1'
+    # Cosmological mass function
+    mfunc: 'tinker10'
+
+jk:
+    # Do you want to do jackknives?
+    do: True
+    # Healpix resolution defining the jackknife regions
+    nside: 8
+    # Should we store the mode-coupling matrix?
+    store_mcm: False
+
+# Information about ell bandpowers
+bandpowers:
+    # Bandpower mode
+    type: "linlog"
+    # Constant width
+    nlb: 20
+    # Threshold between linear and logarithmic
+    lsplit: 52
+    # Width of linar part
+    nlb_lin: 10
+    # Number of logarithmic bins
+    nb_log: 20
+
+# Masks
+# Add an entry for each mask used in the analysis
+masks:
+    # Given each mask a unique name (key)
+    mask_sdss: "data/maps/BOSS_dr12_mask256_v2.fits"
+    mask_tsz: "data/maps/mask_planck60.fits"
+
+# Maps
+maps:
+    # Each item here corresponds to one sky map
+    - name: "sdss1"
+      # 'g' for galaxies, 'y' for tSZ
+      type: "g"
+      # Path to map
+      map: "data/maps/SDSS.DR12.0_1photoz0_15_rLess21_512.fits"
+      # Name of mask (should correspond to one of the keys in the previous section)
+      mask: "mask_sdss"
+      # dndz file
+      dndz: "data/dndz/SDSS_bin1_v1.txt"
+      # Is there a beam associated with this map?
+      beam: False
+      # Best-fit model parameters describing this map
+      model:
+          # HOD and tSZ parameters
+          M0:  12.08
+          M1:  13.55
+          Mmin:  12.08
+          alpha:  1.0
+          b_hydro:  0.4660
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.6454
+          sigma_lnM:  0.15
+    - name: "sdss2"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_15photoz0_2_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin2_v1.txt"
+      beam: False
+      # Names of systematics to deproject at the C_ell or map level
+      syst: False
+      model:
+          M0:  12.14
+          M1:  13.55
+          Mmin:  12.14
+          alpha:  1.0
+          b_hydro:  0.5368
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.5647
+          sigma_lnM:  0.15
+    - name: "sdss3"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_2photoz0_25_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin3_v1.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.26
+          M1:  13.59
+          Mmin:  12.26
+          alpha:  1.0
+          b_hydro:  0.5273
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.5608
+          sigma_lnM:  0.15
+    - name: "sdss4"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_25photoz0_3_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin4_v1.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.29
+          M1:  13.52
+          Mmin:  12.29
+          alpha:  1.0
+          b_hydro:  0.5812
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.4874
+          sigma_lnM:  0.15
+    - name: "sdss5"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_3photoz0_35_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin5_v1.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.18
+          M1:  13.35
+          Mmin:  12.18
+          alpha:  1.0
+          b_hydro:  0.5842
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.4536
+          sigma_lnM:  0.15
+    - name: "sdss6"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_35photoz0_4_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin6_v1.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.19
+          M1:  13.29
+          Mmin:  10.00
+          alpha:  1.0
+          b_hydro:  0.5907
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.4305
+          sigma_lnM:  0.15
+    - name: "sdss7"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_4photoz0_5_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin7_v1.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.01
+          M1:  13.10
+          Mmin:  12.01
+          alpha:  1.0
+          b_hydro:  0.6212
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.5937
+          sigma_lnM:  0.15
+    - name: "sdss8"
+      type: "g"
+      map: "data/maps/SDSS.DR12.0_5photoz0_6_rLess21_512.fits"
+      mask: "mask_sdss"
+      dndz: "data/dndz/SDSS_bin8_v1.txt"
+      beam: False
+      syst: False
+      model:
+          M0:  12.53
+          M1:  13.61
+          Mmin:  12.53
+          alpha:  1.0
+          b_hydro:  0.6929
+          beta_gal:  1.0
+          beta_max:  1.0
+          fc:  1.0
+          r_corr:  -0.7216
+          sigma_lnM:  0.15
+    - name: "y_milca"
+      type: "y"
+      map: "data/maps/milca_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+
+# MCMC
+mcmc:
+    # Name for this run
+    run_name: minimal_hmc
+    # Maximum wavenumber in units of 1/Mpc
+    kmax: 1.
+    # Number of samples in redshift for each bin
+    nz_points_g: 32
+    # Use logarithmic sampling in redshift?
+    z_log_sampling: True
+    # Correct the halo model in the transition regime?
+    hm_correct: True
+    # Print debug information?
+    debug: False
+    # Emcee parameters
+    n_walkers: 200
+    n_steps: 1000
+    # Continue MCMC from previous iteration?
+    continue_mcmc: False
+
+# Model parameters
+params:
+    # Each item here corresponds to one of the parameters
+    # used in our model
+    - name: "M0"
+      # Label for plotting
+      label: "M_0"
+      # Is this the same as another parameter? If so, put its name here.
+      alias: "Mmin"
+      # Is this a free parameter?
+      vary: False
+      # Fiducial value
+      value: 12.5
+      # Prior
+      prior:
+          # Allowed: "Gaussian" or "TopHat"
+          type: "TopHat"
+          # If "TopHat", put edges here.
+          # If "Gaussian", put [mean,sigma].
+          values: [8.,16.]
+    - name: "M1"
+      label: "M_1"
+      vary: True
+      value: 13.5
+      prior:
+          type: "TopHat"
+          values: [8.,16.]
+    - name: "Mmin"
+      label: "M_{\\rm min}"
+      vary: True
+      value: 12.
+      prior:
+          type: "TopHat"
+          values: [8.,16.]
+    - name: "fc"
+      label: "f_c"
+      vary: False
+      value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.,1.]
+    - name: "alpha"
+      label: "\\alpha"
+      vary: False
+      value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.,3.]
+    - name: "beta_max"
+      label: "\\beta_{\\rm max}"
+      alias: "beta_gal"
+    - name: "beta_gal"
+      label: "beta_g"
+      vary: False
+      value: 1.
+      prior:
+          type: "TopHat"
+          values: [0.1,10.]
+    - name: "sigma_lnM"
+      label: "\\sigma_{{\\rm ln}M}"
+      vary: False
+      value: 0.15
+      prior:
+          type: "TopHat"
+          values: [0.01,1.]
+    - name: "b_hydro"
+      label: "b_H"
+      vary: True
+      value: 0.3
+      prior:
+          type: "TopHat"
+          values: [0.,1.]
+    - name: "r_corr"
+      label: "\\rho_{gy}"
+      vary: True
+      value: 0.
+      prior:
+          type: "TopHat"
+          values: [-1.,1.]
+
+# List all the different combinations of
+# power spectra you want to analyze
+data_vectors:
+    - type: 'Cl'
+      # Give each element a different name
+      name: 'sdss1'
+      # Type of covariance matrix to be used.
+      covar_type: 'comb_m'
+      # List here the different power spectrum
+      # combinations you want to use
+      twopoints:
+          # Names of the two tracers (maps) going into this C_ell
+          - tracers: ['sdss1','sdss1']
+            # Minimum multipole to use in the analysis
+            lmin: 0
+          - tracers: ['sdss1','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss2'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss2','sdss2']
+            lmin: 0
+          - tracers: ['sdss2','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss3'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss3','sdss3']
+            lmin: 0
+          - tracers: ['sdss3','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss4'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss4','sdss4']
+            lmin: 0
+          - tracers: ['sdss4','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss5'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss5','sdss5']
+            lmin: 0
+          - tracers: ['sdss5','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss6'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss6','sdss6']
+            lmin: 0
+          - tracers: ['sdss6','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss7'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss7','sdss7']
+            lmin: 0
+          - tracers: ['sdss7','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'sdss8'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['sdss8','sdss8']
+            lmin: 0
+          - tracers: ['sdss8','y_milca']
+            lmin: 0

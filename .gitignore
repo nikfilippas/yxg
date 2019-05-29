@@ -6,6 +6,7 @@ legacy/
 
 
 # File extensions
+out*/*.npy
 *.npz
 *.mcm
 *.cmcm
