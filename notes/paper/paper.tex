@@ -116,7 +116,7 @@
       \begin{equation}
         \langle N_s(M)\rangle=\Theta(M-M_0)\,\left(\frac{M-M_0}{M_1'}\right)^{\alpha_s}.
       \end{equation}
-      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1$.
+      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1'$.
       
       Besides their mean values, we also need to specify the statistics of $N_c$ and $N_s$. Following the standard practice \TODO{cite}, we assume $N_c$ to have a binomial distribution with probability $p=\langle N_c\rangle$, and $N_s$ to be Poisson-distributed.
 
@@ -244,10 +244,16 @@
     \end{equation}
     where ${\bf d}$ is a vector of power spectrum measurements, ${\bf t}(\vec{\theta})$ is the theory prediction for ${\bf d}$ with parameters $\vec{\theta}$ and ${\sf Cov}$ is the covariance matrix described in the previous section.
 
-    We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$.
-    
+    We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \TODO{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
 
-    \TODO{Describe likelihood, free parameters etc.}
+    For each redshift bin, our theory model has four free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$ and $\rho_{yg}$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while the last two are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following non-informative top-hat priors on the free parameters:
+    \begin{align}
+      &10\le\log_{10}M_{\rm min}/M_\odot\le16,\\
+      &10\le\log_{10}M_1'/M_\odot\le16,\\
+      &0\le(1-b_H)\le0.99,\\
+      &-1\le\rho_{yg}\le1.
+    \end{align}
+    We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \TODO{add footnote}.
 
 \section{Results}\label{sec:results}
   \subsection{Fiducial results}\label{ssec:results.fid}
