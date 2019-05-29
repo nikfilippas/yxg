@@ -18,8 +18,8 @@ def rDelta(m,zz,Delta) :
 
 #Read catalog and remove all clusters above z=0.43
 data=(fits.open('data/maps/HFI_PCCS_SZ-union_R2.08.fits'))[1].data
-ids=np.where(data['REDSHIFT']>=0)[0]; data=data[ids]
-idsz=np.where(data['REDSHIFT']<0.43)[0]; data=data[idsz]
+mask = (data['REDSHIFT']>=0) & (data['SNR']>=6)
+data=data[mask]
 #Compute their angular extent
 r500=rDelta(data['MSZ']*HH*1E14,data['REDSHIFT'],500)
 chi=ccl.comoving_radial_distance(cosmo,1./(1+data['REDSHIFT']))*HH
