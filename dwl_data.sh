@@ -15,6 +15,12 @@ if [ ! -f milca_ymaps.fits ] ; then
     rm COM_CompMap_YSZ_R2.00.fits.tgz
 fi
 
+#545GHz map
+if [ ! -f HFI_SkyMap_545_2048_R2.02_full.fits ] ; then
+    echo " Downloading 545 map"
+    wget irsa.ipac.caltech.edu/data/Planck/release_2/all-sky-maps/maps/HFI_SkyMap_545_2048_R2.02_full.fits
+fi
+
 #Masks
 if [ ! -f HFI_Mask_GalPlane-apo0_2048_R2.00.fits ] ; then
     echo " Downloading galatic mask" 

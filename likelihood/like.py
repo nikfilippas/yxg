@@ -15,7 +15,8 @@ class Likelihood(object):
             vector provided in `data`.
         debug (bool): if True, will output debugging information.
     """
-    def __init__(self, pars, data, covar, get_theory, debug=False):
+    def __init__(self, pars, data, covar, get_theory,
+                 template=None, debug=False):
         self.p_free_names = []
         self.p_free_labels = []
         self.p_free_prior = []
@@ -24,9 +25,18 @@ class Likelihood(object):
         self.p0 = []
         self.get_theory = get_theory
         self.dv = data
+        if template is not None:
+            ic = np.linalg.inv(covar)
+            ict = np.dot(ic, template)
+            sigma2 = 1./np.dot(template, ict)
+            iccor = sigma2 * ict[:, None] * ict[None, :]
+            self.ic = ic - iccor
+            self.t_bf = sigma2 * template[:, None] * ict[None, :]
+        else:
+            self.ic = np.linalg.inv(covar)
+            self.t_bf = None
         self.cv = covar
-        self.ic = np.linalg.inv(covar)
-        self.cvhalf = np.linalg.cholesky(covar)
+        self.cvhalf = np.linalg.cholesky(self.cv)
         self.debug = debug
 
         for p in pars:

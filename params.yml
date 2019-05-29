@@ -3,9 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output'
-    # Cosmological mass function
-    mfunc: 'tinker'
+    output_dir: 'output_default'
 
 jk:
     # Do you want to do jackknives?
@@ -34,6 +32,7 @@ masks:
     # Given each mask a unique name (key)
     mask_lowz: "data/maps/mask_v3.fits"
     mask_tsz: "data/maps/mask_planck60.fits"
+    mask_545: "data/maps/mask_planck20.fits"
 
 # Maps
 maps:
@@ -62,6 +61,9 @@ maps:
           fc:  1.0
           r_corr:  -0.1260
           sigma_lnM:  0.15
+      # List of systematics
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc1"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
@@ -79,6 +81,10 @@ maps:
           fc:  1.0
           r_corr:  -0.5755
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc2"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
@@ -96,6 +102,10 @@ maps:
           fc:  1.0
           r_corr:  -0.5711
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc3"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
@@ -113,6 +123,10 @@ maps:
           fc:  1.0
           r_corr:  -0.6038
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc4"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
@@ -130,6 +144,10 @@ maps:
           fc:  1.0
           r_corr:  -0.5897
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc5"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
@@ -147,17 +165,34 @@ maps:
           fc:  1.0
           r_corr:  -0.6789
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "y_milca"
       type: "y"
       map: "data/maps/milca_ymaps.fits"
       mask: "mask_tsz"
       beam: 10.
-
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "y_nilc"
+      type: "y"
+      map: "data/maps/nilc_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "dust_545"
+      type: "d"
+      map: "data/maps/HFI_SkyMap_545_2048_R2.02_full.fits"
+      mask: "mask_545"
+      beam: 10.
 
 # MCMC
 mcmc:
     # Name for this run
-    run_name: minimal_hmc
+    run_name: 'lmin10_kmax1_tinker08_dndz1'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -170,9 +205,11 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 200
-    n_steps: 1000
+    n_steps: 0
     # Continue MCMC from previous iteration?
     continue_mcmc: True
+    # Cosmological mass function
+    mfunc: 'tinker'
 
 # Model parameters
 params:

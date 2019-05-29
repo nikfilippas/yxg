@@ -18,7 +18,7 @@ class ParamRun(object):
         """
         Get preferred mass function
         """
-        return self.p['global']['mfunc']
+        return self.p['mcmc']['mfunc']
 
     def get_cosmo(self):
         """

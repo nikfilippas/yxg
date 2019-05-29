@@ -31,9 +31,10 @@ if p.do_jk():
     # Set union mask
     msk_tot = np.ones(hp.nside2npix(nside))
     for k in p.get('masks').keys():
-        msk_tot *= hp.ud_grade(hp.read_map(p.get('masks')[k],
-                                           verbose=False),
-                               nside_out=nside)
+        if k != 'mask_545':
+            msk_tot *= hp.ud_grade(hp.read_map(p.get('masks')[k],
+                                               verbose=False),
+                                   nside_out=nside)
     # Set jackknife regions
     jk = JackKnife(p.get('jk')['nside'], msk_tot)
 
@@ -52,14 +53,18 @@ print("OK")
 models = p.get_models()
 fields_ng = []
 fields_sz = []
+fields_dt = []
 for d in tqdm(p.get('maps'), desc="Reading fields"):
 #    print(" " + d['name'])
     f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
-              d['map'], d.get('dndz'), is_ndens=d['type'] == 'g')
-    if f.is_ndens:
+              d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
+              syst_list = d.get('systematics'))
+    if d['type'] == 'g':
         fields_ng.append(f)
-    else:
+    elif d['type'] == 'y':
         fields_sz.append(f)
+    else:
+        fields_dt.append(f)
 
 # Compute power spectra
 print("Computing power spectra...", end="")
@@ -102,6 +107,22 @@ for fy in fields_sz:
 cls_yy = {}
 for fy in fields_sz:
     cls_yy[fy.name] = get_power_spectrum(fy, fy)
+# dy power spectra
+cls_dy = {}
+for fy in fields_sz:
+    cls_dy[fy.name] = {}
+    for fd in fields_dt:
+        cls_dy[fy.name][fd.name] = get_power_spectrum(fy, fd)
+# dg power spectra
+cls_dg = {}
+for fg in fields_ng:
+    cls_dg[fg.name] = {}
+    for fd in fields_dt:
+        cls_dg[fg.name][fd.name] = get_power_spectrum(fg, fd)
+# dd power spectra
+cls_dd = {}
+for fd in fields_dt:
+    cls_dd[fd.name] = get_power_spectrum(fd, fd)
 print("OK")
 
 # Generate model power spectra to compute the Gaussian covariance matrix
@@ -163,6 +184,26 @@ cls_cov_yy = {}
 for fy in fields_sz:
     cls_cov_yy[fy.name] = interpolate_spectra(cls_yy[fy.name].leff,
                                               cls_yy[fy.name].cell, nside)
+cls_cov_dd = {}
+for fd in fields_dt:
+    cls_cov_dd[fd.name] = interpolate_spectra(cls_dd[fd.name].leff,
+                                              cls_dd[fd.name].cell, nside)
+# dy power spectra
+cls_cov_dy = {}
+for fy in fields_sz:
+    cls_cov_dy[fy.name] = {}
+    for fd in fields_dt:
+        cl = cls_dy[fy.name][fd.name]
+        cls_cov_dy[fy.name][fd.name] = interpolate_spectra(cl.leff,
+                                                           cl.cell, nside)
+# dg power spectra
+cls_cov_dg = {}
+for fg in fields_ng:
+    cls_cov_dg[fg.name] = {}
+    for fd in fields_dt:
+        cl = cls_dg[fg.name][fd.name]
+        cls_cov_dg[fg.name][fd.name] = interpolate_spectra(cl.leff,
+                                                           cl.cell, nside)
 
 # Generate covariances
 print("Computing covariances...")
@@ -293,6 +334,32 @@ for fy in fields_sz:
         dcov *= (b_hp**2*b_y)[:, None]*(b_hp**2*b_y)[None, :]
         dcov_gygy[fy.name][fg.name] = Covariance(fg.name, fy.name,
                                                  fg.name, fy.name, dcov)
+# gdgd
+print("  gdgd")
+covs_gdgd_data = {}
+for fd in fields_dt:
+    covs_gdgd_data[fd.name] = {}
+    for fg in fields_ng:
+        clvggd = cls_cov_gg_data[fg.name]
+        clvgdd = cls_cov_dg[fg.name][fd.name]
+        clvdd = cls_cov_dd[fd.name]
+        covs_gdgd_data[fd.name][fg.name] = get_covariance(fg, fd, fg, fd,
+                                                          'data',
+                                                          clvggd, clvgdd,
+                                                          clvgdd, clvdd)
+# ydyd
+print("  ydyd")
+covs_ydyd_data = {}
+for fd in fields_dt:
+    covs_ydyd_data[fd.name] = {}
+    for fy in fields_sz:
+        clvyyd = cls_cov_yy[fy.name]
+        clvydd = cls_cov_dy[fy.name][fd.name]
+        clvdd = cls_cov_dd[fd.name]
+        covs_gdgd_data[fd.name][fy.name] = get_covariance(fy, fd, fy, fd,
+                                                          'data',
+                                                          clvyyd, clvydd,
+                                                          clvydd, clvdd)
 
 # Save 1-halo covariance
 print("Saving 1-halo covariances...", end="")
@@ -326,6 +393,9 @@ if p.do_jk():
         for fy in fields_sz:
 #            print(" " + fy.name)
             fy.update_field(msk)
+        for fd in fields_dt:
+#            print(" " + fy.name)
+            fd.update_field(msk)
 
         # Compute spectra
         # gg
@@ -338,6 +408,17 @@ if p.do_jk():
         # yy
         for fy in fields_sz:
             get_power_spectrum(fy, fy, jk_region=jk_id, save_windows=False)
+        # dy
+        for fy in fields_sz:
+            for fd in fields_dt:
+                get_power_spectrum(fy, fd, jk_region=jk_id, save_windows=False)
+        # dg
+        for fg in fields_ng:
+            for fd in fields_dt:
+                get_power_spectrum(fg, fd, jk_region=jk_id, save_windows=False)
+        # dd
+        for fd in fields_dt:
+            get_power_spectrum(fd, fd, jk_region=jk_id, save_windows=False)
 
         # Cleanup MCMs
         if not p.get('jk')['store_mcm']:
@@ -383,6 +464,32 @@ if p.do_jk():
                 prefix2 = p.get_prefix_cls(fy, fg) + "_jk"
                 cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
                                          fg.name, fy.name, fg.name, fy.name)
+            cov.to_file(fname_out, n_samples=jk.npatches)
+
+    for fd in fields_dt:
+        for fg in fields_ng:
+            # gdgd
+            fname_out = p.get_fname_cov(fg, fd, fg, fd, "jk")
+            try:
+                cov = Covariance.from_file(fname_out, fg.name, fd.name,
+                                           fg.name, fd.name)
+            except:
+                prefix1 = p.get_prefix_cls(fg, fd) + "_jk"
+                prefix2 = p.get_prefix_cls(fg, fd) + "_jk"
+                cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
+                                         fg.name, fd.name, fg.name, fd.name)
+            cov.to_file(fname_out, n_samples=jk.npatches)
+        for fy in fields_sz:
+            # ydyd
+            fname_out = p.get_fname_cov(fy, fd, fy, fd, "jk")
+            try:
+                cov = Covariance.from_file(fname_out, fy.name, fd.name,
+                                           fy.name, fd.name)
+            except:
+                prefix1 = p.get_prefix_cls(fy, fd) + "_jk"
+                prefix2 = p.get_prefix_cls(fy, fd) + "_jk"
+                cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
+                                         fy.name, fd.name, fy.name, fd.name)
             cov.to_file(fname_out, n_samples=jk.npatches)
     print("OK")
 
