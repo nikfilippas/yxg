@@ -85,8 +85,9 @@ for s, sur in enumerate(surveys):
         ax2.set_xlim([ll[ind2][0]/1.1, ll[ind2][-1]*1.1])
 
         if i == 0:
-            ax1.axvspan(ax1.get_xlim()[0], ll[ind0][0], color="grey", alpha=0.2)
-            ax2.axvspan(ax1.get_xlim()[0], ll[ind0][0], color="grey", alpha=0.2)
+            if lmin != 0:
+                ax1.axvspan(ax1.get_xlim()[0], ll[ind0][0], color="grey", alpha=0.2)
+                ax2.axvspan(ax1.get_xlim()[0], ll[ind0][0], color="grey", alpha=0.2)
             ax1.text(0.02, 0.05, sci[s]+"\n"+"$\\chi^2/{\\rm dof}=%.2lf/%d$" %
                      (chi2, dof), transform=ax1.transAxes)
 

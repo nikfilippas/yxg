@@ -53,7 +53,7 @@ dir1 = "../../data/dndz/"
 wisc = ["wisc_b%d" % i for i in range(1, 6)]
 surveys = ["2mpz"] + wisc
 sci = [r"$\mathrm{2MPZ}$"] + \
-      [r"$\mathrm{WI \times SC - %d}$" % i for i in range(1, 6)]
+      [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
 
 dz1, dN1 = get_z_Nz()
 dz2, dN2 = get_z_Nz(version="_v2")
