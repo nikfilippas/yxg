@@ -5,6 +5,7 @@ from scipy.integrate import simps
 
 def hm_1h_trispectrum(cosmo, k, a, profiles,
                       logMrange=(6, 17), mpoints=128,
+                      selection=None,
                       **kwargs):
     """Computes the halo model prediction for the 1-halo 3D
     trispectrum of four quantities.
@@ -18,6 +19,9 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
             the four quantities being correlated.
         logMrange (tuple): limits of integration in log10(M/Msun)
         mpoints (int): number of mass samples
+        selection (function): selection function in (M,z) to include
+            in the calculation. Pass None if you don't want to select
+            a subset of the M-z plane.
         **kwargs: parameter used internally by the profiles.
     """
     pau, pav, pbu, pbv = profiles
@@ -34,6 +38,10 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
     Dm = pau.Delta/ccl.omega_x(cosmo, a, 'matter')
     mfunc = np.array([ccl.massfunc(cosmo, M, aa, Dmm)
                       for aa, Dmm in zip(a, Dm)]).T
+    if selection is not None:
+        select = np.array([selection(M,1./aa-1) for aa in a]).T
+    else:
+        select = 1
 
     aU, aUU = pau.fourier_profiles(cosmo, k, M, a,
                                    squeeze=False, **kwargs)
@@ -61,7 +69,7 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
             r = 0
         bUV = np.sqrt(bUU*bVV)*(1+r)
 
-    t1h = simps(mfunc[:, :, None, None] *
+    t1h = simps((select * mfunc)[:, :, None, None] *
                 aUV[:, :, :, None] *
                 bUV[:, :, None, :],
                 x=np.log10(M), axis=0)
@@ -78,7 +86,8 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
 def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
                          zrange_a=(1e-6, 6), zpoints_a=32, zlog_a=True,
                          zrange_b=(1e-6, 6), zpoints_b=32, zlog_b=True,
-                         logMrange=(6, 17), mpoints=128, **kwargs):
+                         logMrange=(6, 17), mpoints=128,
+                         selection=None, **kwargs):
     """Computes the 1-h trispectrum contribution to the covariance of the
     angular cross power spectra involving two pairs of quantities.
 
@@ -117,6 +126,9 @@ def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
         Logarithm (base-10) of the mass integration boundaries.
     mpoints : int
         Number or integration sampling points.
+    selection (function): selection function in (M,z) to include
+        in the calculation. Pass None if you don't want to select
+        a subset of the M-z plane.
     **kwargs : keyword arguments
         Parametrisation of the profiles.
     """
@@ -153,7 +165,8 @@ def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
 
     k = (l+1/2) / chi[..., None]
     t1h = hm_1h_trispectrum(cosmo, k, a, (pau, pav, pbu, pbv),
-                            logMrange, mpoints, **kwargs)
+                            logMrange, mpoints, selection=selection,
+                            **kwargs)
 
     tl = simps(N[:, None, None] * t1h, x, axis=0)
 

@@ -2,10 +2,15 @@ import healpy as hp
 from astropy.io import fits
 import numpy as np
 import pyccl as ccl
-
+from scipy.special import erf
 RHOCRIT0=2.7744948E11
-HH=0.67
-cosmo=ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=HH, sigma8=0.8, n_s=0.96)
+HH=0.6766
+cosmo=ccl.Cosmology(Omega_c=0.26066676,
+                    Omega_b=0.048974682,
+                    h=HH,
+                    sigma8=0.8102,
+                    n_s=0.9665,
+                    mass_function='tinker')
 nside=2048
 
 print(" Making SZ point source mask")
@@ -20,13 +25,50 @@ def rDelta(m,zz,Delta) :
 data=(fits.open('data/maps/HFI_PCCS_SZ-union_R2.08.fits'))[1].data
 mask = (data['REDSHIFT']>=0) & (data['SNR']>=6)
 data=data[mask]
+
+#Check out selection function
+import matplotlib.pyplot as plt
+from model.utils import selection_planck_erf, selection_planck_mthr
+
+
+zs=np.linspace(0,1,100)
+mss=10.**np.linspace(13.5,15.5,128)
+selection=np.array([selection_planck_erf(mss,z,complementary=False) for z in zs]).T
+plt.figure()
+plt.imshow(selection,interpolation='nearest',origin='lower',
+           aspect='auto',extent=[0,1,13.5,15.5]);
+plt.scatter(data['REDSHIFT'],np.log10(data['MSZ']*1E14),c='r',s=1)
+plt.plot(zs,np.log10(selection_planck_mthr(zs)),'k-',lw=2)
+plt.xlim([0,0.6])
+plt.ylim([13.7,15.2])
+plt.xlabel('$z$',fontsize=16)
+plt.ylabel('$\\log_{10}(M/M_\\odot)$',fontsize=16)
+
+zranges=[[0,0.07],[0.07,0.17],[0.17,0.3],[0.3,0.5],[0.5,1.]]
+for z0,zf in zranges:
+    mask = (data['REDSHIFT']<zf) & (data['REDSHIFT']>=z0)
+    zmean = np.mean(data['REDSHIFT'][mask])
+    ms=10.**np.linspace(13.7,15.5,20)
+    Delta = 500./ccl.omega_x(cosmo,1./(1+zmean),"matter")
+    hmf=ccl.massfunc(cosmo,ms,1./(1+zmean),Delta)
+    pd=np.histogram(np.log10(data['MSZ'][mask]*1E14),range=[13.7,15.5],bins=20)[0]+0.
+    pd/=np.sum(pd)
+    pt=selection_planck_erf(ms,zmean,complementary=False)
+    pt=pt*hmf/np.sum(pt*hmf)
+
+    plt.figure()
+    plt.plot(ms,pt,'k-')
+    plt.plot(ms,pd,'r-')
+    plt.xscale('log')
+plt.show()
+
 #Compute their angular extent
 r500=rDelta(data['MSZ']*HH*1E14,data['REDSHIFT'],500)
 chi=ccl.comoving_radial_distance(cosmo,1./(1+data['REDSHIFT']))*HH
 th500=r500/chi
 #Compute angular positions for each cluster
-theta=(90-data['GLAT'])*np.pi/180
-phi=data['GLON']*np.pi/180
+theta=np.radians(90-data['GLAT'])
+phi=np.radians(data['GLON'])
 vx=np.sin(theta)*np.cos(phi)
 vy=np.sin(theta)*np.sin(phi)
 vz=np.cos(theta)
@@ -38,7 +80,6 @@ for i in np.arange(len(data)) :
     radius=3*th500[i]
     ip=hp.query_disc(nside,v,radius)
     mask_sz[ip]=0
-hp.write_map("data/maps/mask_sz.fits",mask_sz,overwrite=True)
 
 print("Reading official Planck masks")
 mask_gal_80=hp.read_map("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=4)

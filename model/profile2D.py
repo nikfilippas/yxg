@@ -6,7 +6,7 @@ from scipy.integrate import quad
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
 import pyccl as ccl
-from .cosmotools import R_Delta, concentration_duffy
+from .utils import R_Delta, concentration_duffy
 
 
 class Arnaud(object):
