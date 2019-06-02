@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_default'
+    output_dir: 'output'
 
 jk:
     # Do you want to do jackknives?
@@ -51,15 +51,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.54
-          M1:  12.91
-          Mmin:  11.54
+          M0:  11.64
+          M1:  13.03
+          Mmin:  11.64
           alpha:  1.0
-          b_hydro:  0.5833
+          b_hydro:  0.4384
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.1260
+          r_corr:  -0.3090
           sigma_lnM:  0.15
       # List of systematics
       systematics:
@@ -72,14 +72,14 @@ maps:
       beam: False
       model:
           M0:  11.90
-          M1:  13.32
+          M1:  13.38
           Mmin:  11.94
           alpha:  1.0
-          b_hydro:  0.3511
+          b_hydro:  0.3355
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5755
+          r_corr:  -0.5893
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -96,11 +96,11 @@ maps:
           M1:  13.18
           Mmin:  11.83
           alpha:  1.0
-          b_hydro:  0.3756
+          b_hydro:  0.3846
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5711
+          r_corr:  -0.5654
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -113,15 +113,15 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.73
-          M1:  13.00
-          Mmin:  11.73
+          M0:  11.70
+          M1:  12.97
+          Mmin:  11.70
           alpha:  1.0
-          b_hydro:  0.3558
+          b_hydro:  0.3604
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6038
+          r_corr:  -0.6058
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -134,15 +134,15 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.76
-          M1:  12.99
-          Mmin:  11.77
+          M0:  11.75
+          M1:  12.98
+          Mmin:  11.75
           alpha:  1.0
-          b_hydro:  0.4002
+          b_hydro:  0.4067
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5897
+          r_corr:  -0.5875
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -155,15 +155,15 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  12.35
-          M1:  13.24
-          Mmin:  12.35
+          M0:  12.29
+          M1:  13.15
+          Mmin:  12.29
           alpha:  1.0
-          b_hydro:  0.4016
+          b_hydro:  0.3949
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6789
+          r_corr:  -0.6858
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -192,7 +192,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lmin10_kmax1_tinker08_dndz1'
+    run_name: 'run_fiducial'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -205,7 +205,7 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 200
-    n_steps: 0
+    n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Cosmological mass function
