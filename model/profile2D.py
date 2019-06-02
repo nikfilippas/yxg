@@ -6,7 +6,10 @@ from scipy.integrate import quad
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
 import pyccl as ccl
-from .cosmotools import R_Delta, concentration_duffy
+try:  # deal with relative import from other scripts
+    from .cosmotools import R_Delta, concentration_duffy
+except ImportError:
+    from cosmotools import R_Delta, concentration_duffy
 
 
 class Arnaud(object):
