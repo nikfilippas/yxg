@@ -31,7 +31,7 @@ bandpowers:
 masks:
     # Given each mask a unique name (key)
     mask_lowz: "data/maps/mask_v3.fits"
-    mask_tsz: "data/maps/mask_planck60.fits"
+    mask_tsz: "data/maps/mask_planck60S.fits"
     mask_545: "data/maps/mask_planck20.fits"
 
 # Maps
@@ -51,15 +51,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.64
-          M1:  13.04
-          Mmin:  11.64
+          M0:  11.54
+          M1:  12.91
+          Mmin:  11.54
           alpha:  1.0
-          b_hydro:  0.3723
+          b_hydro:  0.5833
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.3752
+          r_corr:  -0.1260
           sigma_lnM:  0.15
       # List of systematics
       systematics:
@@ -71,15 +71,15 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  11.94
-          M1:  13.38
+          M0:  11.90
+          M1:  13.32
           Mmin:  11.94
           alpha:  1.0
-          b_hydro:  0.3769
+          b_hydro:  0.3511
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5664
+          r_corr:  -0.5755
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -96,11 +96,11 @@ maps:
           M1:  13.18
           Mmin:  11.83
           alpha:  1.0
-          b_hydro:  0.4248
+          b_hydro:  0.3756
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5404
+          r_corr:  -0.5711
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -113,15 +113,15 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.70
-          M1:  12.97
-          Mmin:  11.70
+          M0:  11.73
+          M1:  13.00
+          Mmin:  11.73
           alpha:  1.0
-          b_hydro:  0.3969
+          b_hydro:  0.3558
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5798
+          r_corr:  -0.6038
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -134,15 +134,15 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.75
-          M1:  12.98
-          Mmin:  11.75
+          M0:  11.76
+          M1:  12.99
+          Mmin:  11.77
           alpha:  1.0
-          b_hydro:  0.4232
+          b_hydro:  0.4002
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5751
+          r_corr:  -0.5897
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -155,15 +155,15 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  12.29
-          M1:  13.15
-          Mmin:  12.29
+          M0:  12.35
+          M1:  13.24
+          Mmin:  12.35
           alpha:  1.0
-          b_hydro:  0.4112
+          b_hydro:  0.4016
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6764
+          r_corr:  -0.6789
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -192,7 +192,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'run_ynilc'
+    run_name: 'run_masked'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -205,7 +205,7 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 200
-    n_steps: 1000
+    n_steps: 0
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Cosmological mass function
@@ -306,7 +306,7 @@ data_vectors:
           - tracers: ['2mpz','2mpz']
             # Minimum multipole to use in the analysis
             lmin: 0
-          - tracers: ['2mpz','y_nilc']
+          - tracers: ['2mpz','y_milca']
             lmin: 0
     - type: 'Cl'
       name: 'wisc1'
@@ -314,7 +314,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc1','wisc1']
             lmin: 10
-          - tracers: ['wisc1','y_nilc']
+          - tracers: ['wisc1','y_milca']
             lmin: 0
     - type: 'Cl'
       name: 'wisc2'
@@ -322,7 +322,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc2','wisc2']
             lmin: 10
-          - tracers: ['wisc2','y_nilc']
+          - tracers: ['wisc2','y_milca']
             lmin: 0
     - type: 'Cl'
       name: 'wisc3'
@@ -330,7 +330,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc3','wisc3']
             lmin: 10
-          - tracers: ['wisc3','y_nilc']
+          - tracers: ['wisc3','y_milca']
             lmin: 0
     - type: 'Cl'
       name: 'wisc4'
@@ -338,7 +338,7 @@ data_vectors:
       twopoints:
           - tracers: ['wisc4','wisc4']
             lmin: 10
-          - tracers: ['wisc4','y_nilc']
+          - tracers: ['wisc4','y_milca']
             lmin: 0
     - type: 'Cl'
       name: 'wisc5'
@@ -346,5 +346,5 @@ data_vectors:
       twopoints:
           - tracers: ['wisc5','wisc5']
             lmin: 10
-          - tracers: ['wisc5','y_nilc']
+          - tracers: ['wisc5','y_milca']
             lmin: 0
