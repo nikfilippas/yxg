@@ -95,6 +95,9 @@ mask_p1=hp.read_map("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,
 mask_p2=hp.read_map("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=2);
 mask_p3=hp.read_map("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=3);
 mask_ph=mask_p0*mask_p1*mask_p2*mask_p3
+print("Reading galaxy catalog masks")
+mask_sdss=hp.ud_grade(hp.read_map("data/maps/BOSS_dr12_mask256_v2.fits",verbose=False),nside_out=nside)
+mask_lowz=hp.ud_grade(hp.read_map("data/maps/mask_v3.fits",verbose=False),nside_out=nside)
 
 print("Writing output masks")
 hp.write_map("data/maps/mask_planck20.fits",mask_gal_20*mask_ph,overwrite=True)
@@ -111,3 +114,5 @@ hp.write_map("data/maps/mask_planck20LS.fits",mask_gal_20*mask_ph*mask_pl*mask_s
 hp.write_map("data/maps/mask_planck40LS.fits",mask_gal_40*mask_ph*mask_pl*mask_sz,overwrite=True)
 hp.write_map("data/maps/mask_planck60LS.fits",mask_gal_60*mask_ph*mask_pl*mask_sz,overwrite=True)
 hp.write_map("data/maps/mask_planck80LS.fits",mask_gal_80*mask_ph*mask_pl*mask_sz,overwrite=True)
+hp.write_map("data/maps/mask_v3S.fits",mask_lowz*mask_sz,overwrite=True)
+hp.write_map("data/maps/BOSS_dr12_mask256_v2S.fits",mask_sdss*mask_sz,overwrite=True)

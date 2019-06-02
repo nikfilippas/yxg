@@ -25,7 +25,7 @@ else:
     hm_correction = None
 
 # Include selection function if needed
-sel = p.get('mcmc').get('selection_function'):
+sel = p.get('mcmc').get('selection_function')
 if sel is not None:
     if sel == 'erf':
         sel = selection_planck_erf

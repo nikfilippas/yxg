@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_default'
+    output_dir: 'output_SZmask'
 
 jk:
     # Do you want to do jackknives?
@@ -30,8 +30,8 @@ bandpowers:
 # Add an entry for each mask used in the analysis
 masks:
     # Given each mask a unique name (key)
-    mask_lowz: "data/maps/mask_v3.fits"
-    mask_tsz: "data/maps/mask_planck60.fits"
+    mask_lowz: "data/maps/mask_v3S.fits"
+    mask_tsz: "data/maps/mask_planck60S.fits"
     mask_545: "data/maps/mask_planck20.fits"
 
 # Maps
@@ -51,15 +51,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.64
-          M1:  13.03
-          Mmin:  11.64
+          M0:  11.97
+          M1:  13.36
+          Mmin:  11.97
           alpha:  1.0
-          b_hydro:  0.439
+          b_hydro:  0.0
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.309
+          r_corr:  -0.168
           sigma_lnM:  0.15
       # List of systematics
       systematics:
@@ -71,15 +71,15 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  11.94
-          M1:  13.38
-          Mmin:  11.94
+          M0:  11.91
+          M1:  13.26
+          Mmin:  11.91
           alpha:  1.0
-          b_hydro:  0.336
+          b_hydro:  0.0
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.589
+          r_corr:  -0.583
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -92,15 +92,15 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.83
-          M1:  13.18
-          Mmin:  11.83
+          M0:  11.90
+          M1:  13.21
+          Mmin:  11.90
           alpha:  1.0
-          b_hydro:  0.385
+          b_hydro:  0.0
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.565
+          r_corr:  -0.601
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -113,15 +113,15 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.70
-          M1:  12.97
-          Mmin:  11.70
+          M0:  11.68
+          M1:  12.89
+          Mmin:  11.68
           alpha:  1.0
-          b_hydro:  0.360
+          b_hydro:  0.03
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.606
+          r_corr:  -0.643
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -134,15 +134,15 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.75
-          M1:  12.98
-          Mmin:  11.75
+          M0:  11.74
+          M1:  12.91
+          Mmin:  11.74
           alpha:  1.0
-          b_hydro:  0.407
+          b_hydro:  0.200
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.587
+          r_corr:  -0.603
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -155,15 +155,15 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  12.29
-          M1:  13.15
-          Mmin:  12.29
+          M0:  12.31
+          M1:  13.14
+          Mmin:  12.31
           alpha:  1.0
-          b_hydro:  0.395
+          b_hydro:  0.222
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.686
+          r_corr:  -0.701
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -210,6 +210,8 @@ mcmc:
     continue_mcmc: True
     # Cosmological mass function
     mfunc: 'tinker'
+    # Use selection function
+    selection_function: 'erf'
 
 # Model parameters
 params:

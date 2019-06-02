@@ -12,9 +12,11 @@ from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
 from model.profile2D import Arnaud, HOD
-from model.power_spectrum import hm_ang_power_spectrum
+from model.power_spectrum import hm_ang_power_spectrum, \
+    HalomodCorrection
 from model.trispectrum import hm_ang_1h_covariance
-from model.beams import beam_gaussian, beam_hpix
+from model.utils import beam_gaussian, beam_hpix, \
+    selection_planck_erf, selection_planck_tophat
 
 try:
     fname_params = sys.argv[1]
@@ -23,6 +25,9 @@ except:
 
 p = ParamRun(fname_params)
 
+# Cosmology (Planck 2018)
+cosmo = p.get_cosmo()
+
 # Include halo model correction if needed
 if p.get('mcmc').get('hm_correct'):
     hm_correction = HalomodCorrection(cosmo)
@@ -30,7 +35,7 @@ else:
     hm_correction = None
 
 # Include selection function if needed
-sel = p.get('mcmc').get('selection_function'):
+sel = p.get('mcmc').get('selection_function')
 if sel is not None:
     if sel == 'erf':
         sel = selection_planck_erf
@@ -53,9 +58,6 @@ if p.do_jk():
                                    nside_out=nside)
     # Set jackknife regions
     jk = JackKnife(p.get('jk')['nside'], msk_tot)
-
-# Cosmology (Planck 2018)
-cosmo = p.get_cosmo()
 
 # Create output directory if needed
 os.system('mkdir -p ' + p.get_outdir())
