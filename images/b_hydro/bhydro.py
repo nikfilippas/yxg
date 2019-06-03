@@ -42,7 +42,7 @@ def plotfunc(ax, a, xerr=None, fmt=None, color=None, label=None):
     """Plots b_hydro data with error bars."""
     x, y = a[0: 2]
     if xerr: xerr = a[2]
-    yerr = a[3:]
+    yerr = a[3:5]
     ax.errorbar(x, y, xerr=xerr, yerr=yerr,
                  fmt=fmt, c=color, label=label)
 
@@ -63,21 +63,24 @@ zbounds = np.append(dz1[0][bounds], np.max(dz1))
 
 
 # b-hydro
-fiducial = np.load("fiducial.npy")
-ynilc = np.load("ynilc.npy")
-masked = np.load("masked.npy")
-mfunc = np.load("mfunc.npy")
-dndz = np.load("dndz.npy")
+data = []
 
-z = fiducial[0]  # probed redshifts
+bHdir = "../../output/"
+runs = ["run_fiducial", "run_ynilc", "run_tinker10", "run_dndz2",
+        "run_kmax", "run_kmax_dndz2"]
+for run in runs:
+    data.append(np.load("../../output/"+run+"_bH.npy"))
+data.append(np.load("masked.npy"))  # TODO: fix once massfunc is done
+
+z = data[0][0]  # probed redshifts
 
 
 # Plot
-data = [fiducial, ynilc, mfunc, dndz, masked]
-colours = ["k", "brown", "darkorange", "orangered", "y"]
+colours = ["k", "brown", "darkorange", "orangered",
+           "darkgreen", "mediumseagreen", "y"]
 fmts = ["o"]*len(data)
-lbls = ["fiducial", "$y$-NILC", "Tinker10",
-        r"$\mathrm{d} n \mathrm{/d} z$", "high mass mask"]
+lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$\mathrm{d} n \mathrm{/d} z$",
+        r"$k_{max}$", r"$k_{max}+\mathrm{d} n \mathrm{/d} z$", "high mass mask"]
 col = [copper(i) for i in np.linspace(0, 1, len(surveys))]
 
 
@@ -89,13 +92,14 @@ ax.axhline(0.58, ls=":", color="grey")
 ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
 ax.axhline(0.72, ls=":", color="cadetblue")
 ax.axhspan(0.72-0.10, 0.72+0.10, color="cadetblue", alpha=0.3)
-ax.annotate("CMB + cluster counts",
-            (0.005, 0.585), fontsize=14, fontweight="bold")
-ax.annotate("CMB lensing", (0.005, 0.725),
-            fontsize=14, fontweight="bold")
+props = dict(boxstyle="round", facecolor="w", alpha=0.7)
+ax.text(0.005, 0.595, "CMB + cluster counts",
+        fontsize=12, fontweight="bold", bbox=props)
+ax.text(0.005, 0.735, "CMB lens. + cluster counts",
+        fontsize=12, fontweight="bold", bbox=props)
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)
-hist.set_ylabel(r"$\mathrm{d} N \mathrm{/d} z$", fontsize=17)
+hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 
 for i, (a, c, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
     plotfunc(ax, a+0.003*i, xerr=None, fmt=fmt, color=c, label=lbl)

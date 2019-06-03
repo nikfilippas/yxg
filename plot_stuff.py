@@ -15,6 +15,7 @@ except IndexError:
     raise ValueError("Must provide param file name as command-line argument")
 
 p = ParamRun(fname_params)
+run_name = p.get('mcmc')['run_name']
 
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
@@ -38,7 +39,9 @@ if sel is not None:
 zmeans = []
 szmeans = []
 bmeans = []
-sbmeans = [[],[]]  # max and min error bar
+sbmeans = [[],[]]    # min and max error bar
+bymeans = []
+sbymeans = [[], []]  # min and max error bar
 for v in p.get('data_vectors'):
     print(v['name'])
 
@@ -89,9 +92,12 @@ for v in p.get('data_vectors'):
     bg = np.mean(hm_bias(cosmo, 1./(1 + zarr),
                          d.tracers[0][0].profile,
                          **(lik.build_kwargs(sam.p0))))
-    by = np.mean(hm_bias(cosmo, 1./(1 + zarr),
-                         d.tracers[1][1].profile,
-                         **(lik.build_kwargs(sam.p0))))
+    bychain = hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1].profile,
+                      **(lik.build_kwargs(sam.p0)))
+    bymin, by, bymax = np.percentile(bychain, [16, 50, 84])
+    bymeans.append(by)
+    sbymeans[0].append(bymin)
+    sbymeans[1].append(bymax)
 
     # Plot power spectra
     figs_cl = lik.plot_data(sam.p0, d, save_figures=True, save_data=True,
@@ -116,15 +122,17 @@ for v in p.get('data_vectors'):
         chain = sam.chain
     pars.append(lik.chi2(sam.p0))
     pars.append(len(d.data_vector))
-    np.save(p.get_outdir()+"/best_fit_params_"+v["name"]+".npy",
-            np.array(pars))
+    np.save(p.get_outdir() + "/best_fit_params_" + run_name + "_"
+            +v["name"]+".npy", np.array(pars))
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
     print(" b_g = %lf" % bg)
     print(" b_y = %.2lE" % by)
 
-bmeans = np.array(bmeans)    # b_hydro measurements`
-sbmeans = np.array(sbmeans)  # (2,N): min,max
+bmeans = np.array(bmeans)      # b_hydro measurements
+sbmeans = np.array(sbmeans)    # (2,N): min,max
+bymeans = np.array(bymeans)    # b_y measurements
+sbymeans = np.array(sbymeans)  # (2,N): min, max
 
 plt.figure()
 plt.errorbar(zmeans, 1-np.array(bmeans),
@@ -134,5 +142,5 @@ plt.ylabel('$1-b$', fontsize=15)
 plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
             bbox_inches='tight')
 
-D = np.vstack((zmeans, 1-bmeans, szmeans, sbmeans))
-np.save("%s/bH_%s" % (p.get_outdir(), p.get_outdir()), D)
+D = np.vstack((zmeans, 1-bmeans, szmeans, sbmeans, bymeans, sbymeans))
+np.save("%s/%s_bH" % (p.get_outdir(), run_name), D)

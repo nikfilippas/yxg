@@ -3,9 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_dndz'
-    # Cosmological mass function
-    mfunc: 'tinker'
+    output_dir: 'output'
 
 jk:
     # Do you want to do jackknives?
@@ -34,6 +32,7 @@ masks:
     # Given each mask a unique name (key)
     mask_lowz: "data/maps/mask_v3.fits"
     mask_tsz: "data/maps/mask_planck60.fits"
+    mask_545: "data/maps/mask_planck20.fits"
 
 # Maps
 maps:
@@ -52,16 +51,19 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.44
-          M1:  12.81
-          Mmin:  11.44
+          M0:  11.79
+          M1:  13.22
+          Mmin:  11.79
           alpha:  1.0
-          b_hydro:  0.5561
+          b_hydro:  0.5833
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.2088
+          r_corr:  -0.5643
           sigma_lnM:  0.15
+      # List of systematics
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc1"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
@@ -69,16 +71,20 @@ maps:
       dndz: "data/dndz/WISC_v2_bin1.txt"
       beam: False
       model:
-          M0:  11.59
+          M0:  11.60
           M1:  13.00
-          Mmin:  11.59
+          Mmin:  11.60
           alpha:  1.0
-          b_hydro:  0.2781
+          b_hydro:  0.2632
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6208
+          r_corr:  -0.6289
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc2"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
@@ -86,16 +92,20 @@ maps:
       dndz: "data/dndz/WISC_v2_bin2.txt"
       beam: False
       model:
-          M0:  11.55
-          M1:  12.88
-          Mmin:  11.55
+          M0:  11.56
+          M1:  12.89
+          Mmin:  11.56
           alpha:  1.0
-          b_hydro:  0.3073
+          b_hydro:  0.3106
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6056
+          r_corr:  -0.6024
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc3"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
@@ -103,16 +113,20 @@ maps:
       dndz: "data/dndz/WISC_v2_bin3.txt"
       beam: False
       model:
-          M0:  11.44
-          M1:  12.71
-          Mmin:  11.44
+          M0:  11.40
+          M1:  12.66
+          Mmin:  11.40
           alpha:  1.0
-          b_hydro:  0.2946
+          b_hydro:  0.2986
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6297
+          r_corr:  -0.6307
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc4"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
@@ -120,16 +134,20 @@ maps:
       dndz: "data/dndz/WISC_v2_bin4.txt"
       beam: False
       model:
-          M0:  11.47
-          M1:  12.68
-          Mmin:  11.47
+          M0:  11.45
+          M1:  12.66
+          Mmin:  11.45
           alpha:  1.0
-          b_hydro:  0.3463
+          b_hydro:  0.3523
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6111
+          r_corr:  -0.6089
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc5"
       type: "g"
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
@@ -137,26 +155,44 @@ maps:
       dndz: "data/dndz/WISC_v2_bin5.txt"
       beam: False
       model:
-          M0:  12.02
-          M1:  12.85
-          Mmin:  12.02
+          M0:  12.00
+          M1:  12.82
+          Mmin:  12.00
           alpha:  1.0
-          b_hydro:  0.3339
+          b_hydro:  0.3276
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6939
+          r_corr:  -0.6981
           sigma_lnM:  0.15
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "y_milca"
       type: "y"
       map: "data/maps/milca_ymaps.fits"
       mask: "mask_tsz"
       beam: 10.
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "y_nilc"
+      type: "y"
+      map: "data/maps/nilc_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "dust_545"
+      type: "d"
+      map: "data/maps/HFI_SkyMap_545_2048_R2.02_full.fits"
+      mask: "mask_545"
+      beam: 10.
 
 # MCMC
 mcmc:
     # Name for this run
-    run_name: minimal_hmc
+    run_name: 'run_dndz2'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -172,6 +208,8 @@ mcmc:
     n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
+    # Cosmological mass function
+    mfunc: 'tinker'
 
 # Model parameters
 params:
@@ -309,4 +347,4 @@ data_vectors:
           - tracers: ['wisc5','wisc5']
             lmin: 10
           - tracers: ['wisc5','y_milca']
-            lmin : 0
+            lmin: 0

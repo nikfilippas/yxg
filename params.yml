@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_default'
+    output_dir: 'output'
 
 jk:
     # Do you want to do jackknives?
@@ -192,7 +192,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lmin10_kmax1_tinker08_dndz1'
+    run_name: 'run_fiducial'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -205,7 +205,7 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 200
-    n_steps: 0
+    n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Cosmological mass function
