@@ -12,9 +12,11 @@ from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
 from model.profile2D import Arnaud, HOD
-from model.power_spectrum import hm_ang_power_spectrum
+from model.power_spectrum import hm_ang_power_spectrum, \
+    HalomodCorrection
 from model.trispectrum import hm_ang_1h_covariance
-from model.beams import beam_gaussian, beam_hpix
+from model.utils import beam_gaussian, beam_hpix, \
+    selection_planck_erf, selection_planck_tophat
 
 try:
     fname_params = sys.argv[1]
@@ -22,6 +24,25 @@ except:
     raise ValueError("Must provide param file name as command-line argument")
 
 p = ParamRun(fname_params)
+
+# Cosmology (Planck 2018)
+cosmo = p.get_cosmo()
+
+# Include halo model correction if needed
+if p.get('mcmc').get('hm_correct'):
+    hm_correction = HalomodCorrection(cosmo)
+else:
+    hm_correction = None
+
+# Include selection function if needed
+sel = p.get('mcmc').get('selection_function')
+if sel is not None:
+    if sel == 'erf':
+        sel = selection_planck_erf
+    elif sel == 'tophat':
+        sel = selection_planck_tophat
+    elif sel == 'none':
+        sel = None
 
 # Read off N_side
 nside = p.get_nside()
@@ -37,9 +58,6 @@ if p.do_jk():
                                    nside_out=nside)
     # Set jackknife regions
     jk = JackKnife(p.get('jk')['nside'], msk_tot)
-
-# Cosmology (Planck 2018)
-cosmo = p.get_cosmo()
 
 # Create output directory if needed
 os.system('mkdir -p ' + p.get_outdir())
@@ -170,9 +188,11 @@ for fg in tqdm(fields_ng, desc="Generating theory power spectra"):
         bmy = beam_gaussian(larr, 10.)
         clgg = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_g),
                                      zrange=fg.zrange, zpoints=64, zlog=True,
+                                     hm_correction=hm_correction, selection=sel,
                                      **(models[fg.name])) * bmh2
         clgy = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_y),
                                      zrange=fg.zrange, zpoints=64, zlog=True,
+                                     hm_correction=hm_correction, selection=sel,
                                      **(models[fg.name])) * bmy * bmh2
         np.savez(p.get_outdir() + '/cl_th_' + fg.name + '.npz',
                  clgg=clgg, clgy=clgy, ls=larr)
@@ -260,7 +280,7 @@ for fg in fields_ng:
                                 (prof_g, prof_g), (prof_g, prof_g),
                                 zrange_a=fg.zrange, zpoints_a=64, zlog_a=True,
                                 zrange_b=fg.zrange, zpoints_b=64, zlog_b=True,
-                                **(models[fg.name]))
+                                selection=sel, **(models[fg.name]))
     dcov_gggg[fg.name] = Covariance(fg.name, fg.name, fg.name, fg.name, dcov)
 
 # gggy
@@ -292,7 +312,8 @@ for fy in fields_sz:
                                     zrange_a=fg.zrange, zpoints_a=64,
                                     zlog_a=True,
                                     zrange_b=fg.zrange, zpoints_b=64,
-                                    zlog_b=True, **(models[fg.name]))
+                                    zlog_b=True,
+                                    selection=sel, **(models[fg.name]))
         b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
         b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
         dcov *= (b_hp**2)[:, None]*(b_hp**2*b_y)[None, :]
@@ -328,7 +349,8 @@ for fy in fields_sz:
                                     zrange_a=fg.zrange, zpoints_a=64,
                                     zlog_a=True,
                                     zrange_b=fg.zrange, zpoints_b=64,
-                                    zlog_b=True, **(models[fg.name]))
+                                    zlog_b=True,
+                                    selection=sel, **(models[fg.name]))
         b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
         b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
         dcov *= (b_hp**2*b_y)[:, None]*(b_hp**2*b_y)[None, :]

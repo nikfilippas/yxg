@@ -47,6 +47,7 @@ class HalomodCorrection(object):
 
 def hm_bias(cosmo, a, profile,
             logMrange=(6, 17), mpoints=128,
+            selection=None,
             **kwargs):
     """Computes the halo model prediction for the bias of a given
     tracer.
@@ -58,6 +59,9 @@ def hm_bias(cosmo, a, profile,
             implemented.
         logMrange (tuple): limits of integration in log10(M/Msun)
         mpoints (int): number of mass samples
+        selection (function): selection function in (M,z) to include
+            in the calculation. Pass None if you don't want to select
+            a subset of the M-z plane.
         **kwargs: parameter used internally by the profiles.
     """
     # Input handling
@@ -78,12 +82,17 @@ def hm_bias(cosmo, a, profile,
     bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
     # shape transformations
     mfunc, bh = mfunc.T[..., None], bh.T[..., None]
+    if selection is not None:
+        select = np.array([selection(M,1./aa-1) for aa in a])
+        select = select.T[..., None]
+    else:
+        select = 1
 
     U, _ = profile.fourier_profiles(cosmo, np.array([0.001]), M, a,
                                     squeeze=False, **kwargs)
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
-    b2h = simps(bh*mfunc*U, x=np.log10(M), axis=0).squeeze()
+    b2h = simps(bh*mfunc*select*U, x=np.log10(M), axis=0).squeeze()
 
     # Contribution from small masses (added in the beginning)
     rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
@@ -102,6 +111,7 @@ def hm_power_spectrum(cosmo, k, a, profiles,
                       logMrange=(6, 17), mpoints=128,
                       include_1h=True, include_2h=True,
                       squeeze=True, hm_correction=None,
+                      selection=None,
                       **kwargs):
     """Computes the halo model prediction for the 3D cross-power
     spectrum of two quantities.
@@ -120,6 +130,9 @@ def hm_power_spectrum(cosmo, k, a, profiles,
         hm_correction (:obj:`HalomodCorrection` or None):
             Correction to the halo model in the transition regime.
             If `None`, no correction is applied.
+        selection (function): selection function in (M,z) to include
+            in the calculation. Pass None if you don't want to select
+            a subset of the M-z plane.
         **kwargs: parameter used internally by the profiles.
     """
     # Input handling
@@ -146,9 +159,17 @@ def hm_power_spectrum(cosmo, k, a, profiles,
                    for i, a in enumerate(a)])
     Dm = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
     mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+    if selection is not None:
+        select = np.array([selection(M,1./aa-1) for aa in a])
+        mfunc *= select
     bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
     # shape transformations
     mfunc, bh = mfunc.T[..., None], bh.T[..., None]
+    if selection is not None:
+        select = np.array([selection(M,1./aa-1) for aa in a])
+        select = select.T[..., None]
+    else:
+        select = 1
 
     U, UU = p1.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
     # optimise for autocorrelation (no need to recompute)
@@ -161,9 +182,9 @@ def hm_power_spectrum(cosmo, k, a, profiles,
         UV = U*V*(1+r)
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
-    P1h = simps(mfunc*UV, x=np.log10(M), axis=0)
-    b2h_1 = simps(bh*mfunc*U, x=np.log10(M), axis=0)
-    b2h_2 = simps(bh*mfunc*V, x=np.log10(M), axis=0)
+    P1h = simps(mfunc*select*UV, x=np.log10(M), axis=0)
+    b2h_1 = simps(bh*mfunc*select*U, x=np.log10(M), axis=0)
+    b2h_2 = simps(bh*mfunc*select*V, x=np.log10(M), axis=0)
 
     # Contribution from small masses (added in the beginning)
     rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
@@ -190,7 +211,8 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
                           zrange=(1e-6, 6), zpoints=32, zlog=True,
                           logMrange=(6, 17), mpoints=128,
                           include_1h=True, include_2h=True,
-                          hm_correction=None, **kwargs):
+                          hm_correction=None, selection=None,
+                          **kwargs):
     """Computes the angular cross power spectrum of two quantities.
 
     Uses the halo model prescription for the 3D power spectrum to compute
@@ -218,6 +240,12 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
         If True, includes the 1-halo contribution.
     include_2h : bool
         If True, includes the 2-halo contribution.
+    hm_correction (:obj:`HalomodCorrection` or None):
+        Correction to the halo model in the transition regime.
+        If `None`, no correction is applied.
+    selection (function): selection function in (M,z) to include
+        in the calculation. Pass None if you don't want to select
+        a subset of the M-z plane.
     **kwargs : keyword arguments
         Parametrisation of the profiles.
     """
@@ -246,7 +274,8 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
     k = (l+1/2)/chi[..., None]
     Puv = hm_power_spectrum(cosmo, k, a, profiles, logMrange, mpoints,
                             include_1h, include_2h, squeeze=False,
-                            hm_correction=hm_correction, **kwargs)
+                            hm_correction=hm_correction, selection=selection,
+                            **kwargs)
     if Puv is None:
         return None
     integrand = N[..., None] * Puv

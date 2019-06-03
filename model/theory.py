@@ -4,6 +4,7 @@ from .power_spectrum import hm_ang_power_spectrum
 
 def get_theory(p, dm, cosmo, return_separated=False,
                include_1h=True, include_2h=True,
+               selection=None,
                hm_correction=None, **kwargs):
     """Computes the theory prediction used in the MCMC.
 
@@ -16,6 +17,9 @@ def get_theory(p, dm, cosmo, return_separated=False,
             in separate arrays.
         hm_correction(:obj:`HalomodCorrection`): halo model correction
             factor.
+        selection (function): selection function in (M,z) to include
+            in the calculation. Pass None if you don't want to select
+            a subset of the M-z plane.
         **kwargs: model parameters
     """
     nz_default = p.get('mcmc')['nz_points_g']
@@ -53,6 +57,7 @@ def get_theory(p, dm, cosmo, return_separated=False,
                                    zlog=use_zlog, hm_correction=hm_correction,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
+                                   selection=selection,
                                    **kwargs)
         if cl is None:
             return None
