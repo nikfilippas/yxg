@@ -8,11 +8,11 @@ from model.theory import get_theory
 import matplotlib.pyplot as plt
 from model.power_spectrum import HalomodCorrection, hm_bias
 
-try:
-    fname_params = sys.argv[1]
-except IndexError:
-    raise ValueError("Must provide param file name as command-line argument")
-
+#try:
+#    fname_params = sys.argv[1]
+#except IndexError:
+#    raise ValueError("Must provide param file name as command-line argument")
+fname_params = "params.yml"
 p = ParamRun(fname_params)
 run_name = p.get('mcmc')['run_name']
 
@@ -78,12 +78,12 @@ for v in p.get('data_vectors'):
     bg = np.mean(hm_bias(cosmo, 1./(1 + zarr),
                          d.tracers[0][0].profile,
                          **(lik.build_kwargs(sam.p0))))
-    bychain = hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1].profile,
-                      **(lik.build_kwargs(sam.p0)))
+    bychain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1].profile,
+                      **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
     bymin, by, bymax = np.percentile(bychain, [16, 50, 84])
     bymeans.append(by)
-    sbymeans[0].append(bymin)
-    sbymeans[1].append(bymax)
+    sbymeans[0].append(by-bymin)
+    sbymeans[1].append(bymax-by)
 
     # Plot power spectra
     figs_cl = lik.plot_data(sam.p0, d, save_figures=True, save_data=True,
@@ -121,12 +121,12 @@ sbmeans = np.array(sbmeans)    # (2,N): min,max
 bymeans = np.array(bymeans)    # b_y measurements
 sbymeans = np.array(sbymeans)  # (2,N): min, max
 
-plt.figure()
-plt.errorbar(zmeans, 1-np.array(bmeans),
+fig, ax = plt.subplots()
+ax.errorbar(zmeans, 1-np.array(bmeans),
              xerr=szmeans, yerr=np.flip(sbmeans, 0), fmt='ro')
-plt.xlabel('$z$', fontsize=15)
-plt.ylabel('$1-b$', fontsize=15)
-plt.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
+ax.set_xlabel('$z$', fontsize=15)
+ax.set_ylabel('$1-b$', fontsize=15)
+fig.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
             bbox_inches='tight')
 
 D = np.vstack((zmeans, 1-bmeans, szmeans, sbmeans, bymeans, sbymeans))
