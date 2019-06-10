@@ -6,7 +6,7 @@ rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 
 run_name = "run_fiducial"
-data = np.load("../../output/"+run_name+"bH.npy")
+data = np.load("../../output/"+run_name+"_bH.npy")
 
 z = data[0]
 by = data[-3]
@@ -23,7 +23,7 @@ green = DES[:, 1::2]
 orang = DES[:, 2::2]
 
 fig, ax = plt.subplots(figsize=(9,7))
-ax.errorbar(z, 1e3*by, 0*sby, fmt="o", c="royalblue", elinewidth=2, label="this work")
+ax.errorbar(z, 1e3*by, 1e3*sby, fmt="o", c="royalblue", elinewidth=2, label="this work")
 
 ax.errorbar(black[0], black[1], black[2], fmt="ko", elinewidth=2,
             label="Vikram16")
