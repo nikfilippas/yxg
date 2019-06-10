@@ -169,4 +169,4 @@ for s, sur in enumerate(surveys):
 
 plt.tight_layout(h_pad=0.05, w_pad=0.1)
 plt.show()
-#plt.savefig("fits.pdf", bbox_inches="tight")
+plt.savefig("fits_v2.pdf", bbox_inches="tight")
