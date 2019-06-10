@@ -2,7 +2,7 @@ import numpy as np
 import os
 import pyccl as ccl
 from .profile2D import Arnaud, HOD
-from .beams import beam_gaussian, beam_hpix
+from .utils import beam_gaussian, beam_hpix
 
 
 def get_profile(m):

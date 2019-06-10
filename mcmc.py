@@ -6,6 +6,7 @@ from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
 from model.power_spectrum import HalomodCorrection
+from model.utils import selection_planck_erf, selection_planck_tophat
 
 try:
     fname_params = sys.argv[1]
@@ -23,6 +24,16 @@ if p.get('mcmc').get('hm_correct'):
 else:
     hm_correction = None
 
+# Include selection function if needed
+sel = p.get('mcmc').get('selection_function')
+if sel is not None:
+    if sel == 'erf':
+        sel = selection_planck_erf
+    elif sel == 'tophat':
+        sel = selection_planck_tophat
+    elif sel == 'none':
+        sel = None
+
 for v in p.get('data_vectors'):
     print(v['name'])
 
@@ -33,6 +44,7 @@ for v in p.get('data_vectors'):
     def th(pars):
         return get_theory(p, d, cosmo,
                           hm_correction=hm_correction,
+                          selection=sel,
                           **pars)
 
     # Set up likelihood

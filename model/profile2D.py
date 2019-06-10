@@ -7,9 +7,9 @@ from scipy.integrate import simps
 from scipy.interpolate import interp1d
 import pyccl as ccl
 try:  # deal with relative import from other scripts
-    from .cosmotools import R_Delta, concentration_duffy
+    from .utils import R_Delta, concentration_duffy
 except ImportError:
-    from cosmotools import R_Delta, concentration_duffy
+    from utils import R_Delta, concentration_duffy
 
 
 class Arnaud(object):

@@ -7,6 +7,7 @@ from model.data import DataManager
 from model.theory import get_theory
 import matplotlib.pyplot as plt
 from model.power_spectrum import HalomodCorrection, hm_bias
+from model.utils import selection_planck_erf, selection_planck_tophat
 
 #try:
 #    fname_params = sys.argv[1]
@@ -24,6 +25,16 @@ if p.get('mcmc').get('hm_correct'):
     hm_correction = HalomodCorrection(cosmo)
 else:
     hm_correction = None
+
+# Include selection function if needed
+sel = p.get('mcmc').get('selection_function')
+if sel is not None:
+    if sel == 'erf':
+        sel = selection_planck_erf
+    elif sel == 'tophat':
+        sel = selection_planck_tophat
+    elif sel == 'none':
+        sel = None
 
 zmeans = []
 szmeans = []
@@ -46,17 +57,20 @@ for v in p.get('data_vectors'):
     def th(pars):
         return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
+                          selection=sel,
                           **pars)
 
     def th1h(pars):
         return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
+                          selection=sel,
                           include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(pars):
         return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
+                          selection=sel,
                           include_2h=True, include_1h=False,
                           **pars)
 
@@ -93,7 +107,6 @@ for v in p.get('data_vectors'):
     # Plot likelihood
     figs_ch = lik.plot_chain(sam.chain, save_figure=True,
                              prefix=p.get_sampler_prefix(v['name']))
-
     print(" Best-fit parameters:")
     pars = []
     for i, nn, in enumerate(sam.parnames):
