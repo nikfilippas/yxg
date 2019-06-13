@@ -64,4 +64,4 @@ ax.tick_params(which="both", labelsize="large")
 
 cbar.set_label("$z$", rotation=0, labelpad=15, fontsize=17)
 cbar.ax.tick_params(labelsize="large")
-plt.savefig("massfunc.pdf")
+plt.savefig("massfunc.pdf", bbox_inches="tight")

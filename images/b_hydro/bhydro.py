@@ -119,10 +119,10 @@ ax.tick_params(labelsize="large")
            c=col[i], lw=2, label=sci[i]) for i, _ in enumerate(surveys)]
 [hist.plot(dz2[i], dN2[i], ls=":", alpha=0.6,
            c=col[i], lw=2) for i, _ in enumerate(surveys)]
-hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.14],
+hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.16],
             ncol=len(surveys), fontsize=9.5, frameon=False)
 
 hist.set_ylim(0, hist.get_ylim()[1])
 hist.tick_params(labelsize="large")
 
-plt.savefig("bhydro.pdf")
+plt.savefig("bhydro.pdf", bbox_inches="tight")
