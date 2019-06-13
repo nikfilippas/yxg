@@ -46,7 +46,7 @@ class Tracer(object):
             self.z_range = [z_inrange[0], z_inrange[-1]]
             zmean = np.sum(z*nz)/np.sum(nz)
             chimean = ccl.comoving_radial_distance(cosmo, 1./(1+zmean))
-            self.lmax = int(kmax*chimean-0.5)
+            self.lmax = kmax*chimean-0.5
         else:
             self.z_range = [1E-6, 6]
             self.lmax = 100000
@@ -139,10 +139,11 @@ class DataManager(object):
         v (dict): dictionary containing the list of two-point functions you
             want to analyze.
         cosmo (:obj:`ccl.Cosmology`): cosmology object.
+        all_data (bool): whether to use all ells or form a mask
     """
-    def __init__(self, p, v, cosmo):
+    def __init__(self, p, v, cosmo, all_data=False):
         nside = p.get_nside()
-        kmax = p.get('mcmc')['kmax']
+        kmax = np.inf if all_data else p.get('mcmc')['kmax']
         # Create tracers for all maps in the param file.
         tracers = {m['name']: Tracer(m, cosmo, kmax) for m in p.get('maps')}
 
@@ -168,7 +169,10 @@ class DataManager(object):
             fname_cl = choose_cl_file(p, tr)
             with np.load(fname_cl) as f:
                 # Scale cuts
-                mask = ((tp['lmin'] <= f['ls']) & (f['ls'] <= lmax))
+                if all_data:
+                    mask = [True]*len(f['ls'])
+                else:
+                    mask = ((tp['lmin'] <= f['ls']) & (f['ls'] <= lmax))
                 mask_total.append(mask)
                 self.ells.append(f['ls'][mask])
                 # Subtract noise bias

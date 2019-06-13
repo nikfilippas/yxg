@@ -199,32 +199,32 @@ class Likelihood(object):
             """Returns indices of all elements in nested arrays."""
             indices = []
             ind0 = 0
-            for l in ls:
+            for l in a:
                 sub = [x for x in range(ind0, ind0+len(l))]
                 indices.append(sub)
                 ind0 += len(l)
             return np.array(indices)
 
-        def unwrap(arr):
+        def unwrap(arr, indices):
             arr_out = []
             for i in indices:
                 arr_out.append(arr[i])
             return arr_out
 
-        def eval_and_unwrap(pars, func):
-            return unwrap(func(pars))
+        def eval_and_unwrap(pars, func, indices):
+            return unwrap(func(pars), indices)
 
         # Compute theory prediction and reshape to
         # [n_correlations,n_ells]
         indices = unequal_enumerate(ls)
-        tv = eval_and_unwrap(params, self.get_theory)
+        tv = eval_and_unwrap(params, self.get_theory, indices)
         # Compute 1-h and 2-h if needed:
         if get_theory_1h is not None:
-            tv1h = eval_and_unwrap(params, get_theory_1h)
+            tv1h = eval_and_unwrap(params, get_theory_1h, indices)
         else:
             tv1h = None
         if get_theory_2h is not None:
-            tv2h = eval_and_unwrap(params, get_theory_2h)
+            tv2h = eval_and_unwrap(params, get_theory_2h, indices)
         else:
             tv2h = None
         # Reshape data vector

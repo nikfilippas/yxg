@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 from model.power_spectrum import HalomodCorrection, hm_bias
 from model.utils import selection_planck_erf, selection_planck_tophat
 
-try:
-    fname_params = sys.argv[1]
-except IndexError:
-    raise ValueError("Must provide param file name as command-line argument")
-
+#try:
+#    fname_params = sys.argv[1]
+#except IndexError:
+#    raise ValueError("Must provide param file name as command-line argument")
+fname_params = "params.yml"
 p = ParamRun(fname_params)
 run_name = p.get('mcmc')['run_name']
 
@@ -48,7 +48,7 @@ for v in p.get('data_vectors'):
     # Construct data vector and covariance
     d = DataManager(p, v, cosmo)
     z, nz = np.loadtxt(d.tracers[0][0].dndz, unpack=True)
-    zmean = np.sum(nz * z) / np.sum(nz)
+    zmean = np.average(z, weights=nz)
     sigz = np.sqrt(np.sum(nz * (z - zmean)**2) / np.sum(nz))
     zmeans.append(zmean)
     szmeans.append(sigz)
