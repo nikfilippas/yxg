@@ -3,7 +3,7 @@ __pycache__/
 #images/
 data/
 legacy/
-
+images/fits/legacy/
 
 # File extensions
 out*/*.npy
