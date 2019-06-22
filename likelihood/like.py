@@ -228,10 +228,10 @@ class Likelihood(object):
         else:
             tv2h = None
         # Reshape data vector
-        dv = unwrap(self.dv)
+        dv = unwrap(self.dv, indices)
 
         # Compute error bars and reshape
-        ev = unwrap(np.sqrt(np.diag(self.cv)))
+        ev = unwrap(np.sqrt(np.diag(self.cv)), indices)
         # Compute chi^2
         chi2 = self.chi2(par)
         dof = len(self.dv)
