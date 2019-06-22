@@ -1,3 +1,5 @@
+import os
+os.chdir("../../")
 import numpy as np
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
@@ -48,7 +50,7 @@ def plotfunc(ax, a, xerr=None, fmt=None, color=None, label=None):
 
 
 # dn/dz
-dir1 = "../../data/dndz/"
+dir1 = "data/dndz/"
 
 wisc = ["wisc_b%d" % i for i in range(1, 6)]
 surveys = ["2mpz"] + wisc
@@ -65,12 +67,16 @@ zbounds = np.append(dz1[0][bounds], np.max(dz1))
 # b-hydro
 data = []
 
-bHdir = "../../output/"
-runs = ["run_fiducial", "run_ynilc", "run_tinker10", "run_dndz2",
-        "run_kmax", "run_kmax_dndz2"]
+bHdir = "output_default/"
+runs = ['lmin10_kmax1_tinker08_dndz1_ymilca',
+        'lmin10_kmax1_tinker08_dndz1_ynilc',
+        'lmin10_kmax1_tinker10_dndz1_ymilca',
+        'lmin10_kmax1_tinker08_dndz2_ymilca',
+        'lmin10_kmax05_tinker08_dndz1_ymilca',
+        'lmin10_kmax05_tinker08_dndz2_ymilca']
 for run in runs:
-    data.append(np.load("../../output/"+run+"_bH.npy"))
-data.append(np.load("masked.npy"))  # TODO: fix once massfunc is done
+    data.append(np.load(bHdir+run+"_bH.npy"))
+data.append(np.load("output_mask/lmin10_kmax1_tinker08_dndz1_bH.npy"))
 
 z = data[0][0]  # probed redshifts
 
@@ -125,4 +131,5 @@ hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.16],
 hist.set_ylim(0, hist.get_ylim()[1])
 hist.tick_params(labelsize="large")
 
+os.chdir("images/b_hydro/")
 plt.savefig("bhydro.pdf", bbox_inches="tight")

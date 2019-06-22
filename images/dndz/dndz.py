@@ -8,12 +8,12 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import HalomodCorrection
-from model.utils import selection_planck_erf, selection_planck_tophat
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
+
 
 # Theory predictor wrapper
 class thr(object):
@@ -35,24 +35,13 @@ class thr(object):
                           **pars)
 
 
-fname_params = "params_default.yml"
-p = ParamRun(fname_params)
+
+fnames = ["params.yml", "params_test_dndz.yml"]
+p, q = [ParamRun(fname) for fname in fnames]
 cosmo = p.get_cosmo()
 
-# Include halo model correction if needed
-if p.get('mcmc').get('hm_correct'):
-    hm_correction = HalomodCorrection(cosmo)
-else:
-    hm_correction = None
-# Include selection function if needed
-sel = p.get('mcmc').get('selection_function')
-if sel is not None:
-    if sel == 'erf':
-        sel = selection_planck_erf
-    elif sel == 'tophat':
-        sel = selection_planck_tophat
-    elif sel == 'none':
-        sel = None
+hm_correction = HalomodCorrection(cosmo)
+sel = None
 
 surveys = ["2mpz"] + ["wisc%d" % i for i in range(1, 6)]
 sci = [r"$\mathrm{2MPZ}$"] + \
@@ -66,31 +55,32 @@ gs_main = GridSpec(6, 2, figure=f)
 for s, v in enumerate(p.get("data_vectors")):
 
     # Construct data vector and covariance
-    d = DataManager(p, v, cosmo, all_data=False)
-    g = DataManager(p, v, cosmo, all_data=True)
+    d = DataManager(p, v, cosmo)
+    g = DataManager(q, v, cosmo)
 
     thd = thr(d)
     thg = thr(g)
 
     z, nz = np.loadtxt(d.tracers[0][0].dndz, unpack=True)
     zmean = np.average(z, weights=nz)
+    chi = ccl.comoving_radial_distance(cosmo, 1/(1+zmean))
+    kmax = p.get("mcmc")["kmax"]
+    lmax = kmax*chi - 0.5
 
     # Set up likelihood
-    likd = Likelihood(p.get('params'), d.data_vector, d.covar, thd.th)
-    likg = Likelihood(p.get('params'), g.data_vector, g.covar, thg.th)
+    lik = Likelihood(p.get('params'), d.data_vector, d.covar, thd.th)
     # Set up sampler
-    sam = Sampler(likd.lnprob, likd.p0, likd.p_free_names,
+    sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']), p.get('mcmc'))
 
     # Read chains and best-fit
     sam.get_chain()
     sam.update_p0(sam.chain[np.argmax(sam.probs)])
 
-    params = likd.build_kwargs(sam.p0)
+    params = lik.build_kwargs(sam.p0)
 
     # Array of multipoles
-    lsd = np.array(d.ells)
-    lsg = np.array(g.ells)
+    ls = np.array(d.ells)
 
     # Indices used in the analysis
     def unequal_enumerate(a):
@@ -114,24 +104,20 @@ for s, v in enumerate(p.get("data_vectors")):
 
     # Compute theory prediction and reshape to
     # [n_correlations, n_ells]
-    indd = unequal_enumerate(lsd)
-    tvd = eval_and_unwrap(params, thd.th, indd)
-    tv1hd = eval_and_unwrap(params, thd.th1h, indd)
-    tv2hd = eval_and_unwrap(params, thd.th2h, indd)
+    ind = unequal_enumerate(ls)
 
-    indg = unequal_enumerate(lsg)
-    tvg = eval_and_unwrap(params, thg.th, indg)
-    tv1hg = eval_and_unwrap(params, thg.th1h, indg)
-    tv2hg = eval_and_unwrap(params, thg.th2h, indg)
+    tvd = eval_and_unwrap(params, thd.th, ind)
+    tv1hd = eval_and_unwrap(params, thd.th1h, ind)
+    tv2hd = eval_and_unwrap(params, thd.th2h, ind)
+
+    tvg = eval_and_unwrap(params, thg.th, ind)
+    tv1hg = eval_and_unwrap(params, thg.th1h, ind)
+    tv2hg = eval_and_unwrap(params, thg.th2h, ind)
 
     # Reshape data vector
-    dv = unwrap(likg.dv, indg)
+    dv = unwrap(lik.dv, ind)
     # Compute error bars and reshape
-    ev = unwrap(np.sqrt(np.diag(likg.cv)), indg)
-    # Compute chi^2
-    chi2 = likd.chi2(sam.p0)
-    dof = len(likd.dv)
-
+    ev = unwrap(np.sqrt(np.diag(lik.cv)), ind)
 
 
     for i in range(2):
@@ -142,61 +128,44 @@ for s, v in enumerate(p.get("data_vectors")):
         ax1 = f.add_subplot(gs[0])
         ax2 = f.add_subplot(gs[1])
 
-        # Create mask
-        lmin = v["twopoints"][i]["lmin"]
-        chi = ccl.comoving_radial_distance(cosmo, 1/(1+zmean))
-        kmax = p.get("mcmc")["kmax"]
-        lmax = kmax*chi - 0.5
-
-        mask = np.invert((lmin > lsg[i]) | (lmax < lsg[i]))
-
         # Residuals and formatting plot
         res = (dv[i]-tvg[i])/ev[i]
         ax2.axhline(color="k", ls="--")
-        ax2.errorbar(lsg[i], res, yerr=np.ones_like(dv[i]), fmt="r.")
+        ax2.errorbar(ls[i], res, yerr=np.ones_like(dv[i]), fmt="r.")
 
         ax1.set_xscale("log")
         ax1.set_yscale("log")
         ax2.set_xscale("log")
 
-        ax1.set_xlim(lsg[i][0]/1.1, lsg[i][-1]*1.1)
+        ax1.set_xlim(ls[i][0]/1.1, ls[i][-1]*1.1)
         ax2.set_xlim(ax1.get_xlim())
-        ax2.set_ylim(res[mask].min()-1, res[mask].max()+1)
-
-        # flip one data point start & end to draw line
-        if not mask[0]: mask[np.where(mask == True)[0][0]] = False
-        if not mask[-1]: mask[np.where(mask == True)[0][-1]] = False
-
-        ll, tt, t1, t2 = map(lambda x: np.ma.masked_array(x, mask),
-                             [lsg[i], tvg[i], tv1hg[i], tv2hg[i]])
+        ax2.set_ylim(res.min()-1, res.max()+1)
 
 
         # plot data & theory
-        ax1.plot(ll, t1, ls=":", c="darkgreen", alpha=0.3)
-        ax1.plot(lsd[i], tv1hd[i], ls="-", c="darkgreen", alpha=0.3,
+        ax1.plot(ls[i], tv1hg[i], ls=":", c="darkgreen", alpha=0.3)
+        ax1.plot(ls[i], tv1hd[i], ls="-", c="darkgreen", alpha=0.3,
                  label=r"$\mathrm{1}$-$\mathrm{halo}$")
 
-        ax1.plot(ll, t2, ls=":", c="navy", alpha=0.3)
-        ax1.plot(lsd[i], tv2hd[i], ls="-", c="navy", alpha=0.3,
+        ax1.plot(ls[i], tv2hg[i], ls=":", c="navy", alpha=0.3)
+        ax1.plot(ls[i], tv2hd[i], ls="-", c="navy", alpha=0.3,
                  label=r"$\mathrm{2}$-$\mathrm{halo}$")
 
-        ax1.plot(ll, tt, ls=":", c="k")
-        ax1.plot(lsd[i], tvd[i], ls="-", c="k", label=r"$\mathrm{1h+2h}$")
+        ax1.plot(ls[i], tvg[i], ls=":", c="k")
+        ax1.plot(ls[i], tvd[i], ls="-", c="k", label=r"$\mathrm{1h+2h}$")
 
 
-        ax1.errorbar(lsg[i], dv[i], yerr=ev[i], fmt="r.")
+        ax1.errorbar(ls[i], dv[i], yerr=ev[i], fmt="r.")
 
 
         # grey boundaries
+        lmin = v["twopoints"][i]["lmin"]
         ax1.axvspan(ax1.get_xlim()[0], lmin, color="grey", alpha=0.2)
         ax2.axvspan(ax1.get_xlim()[0], lmin, color="grey", alpha=0.2)
         ax1.axvspan(lmax, ax1.get_xlim()[1], color="grey", alpha=0.2)
         ax2.axvspan(lmax, ax1.get_xlim()[1], color="grey", alpha=0.2)
 
         if i == 0:
-            ax1.text(0.02, 0.06, sci[s]+"\n"+"$\\chi^2/{\\rm dof}=%.2lf/%d$" %
-                     (chi2, dof), transform=ax1.transAxes)
-
             ax1.set_ylabel('$C_\\ell$', fontsize=15)
             ax2.set_ylabel('$\\Delta_\\ell$', fontsize=15)
 
@@ -218,4 +187,4 @@ for s, v in enumerate(p.get("data_vectors")):
 
 f.tight_layout(h_pad=0.05, w_pad=0.1)
 f.show()
-f.savefig("images/fits/fits_v3.pdf", bbox_inches="tight")
+#f.savefig("images/fits/fits_v3.pdf", bbox_inches="tight")
