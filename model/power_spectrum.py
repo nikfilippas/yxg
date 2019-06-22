@@ -267,8 +267,8 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
 
     # Window functions
     p1, p2 = profiles
-    Wu = p1.kernel(cosmo, a)
-    Wv = Wu if (p1.name == p2.name) else p2.kernel(cosmo, a)
+    Wu = p1.kernel(cosmo, a, **kwargs)
+    Wv = Wu if (p1.name == p2.name) else p2.kernel(cosmo, a, **kwargs)
     N = H_inv*Wu*Wv/chi**2  # overall normalisation factor
 
     k = (l+1/2)/chi[..., None]

@@ -191,14 +191,18 @@ class HOD(object):
 
         self.Delta = 500  # reference overdensity (Arnaud et al.)
         z, nz = np.loadtxt(nz_file, unpack=True)
-        self.nzf = interp1d(z, nz, bounds_error=False, fill_value=0)
+        self.nzf = interp1d(z, nz, kind="cubic",
+                            bounds_error=False, fill_value=0)
+        self.z_avg = np.average(z, weights=nz)
         self.name = name
 
-    def kernel(self, cosmo, a):
+    def kernel(self, cosmo, a, **kwargs):
         """The galaxy number overdensity window function."""
+        w = kwargs["width"]
         unit_norm = 3.3356409519815204e-04  # 1/c
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
-        return Hz*unit_norm * self.nzf(1/a - 1)
+        z = 1/a - 1
+        return Hz*unit_norm * self.nzf(self.z_avg - w*(z-self.z_avg))
 
     def n_cent(self, M, **kwargs):
         """Number of central galaxies in a halo."""
