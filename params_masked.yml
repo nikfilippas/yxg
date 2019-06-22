@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_SZmask'
+    output_dir: 'output_mask'
 
 jk:
     # Do you want to do jackknives?
@@ -55,11 +55,11 @@ maps:
           M1:  13.36
           Mmin:  11.97
           alpha:  1.0
-          b_hydro:  0.0
+          b_hydro:  0.5
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.168
+          r_corr:  -0.1802
           sigma_lnM:  0.15
       # List of systematics
       systematics:
@@ -71,15 +71,15 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  11.91
-          M1:  13.26
-          Mmin:  11.91
+          M0:  11.99
+          M1:  13.37
+          Mmin:  11.99
           alpha:  1.0
-          b_hydro:  0.0
+          b_hydro:  0.5
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.583
+          r_corr:  -0.5803
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -92,15 +92,15 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.90
-          M1:  13.21
-          Mmin:  11.90
+          M0:  11.93
+          M1:  13.25
+          Mmin:  11.93
           alpha:  1.0
-          b_hydro:  0.0
+          b_hydro:  0.5
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.601
+          r_corr:  -0.5948
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -114,14 +114,14 @@ maps:
       beam: False
       model:
           M0:  11.68
-          M1:  12.89
+          M1:  12.90
           Mmin:  11.68
           alpha:  1.0
-          b_hydro:  0.03
+          b_hydro:  0.50
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.643
+          r_corr:  -0.6440
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -138,11 +138,11 @@ maps:
           M1:  12.91
           Mmin:  11.74
           alpha:  1.0
-          b_hydro:  0.200
+          b_hydro:  0.20
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.603
+          r_corr:  -0.6050
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -159,7 +159,7 @@ maps:
           M1:  13.14
           Mmin:  12.31
           alpha:  1.0
-          b_hydro:  0.222
+          b_hydro:  0.2226
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
@@ -205,7 +205,7 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 200
-    n_steps: 0
+    n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Cosmological mass function

@@ -51,15 +51,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.64
-          M1:  13.03
-          Mmin:  11.64
+          M0:  11.58
+          M1:  12.96
+          Mmin:  11.58
           alpha:  1.0
-          b_hydro:  0.439
+          b_hydro:  0.5420
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.309
+          r_corr:  -0.1600
           sigma_lnM:  0.15
       # List of systematics
       systematics:
@@ -71,15 +71,15 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  11.94
-          M1:  13.38
-          Mmin:  11.94
+          M0:  11.90
+          M1:  13.32
+          Mmin:  11.90
           alpha:  1.0
-          b_hydro:  0.336
+          b_hydro:  0.3601
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.589
+          r_corr:  -0.5686
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -96,11 +96,11 @@ maps:
           M1:  13.18
           Mmin:  11.83
           alpha:  1.0
-          b_hydro:  0.385
+          b_hydro:  0.3843
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.565
+          r_corr:  -0.5630
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -117,11 +117,11 @@ maps:
           M1:  12.97
           Mmin:  11.70
           alpha:  1.0
-          b_hydro:  0.360
+          b_hydro:  0.3605
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.606
+          r_corr:  -0.6047
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -138,11 +138,11 @@ maps:
           M1:  12.98
           Mmin:  11.75
           alpha:  1.0
-          b_hydro:  0.407
+          b_hydro:  0.4078
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.587
+          r_corr:  -0.5865
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -159,11 +159,11 @@ maps:
           M1:  13.15
           Mmin:  12.29
           alpha:  1.0
-          b_hydro:  0.395
+          b_hydro:  0.3945
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.686
+          r_corr:  -0.6861
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -192,7 +192,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lmin10_kmax1_tinker08_dndz1'
+    run_name: 'lmin10_kmax1_tinker08_dndz1_ymilca'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin

@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 from model.power_spectrum import HalomodCorrection, hm_bias
 from model.utils import selection_planck_erf, selection_planck_tophat
 
-#try:
-#    fname_params = sys.argv[1]
-#except IndexError:
-#    raise ValueError("Must provide param file name as command-line argument")
-fname_params = "params.yml"
+try:
+    fname_params = sys.argv[1]
+except IndexError:
+    raise ValueError("Must provide param file name as command-line argument")
+
 p = ParamRun(fname_params)
 run_name = p.get('mcmc')['run_name']
 
