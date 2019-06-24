@@ -52,6 +52,7 @@ def get_theory(p, dm, cosmo, return_separated=False,
             else:  # Only other option right now is for both of them to be y
                 zrange = tr[0].z_range
                 zpoints = nz_default
+
         cl = hm_ang_power_spectrum(cosmo, ls, profiles,
                                    zrange=zrange, zpoints=zpoints,
                                    zlog=use_zlog, hm_correction=hm_correction,

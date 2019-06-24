@@ -68,25 +68,21 @@ zbounds = np.append(dz1[0][bounds], np.max(dz1))
 data = []
 
 bHdir = "output_default/"
-runs = ['lmin10_kmax1_tinker08_dndz1_ymilca',
-        'lmin10_kmax1_tinker08_dndz1_ynilc',
-        'lmin10_kmax1_tinker10_dndz1_ymilca',
-        'lmin10_kmax1_tinker08_dndz2_ymilca',
-        'lmin10_kmax05_tinker08_dndz1_ymilca',
-        'lmin10_kmax05_tinker08_dndz2_ymilca']
+runs = ['lmin10_kmax1_tinker08_ymilca',
+        'lmin10_kmax1_tinker08_ynilc',
+        'lmin10_kmax1_tinker10_ymilca',
+        'lmin10_kmax05_tinker08_ymilca']
 for run in runs:
     data.append(np.load(bHdir+run+"_bH.npy"))
-data.append(np.load("output_mask/lmin10_kmax1_tinker08_dndz1_bH.npy"))
+data.append(np.load("output_mask/lmin10_kmax1_tinker08_ymilca_bH.npy"))
 
 z = data[0][0]  # probed redshifts
 
 
 # Plot
-colours = ["k", "brown", "darkorange", "orangered",
-           "darkgreen", "mediumseagreen", "y"]
+colours = ["k", "brown", "darkorange", "orangered", "y"]
 fmts = ["o"]*len(data)
-lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$\mathrm{d} n \mathrm{/d} z$",
-        r"$k_{max}$", r"$k_{max}+\mathrm{d} n \mathrm{/d} z$", "high mass mask"]
+lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$k_{max}$", "high mass mask"]
 col = [copper(i) for i in np.linspace(0, 1, len(surveys))]
 
 
@@ -98,10 +94,10 @@ ax.axhline(0.58, ls=":", color="grey")
 ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
 ax.axhline(0.72, ls=":", color="cadetblue")
 ax.axhspan(0.72-0.10, 0.72+0.10, color="cadetblue", alpha=0.3)
-props = dict(boxstyle="round", facecolor="w", alpha=0.7)
-ax.text(0.005, 0.595, "CMB + cluster counts",
+props = dict(boxstyle="round", facecolor="w", alpha=0.2)
+ax.text(0.005, 0.600, "CMB + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
-ax.text(0.005, 0.735, "CMB lens. + cluster counts",
+ax.text(0.005, 0.740, "CMB lens. + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)

@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output'
+    output_dir: 'output_default'
 
 jk:
     # Do you want to do jackknives?
@@ -45,21 +45,21 @@ maps:
       # Name of mask (should correspond to one of the keys in the previous section)
       mask: "mask_lowz"
       # dndz file
-      dndz: "data/dndz/2MPZ_v2_bin1.txt"
+      dndz: "data/dndz/2MPZ_bin1.txt"
       # Is there a beam associated with this map?
       beam: False
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.79
-          M1:  13.22
-          Mmin:  11.79
+          M0:  11.58
+          M1:  12.96
+          Mmin:  11.58
           alpha:  1.0
-          b_hydro:  0.5833
+          b_hydro:  0.5420
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5643
+          r_corr:  -0.1600
           sigma_lnM:  0.15
       # List of systematics
       systematics:
@@ -71,15 +71,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin1.txt"
       beam: False
       model:
-          M0:  11.60
-          M1:  13.00
-          Mmin:  11.60
+          M0:  11.90
+          M1:  13.32
+          Mmin:  11.90
           alpha:  1.0
-          b_hydro:  0.2632
+          b_hydro:  0.3601
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6289
+          r_corr:  -0.5686
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -92,15 +92,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin2.txt"
       beam: False
       model:
-          M0:  11.56
-          M1:  12.89
-          Mmin:  11.56
+          M0:  11.83
+          M1:  13.18
+          Mmin:  11.83
           alpha:  1.0
-          b_hydro:  0.3106
+          b_hydro:  0.3843
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6024
+          r_corr:  -0.5630
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -113,15 +113,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin3.txt"
       beam: False
       model:
-          M0:  11.40
-          M1:  12.66
-          Mmin:  11.40
+          M0:  11.70
+          M1:  12.97
+          Mmin:  11.70
           alpha:  1.0
-          b_hydro:  0.2986
+          b_hydro:  0.3605
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6307
+          r_corr:  -0.6047
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -134,15 +134,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin4.txt"
       beam: False
       model:
-          M0:  11.45
-          M1:  12.66
-          Mmin:  11.45
+          M0:  11.75
+          M1:  12.98
+          Mmin:  11.75
           alpha:  1.0
-          b_hydro:  0.3523
+          b_hydro:  0.4078
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6089
+          r_corr:  -0.5865
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -155,15 +155,15 @@ maps:
       dndz: "data/dndz/WISC_v2_bin5.txt"
       beam: False
       model:
-          M0:  12.00
-          M1:  12.82
-          Mmin:  12.00
+          M0:  12.29
+          M1:  13.15
+          Mmin:  12.29
           alpha:  1.0
-          b_hydro:  0.3276
+          b_hydro:  0.3945
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6981
+          r_corr:  -0.6861
           sigma_lnM:  0.15
       systematics:
         - 'scos_plates'
@@ -192,7 +192,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'run_dndz2'
+    run_name: 'lmin10_kmax1_tinker08_dndz2_ymilca'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin

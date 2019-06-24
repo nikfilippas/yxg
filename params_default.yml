@@ -51,17 +51,17 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.58
-          M1:  12.96
-          Mmin:  11.58
+          M0:  12.01
+          M1:  13.44
+          Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.5420
+          b_hydro:  0.6842
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.1600
+          r_corr:  -0.3287
           sigma_lnM:  0.15
-          width: 1.0
+          width: 0.8305
       # List of systematics
       systematics:
         - 'data/maps/lambda_sfd_ebv.fits'
@@ -72,17 +72,17 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  11.90
-          M1:  13.32
-          Mmin:  11.90
+          M0:  12.01
+          M1:  13.44
+          Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.3601
+          b_hydro:  0.3274
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5686
+          r_corr:  -0.5759
           sigma_lnM:  0.15
-          width: 1.0
+          width: 1.031
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
@@ -94,17 +94,17 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.83
-          M1:  13.18
-          Mmin:  11.83
+          M0:  11.99
+          M1:  13.35
+          Mmin:  11.99
           alpha:  1.0
-          b_hydro:  0.3843
+          b_hydro:  0.3445
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5630
+          r_corr:  -0.5263
           sigma_lnM:  0.15
-          width: 1.0
+          width: 1.060
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
@@ -116,17 +116,17 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.70
-          M1:  12.97
-          Mmin:  11.70
+          M0:  11.97
+          M1:  13.27
+          Mmin:  11.97
           alpha:  1.0
-          b_hydro:  0.3605
+          b_hydro:  0.3061
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6047
+          r_corr:  -0.5975
           sigma_lnM:  0.15
-          width: 1.0
+          width: 1.097
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
@@ -138,17 +138,17 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.75
-          M1:  12.98
-          Mmin:  11.75
+          M0:  11.98
+          M1:  13.23
+          Mmin:  11.98
           alpha:  1.0
-          b_hydro:  0.4078
+          b_hydro:  0.3664
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5865
+          r_corr:  -0.5788
           sigma_lnM:  0.15
-          width: 1.0
+          width: 1.085
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
@@ -160,17 +160,17 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  12.29
-          M1:  13.15
-          Mmin:  12.29
+          M0:  11.98
+          M1:  12.78
+          Mmin:  11.98
           alpha:  1.0
-          b_hydro:  0.3945
+          b_hydro:  0.4399
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6861
+          r_corr:  -0.6920
           sigma_lnM:  0.15
-          width: 1.0
+          width: 0.8969
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
@@ -198,7 +198,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lmin10_kmax1_tinker08_dndz1_ymilca'
+    run_name: 'lmin10_kmax1_tinker08_ymilca'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -297,7 +297,7 @@ params:
           type: "TopHat"
           values: [-1.,1.]
     - name: "width"
-      label: "\\w_{N(z)}"
+      label: "w_{N(z)}"
       vary: True
       value: 1.
       prior:

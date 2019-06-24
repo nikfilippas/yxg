@@ -5,8 +5,8 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 
-run_name = "run_fiducial"
-data = np.load("../../output/"+run_name+"_bH.npy")
+run_name = "lmin10_kmax1_tinker08_ymilca"
+data = np.load("../../output_default/"+run_name+"_bH.npy")
 
 z = data[0]
 by = data[-3]
