@@ -2,6 +2,8 @@ import os
 os.chdir("../../")
 import numpy as np
 from scipy.integrate import simps
+from scipy.interpolate import interp1d
+from analysis.params import ParamRun
 from likelihood.chanal import chan
 import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerBase
@@ -24,23 +26,6 @@ class AnyObjectHandler(HandlerBase):
         return [l1, l2]
 
 
-def get_z_Nz(version=""):
-    """Get a version of dn/dz's."""
-    dz, dN = [[[] for j in surveys] for i in range(2)]
-    for i, s in enumerate(surveys):
-        # data manipulation
-        fname = dir1 + ("2MPZ" + version + "_bin1.txt" if s is "2mpz" \
-                        else  s[:4].upper() + version + "_bin%d.txt" % i)
-        zd, Nd = np.loadtxt(fname, unpack=True)
-        Nd /= simps(Nd, x=zd)  # normalise histogram
-        #surveys
-        dz[i] = zd
-        dN[i] = Nd
-
-    dz, dN = map(lambda x: [np.array(y) for y in x], [dz, dN])
-    return dz, dN
-
-
 def plotfunc(ax, a, xerr=None, fmt=None, color=None, label=None):
     """Plots b_hydro data with error bars."""
     x, y = a[0: 2]
@@ -48,6 +33,19 @@ def plotfunc(ax, a, xerr=None, fmt=None, color=None, label=None):
     yerr = a[3:5]
     ax.errorbar(x, y, xerr=xerr, yerr=yerr,
                  fmt=fmt, c=color, label=label)
+
+
+
+def get_dndz(fname, width):
+    """Get the modified galaxy number counts."""
+    zd, Nd = np.loadtxt(fname, unpack=True)
+
+    Nd /= simps(Nd, x=zd)
+    zavg = np.average(zd, weights=Nd)
+    nzf = interp1d(zd, Nd, kind="cubic", bounds_error=False, fill_value=0)
+
+    Nd_new = nzf(zavg + (1/width)*(zd-zavg))
+    return zd, Nd_new
 
 
 # dn/dz
@@ -58,8 +56,7 @@ surveys = ["2mpz"] + wisc
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
 
-dz1, dN1 = get_z_Nz()
-dz2, dN2 = get_z_Nz(version="_v2")
+
 bins = np.array([np.argmax(np.array(dN1)[:, i]) for i, _ in enumerate(dz1[0])])
 bounds = np.array([np.where(bins == i)[0][0] for i, _ in enumerate(dz1)])
 zbounds = np.append(dz1[0][bounds], np.max(dz1))
@@ -68,14 +65,26 @@ zbounds = np.append(dz1[0][bounds], np.max(dz1))
 # b-hydro
 data = []
 
-bHdir = "output_default/"
-runs = ['lmin10_kmax1_tinker08_ymilca',
-        'lmin10_kmax1_tinker08_ynilc',
-        'lmin10_kmax1_tinker10_ymilca',
-        'lmin10_kmax05_tinker08_ymilca']
-for run in runs:
-    data.append(np.load(bHdir+run+"_bH.npy"))
-data.append(np.load("output_mask/lmin10_kmax1_tinker08_ymilca_bH.npy"))
+param_yml = ["params_default.yml",
+             "params_ynilc.yml",
+             "params_tinker.yml",
+             "params_kmax.yml"
+             "params_masked.yml"]
+for run in param_yml:
+    p = ParamRun(run)
+    pars, _ = chan(run)
+
+    i = 0
+    for g in p.get("maps"):
+        if g["type"] == "g":
+            width = pars[i]["width"]
+            dz, dN = get_dndz(g["dndz"], width)
+
+            i += 1
+
+
+    pass
+
 
 z = data[0][0]  # probed redshifts
 

@@ -190,19 +190,25 @@ class HOD(object):
     def __init__(self, name='HOD', nz_file=None):
 
         self.Delta = 500  # reference overdensity (Arnaud et al.)
-        z, nz = np.loadtxt(nz_file, unpack=True)
-        self.nzf = interp1d(z, nz, kind="cubic",
+        self.z, nz = np.loadtxt(nz_file, unpack=True)
+        self.nzf = interp1d(self.z, nz, kind="cubic",
                             bounds_error=False, fill_value=0)
-        self.z_avg = np.average(z, weights=nz)
+        self.z_avg = np.average(self.z, weights=nz)
         self.name = name
 
     def kernel(self, cosmo, a, **kwargs):
         """The galaxy number overdensity window function."""
-        w = kwargs["width"]
         unit_norm = 3.3356409519815204e-04  # 1/c
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
+
         z = 1/a - 1
-        return Hz*unit_norm * self.nzf(self.z_avg - w*(z-self.z_avg))
+        w = kwargs["width"]
+        nz_new = self.nzf(self.z_avg+(1/w)*(self.z-self.z_avg))
+        nz_new /= simps(nz_new, x=self.z)
+        nzf_new = interp1d(self.z, nz_new, kind="cubic",
+                           bounds_error=False, fill_value=0)
+
+        return Hz*unit_norm * nzf_new(z)
 
     def n_cent(self, M, **kwargs):
         """Number of central galaxies in a halo."""
