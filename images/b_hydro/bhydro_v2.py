@@ -57,44 +57,42 @@ sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
 
 
-bins = np.array([np.argmax(np.array(dN1)[:, i]) for i, _ in enumerate(dz1[0])])
-bounds = np.array([np.where(bins == i)[0][0] for i, _ in enumerate(dz1)])
-zbounds = np.append(dz1[0][bounds], np.max(dz1))
-
-
-# b-hydro
-data = []
-
 param_yml = ["params_default.yml",
              "params_ynilc.yml",
              "params_tinker.yml",
              "params_kmax.yml"
              "params_masked.yml"]
-for run in param_yml:
-    p = ParamRun(run)
-    pars, _ = chan(run)
 
-    i = 0
-    for g in p.get("maps"):
-        if g["type"] == "g":
-            width = pars[i]["width"]
-            dz, dN = get_dndz(g["dndz"], width)
-
-            i += 1
+lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$k_{max}$", "high mass mask"]
+colours = ["k", "brown", "darkorange", "orangered", "y"]
+col = [copper(i) for i in np.linspace(0, 1, len(surveys))]
+fmts = ["o"]*len(param_yml)
 
 
-    pass
 
+p = ParamRun(param_yml[0])
+pars, _ = chan(param_yml[0])
+
+dz, dN = [[] for i in range(2)]
+i = 0
+for g in p.get("maps"):
+    if g["type"] == "g":
+        width = pars[i]["width"]
+        zz, NN = get_dndz(g["dndz"], width)
+        dz.append(zz)
+        dN.append(NN)
+
+        i += 1
+
+"""
+bins = np.array([np.argmax(np.array(dN1)[:, i]) for i, _ in enumerate(dz1[0])])
+bounds = np.array([np.where(bins == i)[0][0] for i, _ in enumerate(dz1)])
+zbounds = np.append(dz1[0][bounds], np.max(dz1))
 
 z = data[0][0]  # probed redshifts
 
 
 # Plot
-colours = ["k", "brown", "darkorange", "orangered", "y"]
-fmts = ["o"]*len(data)
-lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$k_{max}$", "high mass mask"]
-col = [copper(i) for i in np.linspace(0, 1, len(surveys))]
-
 
 fig, (hist, ax) = plt.subplots(2, 1, sharex=True, figsize=(10, 12),
                          gridspec_kw={"height_ratios":[1, 3], "hspace":0.05})
@@ -139,3 +137,5 @@ hist.tick_params(labelsize="large")
 
 os.chdir("images/b_hydro/")
 #plt.savefig("bhydro.pdf", bbox_inches="tight")
+"""
+#"""
