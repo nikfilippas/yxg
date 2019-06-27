@@ -2,7 +2,6 @@ import os
 os.chdir("../../")
 import numpy as np
 from scipy.integrate import simps
-from likelihood.chanal import chan
 import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerBase
 from matplotlib.cm import copper

@@ -55,14 +55,14 @@ def get_dndz(fname, width):
 #             "params_tinker.yml",
 #             "params_kmax.yml"
 #             "params_masked.yml"]
-param_yml = ["params_default.yml",
-             "params_priors1.yml",
-             "params_priors2.yml"]
+param_yml = ["params_wfixed.yml",
+             "params_wnarrow.yml",
+             "params_wbroad.yml"]
 
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
 #lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$k_{max}$", "high mass mask"]
-lbls = ["[0.2, 2]", "fixed=1", "[0.8, 1.2]"]
+lbls = ["$w = 1$", r"$w \in [0.8, 1.2]$", r"$w \in [0.2, 2.0]$"]
 colours = ["k", "brown", "darkorange", "orangered", "y"]
 col = [copper(i) for i in np.linspace(0, 1, len(sci))]
 fmts = ["o"]*len(param_yml)
@@ -70,7 +70,7 @@ fmts = ["o"]*len(param_yml)
 
 
 p = ParamRun(param_yml[0])
-temp = [chan(paryml, diff=True, probability=False) for paryml in param_yml]
+temp = [chan(paryml, diff=True, error_type="hpercentile") for paryml in param_yml]
 pars = [t[0] for t in temp]
 data = np.array([[p["b_hydro"] for p in par] for par in pars])
 data = [d.T for d in data]
@@ -80,8 +80,9 @@ dz, dN = [[] for i in range(2)]
 i = 0
 for g in p.get("maps"):
     if g["type"] == "g":
-        width = pars[0][i]["width"][0]  # [default][z-bins]["width"][best-fit]
-        zz, NN = get_dndz(g["dndz"], width)
+        w = pars[0][i]["width"]  # [default][z-bins]["width"]
+        w = w if type(w) is float else w[0]  # for fixed w
+        zz, NN = get_dndz(g["dndz"], w)
         dz.append(zz)
         dN.append(NN)
         i += 1  # g-counter
@@ -116,7 +117,7 @@ ax.text(0.005, 0.735, "CMB lens. + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)
-hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
+hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z|_{w = 1}$", fontsize=17)
 
 for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
     plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True, offset=i)
@@ -136,4 +137,4 @@ hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.15],
 
 
 os.chdir("images/b_hydro/")
-#plt.savefig("bhydro_v2.2.pdf", bbox_inches="tight")
+#plt.savefig("bhydro_widthv2.pdf", bbox_inches="tight")
