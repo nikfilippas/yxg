@@ -36,12 +36,10 @@ if sel is not None:
     elif sel == 'none':
         sel = None
 
+
 zmeans = []
-szmeans = []
 bmeans = []
-sbmeans = [[],[]]    # min and max error bar
-bymeans = []
-sbymeans = [[], []]  # min and max error bar
+sbmeans = [[],[]]  # min and max error bar
 for v in p.get('data_vectors'):
     print(v['name'])
 
@@ -51,7 +49,6 @@ for v in p.get('data_vectors'):
     zmean = np.average(z, weights=nz)
     sigz = np.sqrt(np.sum(nz * (z - zmean)**2) / np.sum(nz))
     zmeans.append(zmean)
-    szmeans.append(sigz)
 
     # Theory predictor wrapper
     def th(pars):
@@ -80,8 +77,7 @@ for v in p.get('data_vectors'):
 
     # Set up sampler
     sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
-                  p.get_sampler_prefix(v['name']),
-                  p.get('mcmc'))
+                  p.get_sampler_prefix(v['name']), p.get('mcmc'))
 
     # Read chains and best-fit
     sam.get_chain()
@@ -89,15 +85,13 @@ for v in p.get('data_vectors'):
 
     # Compute galaxy bias
     zarr = np.linspace(zmean - sigz, zmean + sigz, 10)
-    bg = np.mean(hm_bias(cosmo, 1./(1 + zarr),
-                         d.tracers[0][0].profile,
-                         **(lik.build_kwargs(sam.p0))))
+    bgchain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[0][0].profile,
+                      **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
     bychain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1].profile,
                       **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
+
+    bgmin, bg, bgmax = np.percentile(bgchain, [16, 50, 84])
     bymin, by, bymax = np.percentile(bychain, [16, 50, 84])
-    bymeans.append(by)
-    sbymeans[0].append(by-bymin)
-    sbymeans[1].append(bymax-by)
 
     # Plot power spectra
     figs_cl = lik.plot_data(sam.p0, d, save_figures=True, save_data=True,
@@ -118,7 +112,7 @@ for v in p.get('data_vectors'):
         if nn == 'b_hydro':
             bmeans.append(vv)          # median
             sbmeans[0].append(errmin)  # min errorbar
-            sbmeans[1].append(errmax)  # max errorbar
+            sbmeans[1].append(errmax) # max errorbar
         chain = sam.chain
     pars.append(lik.chi2(sam.p0))
     pars.append(len(d.data_vector))
@@ -126,21 +120,12 @@ for v in p.get('data_vectors'):
             +v["name"]+".npy", np.array(pars))
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
-    print(" b_g = %lf" % bg)
-    print(" b_y = %.2lE" % by)
+    print(" b_g = %.3lE +/- (%.3lE %.3lE) " % (bg, bg-bgmin, bgmax-bg))
+    print(" b_y = %.3lE +/- (%.3lE %.3lE) " % (by, by-bymin, bymax-by))
 
-bmeans = np.array(bmeans)      # b_hydro measurements
-sbmeans = np.array(sbmeans)    # (2,N): min,max
-bymeans = np.array(bymeans)    # b_y measurements
-sbymeans = np.array(sbymeans)  # (2,N): min, max
 
 fig, ax = plt.subplots()
-ax.errorbar(zmeans, 1-np.array(bmeans),
-             xerr=szmeans, yerr=np.flip(sbmeans, 0), fmt='ro')
+ax.errorbar(zmeans, 1-np.array(bmeans), yerr=np.flip(sbmeans, 0), fmt='ro')
 ax.set_xlabel('$z$', fontsize=15)
 ax.set_ylabel('$1-b$', fontsize=15)
-fig.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf',
-            bbox_inches='tight')
-
-D = np.vstack((zmeans, 1-bmeans, szmeans, sbmeans, bymeans, sbymeans))
-np.save("%s/%s_bH" % (p.get_outdir(), run_name), D)
+fig.savefig(p.get_sampler_prefix('b_hydro')+'all.pdf', bbox_inches='tight')
