@@ -198,7 +198,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lmin10_kmax1_tinker10_ymilca'
+    run_name: 'lmin10_kmax1_tinker10_ymilca_wnarrow'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -302,7 +302,7 @@ params:
       value: 1.
       prior:
           type: "TopHat"
-          values: [0.2, 2.]
+          values: [0.8, 1.2]
 
 # List all the different combinations of
 # power spectra you want to analyze

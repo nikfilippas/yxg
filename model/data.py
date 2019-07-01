@@ -71,7 +71,7 @@ class Tracer(object):
         return b0
 
 
-def choose_cl_file(p, tracers):
+def choose_cl_file(p, tracers, jk_region=None):
     """
     Try to find the file name containing the power spectrum
     of two tracers.
@@ -85,7 +85,7 @@ def choose_cl_file(p, tracers):
     """
     # Search for file with any possible ordering
     for tr in [tracers, tracers[::-1]]:
-        fname = p.get_fname_cls(tr[0], tr[1])
+        fname = p.get_fname_cls(tr[0], tr[1], jk_region=jk_region)
         if os.path.isfile(fname):
             return fname
             break
@@ -120,7 +120,7 @@ def choose_cov_file(p, tracers1, tracers2, suffix):
                 fname = p.get_fname_cov(tr1[0], tr1[1], tr2[0], tr2[1], suffix)
                 if os.path.isfile(fname):
                     return fname, transp
-    print(fname)
+
     raise ValueError("Can't find Cov file for " +
                      tracers1[0].name+", "+tracers1[1].name+", " +
                      tracers2[0].name+", "+tracers2[1].name)
@@ -141,7 +141,7 @@ class DataManager(object):
         cosmo (:obj:`ccl.Cosmology`): cosmology object.
         all_data (bool): whether to use all ells or form a mask
     """
-    def __init__(self, p, v, cosmo, all_data=False):
+    def __init__(self, p, v, cosmo, all_data=False, jk_region=None):
         nside = p.get_nside()
         kmax = np.inf if all_data else p.get('mcmc')['kmax']
         # Create tracers for all maps in the param file.
@@ -166,7 +166,7 @@ class DataManager(object):
 
             self.tracers.append(tr)
 
-            fname_cl = choose_cl_file(p, tr)
+            fname_cl = choose_cl_file(p, tr, jk_region=jk_region)
             with np.load(fname_cl) as f:
                 # Scale cuts
                 if all_data:
@@ -212,6 +212,7 @@ class DataManager(object):
                 tr2 = [tracers[n] for n in tp2['tracers']]
                 nd2_here = np.sum(m2)  # Number of points for vector 2
                 # Read covariance block
+                if jk_region: v["covar_type"] = "jk"  # jackknives
                 fname_cov, trans = choose_cov_file(p, tr1, tr2,
                                                    v['covar_type'])
                 with np.load(fname_cov) as f:
