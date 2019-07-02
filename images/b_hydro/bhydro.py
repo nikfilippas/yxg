@@ -110,11 +110,17 @@ ax.axhline(0.58, ls=":", color="grey")
 ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
 ax.axhline(0.72, ls=":", color="cadetblue")
 ax.axhspan(0.72-0.10, 0.72+0.10, color="cadetblue", alpha=0.3)
+ax.axhline(0.44, ls=":", color="slateblue")
+ax.axhspan(0.44-0.03, 0.44+0.03, color="slateblue", alpha=0.3)
+
 props = dict(boxstyle="round", facecolor="w", alpha=0.2)
 ax.text(0.005, 0.595, "CMB + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
 ax.text(0.005, 0.735, "CMB lens. + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
+ax.text(0.005, 0.460, "constant best-fit",
+        fontsize=12, fontweight="bold", bbox=props)
+
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)
 hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)

@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import inv
 
 
-b = np.load("output_default/b_hydro_jackknife.npy")
+b = np.load("output_default/b_hydro_lmin10_kmax1_tinker08_ynilc_wnarrow.npy")
 bjk = np.vstack([np.load("output_default/b_hydro_jackknife_jk%d.npy" % jk)
                  for jk in np.arange(1, 461)])
 
@@ -21,4 +21,4 @@ cs = b - np.dot(bbf, np.ones_like(b))
 chisq = np.dot(np.dot(cs.T, inv(cov)), cs)
 
 print(chisq, bbf, sigma)
-# 1876269.7807210516, 0.4522814493619899, 0.029475534929548835
+# 2.8658900537102956, 0.4522814493619899, 0.029475534929548835
