@@ -117,7 +117,7 @@ ax.text(0.005, 0.735, "CMB lens. + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)
-hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z|_{w = 1}$", fontsize=17)
+hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 
 for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
     plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True, offset=i)
