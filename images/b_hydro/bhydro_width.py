@@ -70,7 +70,8 @@ fmts = ["o"]*len(param_yml)
 
 
 p = ParamRun(param_yml[0])
-temp = [chan(paryml, diff=True, error_type="hpercentile") for paryml in param_yml]
+temp = [chan(paryml, diff=True, error_type="hpercentile", chains=False)
+         for paryml in param_yml]
 pars = [t[0] for t in temp]
 data = np.array([[p["b_hydro"] for p in par] for par in pars])
 data = [d.T for d in data]
