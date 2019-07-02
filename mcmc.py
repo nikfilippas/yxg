@@ -84,6 +84,7 @@ for v in p.get('data_vectors'):
         sam.sample(carry_on=p.get('mcmc')['continue_mcmc'], verbosity=1)
 
 if len(par) > 0:
+    is_jk = jk_region if bool(jk_region) else ""
     fname = p.get_outdir() + "/" + p.get("mcmc")["save_par"] + \
-            "_" + p.get("mcmc")["run_name"]
+            "_" + p.get("mcmc")["run_name"] + is_jk
     np.save(fname, np.array(par))

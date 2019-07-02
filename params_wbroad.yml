@@ -198,7 +198,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lmin10_kmax1_tinker08_ymilca'
+    run_name: 'lmin10_kmax1_tinker08_ymilca_wbroad'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -214,6 +214,8 @@ mcmc:
     n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
+    # Save parameters (separated by whitespace)
+    save_par: False
     # Cosmological mass function
     mfunc: 'tinker'
 

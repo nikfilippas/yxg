@@ -214,7 +214,7 @@ mcmc:
     n_steps: 0
     # Continue MCMC from previous iteration?
     continue_mcmc: True
-    # Save parameters (separated by whitespace)
+    # Save parameters
     save_par: 'b_hydro'
     # Cosmological mass function
     mfunc: 'tinker'
