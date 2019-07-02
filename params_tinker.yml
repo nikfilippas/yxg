@@ -214,6 +214,8 @@ mcmc:
     n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
+    # Save parameters (separated by whitespace)
+    save_par: False
     # Cosmological mass function
     mfunc: 'tinker10'
 
