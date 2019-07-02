@@ -48,4 +48,4 @@ ax.set_ylabel(r"$\mathrm{\langle bP_e \rangle \ \big[ eV \ cm^{-3} \big] }$", fo
 ax.legend(loc="upper left", frameon=False, fontsize=14)
 
 os.chdir("images/by/")
-#fig.savefig("by.pdf", bbox_inches="tight")
+fig.savefig("by.pdf", bbox_inches="tight")
