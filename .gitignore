@@ -8,6 +8,7 @@ other/
 
 # File extensions
 out*/*.npy
+!out*/b_hydro*.npy
 *.npz
 *.mcm
 *.cmcm
