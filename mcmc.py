@@ -22,14 +22,6 @@ try:
 except IndexError:
     jk_region = None
 
-if jk_region:
-    p.get("mcmc")["run_name"] += "_jk%d" % jk_region
-    for dv in p.get("data_vectors"):
-        if dv["covar_type"] != "jk":
-            dv["covar_type"] = "jk"
-            print("Changed %s covariance to 'jk'." % dv["name"])
-
-
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
 

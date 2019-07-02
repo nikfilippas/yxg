@@ -36,7 +36,6 @@ def selfunc(p):
 def get_dndz(fname, width):
     """Get the modified galaxy number counts."""
     zd, Nd = np.loadtxt(fname, unpack=True)
-
     Nd /= simps(Nd, x=zd)
     zavg = np.average(zd, weights=Nd)
     nzf = interp1d(zd, Nd, kind="cubic", bounds_error=False, fill_value=0)
@@ -98,9 +97,7 @@ def sampler2kwargs(sam, lik, diff=False, error_type=None):
     return kwargs
 
 
-
-
-def chan(fname_params, diff=False, error_type=None):
+def chan(fname_params, diff=False, error_type=None, b_hydro=None, chains=True):
     """
     Given a parameter file, looks up corresponding sampler and calculates
     best-fit parameters, and min & max values.
@@ -112,13 +109,16 @@ def chan(fname_params, diff=False, error_type=None):
                      If False, return min and max values.
         error_type (str): How to estimate errors:
                         - `probability`: 68% of highest probability samples
-                        - `hpercentile`: 68% of horizontal percentiles
-                        - `vpercentile`: 68% of vertical percentiles
+                        - `hpercentile`: 68% using 16-84 percentiles
+                        - `vpercentile`: 68% using watershed method
+        b_hydro (float): Custom `b_hydro` value. If `None`, use `p0`.
+        chains (bool): Whether to return chains.
 
     Returns:
         params (dict): Dictionary of values. "name" : [50, 16, 84] probability-
                        wise percentiles.
         chi2, dof (float): Chi-squared of best-fit and degrees of freedom.
+        chains: The chains of the fitted parameters.
     """
     def th(pars):
         return get_theory(p, d, cosmo, hm_correction=hm_correction,
@@ -152,17 +152,28 @@ def chan(fname_params, diff=False, error_type=None):
         zmean = np.average(zz, weights=NN)
         sigz = np.sqrt(np.sum(NN * (zz - zmean)**2) / np.sum(NN))
         zarr = np.linspace(zmean - sigz, zmean + sigz, 10)
-        bys = np.array([hm_bias(cosmo, 1/(1 + zarr), d.tracers[1][1].profile,
-                  **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
-        bymin, by, bymax = np.percentile(bys, [16, 50, 84])
-        if diff: bymin=by-bymin; bymax=bymax-by
-        kwargs["by"] = [by, bymin, bymax]
+
+        # p0 or user-input b_hydro
+        if b_hydro is None:
+            bys = np.array([hm_bias(cosmo, 1/(1 + zarr),
+                        d.tracers[1][1].profile,
+                        **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
+            bymin, by, bymax = np.percentile(bys, [16, 50, 84])
+            if diff: bymin=by-bymin; bymax=bymax-by
+            kwargs["by"] = [by, bymin, bymax]
+        else:
+            bys = np.array([hm_bias(cosmo, 1/(1 + zarr),
+                            d.tracers[1][1].profile,
+                            **{"b_hydro": bh}) for bh in b_hydro[:, s]])
+            kwargs["by"] = [by.mean() for by in bys]
+
         kwargs["z"] = zmean
 
         params.append(kwargs)
         chi2.append(lik.chi2(sam.p0))
         dof.append(len(lik.dv))
-        chains[0].append(sam.chain)
-        chains[1].append(bys.flatten())
+        if chains:
+            chains[0].append(sam.chain)
+            chains[1].append(bys.flatten())
 
-    return params, (chi2, dof), chains
+    return (params, (chi2, dof), chains) if chains else (params, (chi2, dof))
