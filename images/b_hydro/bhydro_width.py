@@ -1,5 +1,5 @@
 import os
-os.chdir("../../")
+#os.chdir("../../")
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
@@ -50,13 +50,8 @@ def get_dndz(fname, width):
 
 
 
-#param_yml = ["params_default.yml",
-#             "params_ynilc.yml",
-#             "params_tinker.yml",
-#             "params_kmax.yml"
-#             "params_masked.yml"]
 param_yml = ["params_wfixed.yml",
-             "params_wnarrow.yml",
+             "params_default.yml",
              "params_wbroad.yml"]
 
 sci = [r"$\mathrm{2MPZ}$"] + \

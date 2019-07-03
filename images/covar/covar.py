@@ -1,5 +1,5 @@
 import os
-os.chdir("../../")
+#os.chdir("../../")
 import numpy as np
 from likelihood.chanal import chan
 import matplotlib.pyplot as plt
@@ -31,7 +31,7 @@ def covplot(cov, save=None):
         os.chdir("../../")
 
 
-bh = np.vstack([np.load("output_default/b_hydro_jackknife_jk%d.npy" % jk)
+bh = np.vstack([np.load("output_default/b_hydro_jackknife%d.npy" % jk)
                  for jk in np.arange(1, 461)])
 
 bh_cov = (len(bh)-1)*np.cov(bh.T, bias=True)
@@ -41,7 +41,7 @@ covplot(bh_cov, save="bhydro_covar.pdf")
 
 
 ## extra work for b_y covariance ##
-dd = chan("params_wnarrow.yml", error_type="hpercentile", chains=False, b_hydro=bh)
+dd = chan("params_default.yml", error_type="hpercentile", chains=False, b_hydro=bh)
 by = np.column_stack([x["by"] for x in dd[0]])
 
 by_cov = (len(by)-1)*np.cov(by.T, bias=True)

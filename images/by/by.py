@@ -1,5 +1,5 @@
 import os
-os.chdir("../../")
+#os.chdir("../../")
 import numpy as np
 from likelihood.chanal import chan
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 
-fname_params = "params_wnarrow.yml"
+fname_params = "params_default.yml"
 pars, _, chains = chan(fname_params, diff=True, error_type="hpercentile")
 bys = [bb for bb in 1e3*np.array(chains[1])]
 

@@ -1,5 +1,5 @@
 import os
-os.chdir("../../")
+#os.chdir("../../")
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
@@ -48,8 +48,8 @@ def get_dndz(fname, width):
     return zd, Nd_new
 
 
-
-param_yml = ["params_wnarrow.yml",
+print(os.system("pwd"))
+param_yml = ["params_default.yml",
              "params_ynilc.yml",
              "params_tinker.yml",
              "params_kmax.yml",

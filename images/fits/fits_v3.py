@@ -1,5 +1,5 @@
 import os
-os.chdir("../..")
+#os.chdir("../..")
 import numpy as np
 import pyccl as ccl
 from analysis.params import ParamRun
@@ -35,7 +35,7 @@ class thr(object):
                           **pars)
 
 
-fname_params = "params_wnarrow.yml"
+fname_params = "params_default.yml"
 p = ParamRun(fname_params)
 cosmo = p.get_cosmo()
 
