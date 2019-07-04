@@ -15,8 +15,9 @@
 \usepackage{balance}
 \usepackage{enumitem}
 \usepackage{lipsum}
-\newcommand{\nv}{\hat{\bf n}}
+\newcommand{\nv}{\hat{\boldsymbol{\theta}}}
 \newcommand{\TODO}[1]{{\bf TODO:} #1}
+\newcommand{\todo}[1]{{\bf TODO:} #1}
 \newcommand{\kalo}{Karhunen-Lo\`{e}ve\,}
 \newcommand{\jcap}{JCAP}
 \newcommand{\mnras}{MNRAS}
@@ -33,7 +34,7 @@
 \newcommand{\physrep}{Physics Reports}
 
 \title[Tomographic measurement of the gas pressure through galaxy-tSZ cross-correlations]{Tomographic measurement of the gas pressure through galaxy-tSZ cross-correlations}
-\author[David Alonso]{David Alonso$^1$, Maciej Bilicki$^2$, Nick Koukoufilippas$^1$, John A. Peacock$^3$\\
+\author[David Alonso]{Nick Koukoufilippas$^1$, David Alonso$^1$, Maciej Bilicki$^2$, John A. Peacock$^3$\\
                       $^{1}$Department of Physics, University of Oxford, Keble Road, Oxford, OX1 3RH, UK\\
                       $^{2}$Center for Theoretical Physics, Polish Academy of Sciences, al. Lotnik\'ow 32/46, 02-668, Warsaw, Poland\\
                       $^{3}$Institute for Astronomy, University of Edinburgh, Royal Observatory, Edinburgh EH9 3HJ, United Kingdom
@@ -53,24 +54,38 @@
 \end{keywords}
 
 \section{Introduction}\label{sec:intro}
-  \TODO{Motivation:}
-  \begin{itemize}
-    \item Measure $\langle P_e\rangle(z)$ or $(1-b_H)(z)$.
-    \item Conversely, gain info on HOD properties (?)
-    \item Pressure-galaxy relation (?)
-  \end{itemize}
-  \TODO{Define tSZ}
+  Modern observational cosmology has reached a stage where the constraining power of most current and future datasets are limited by astrophysical systematic uncertainties, i.e. our lack of understanding of the physics behind the luminous components of the Universe, galaxies and gas \TODO{cites}, especially on the smallest scales. The limiting factor for cluster number counts is the uncertainty in the mass-observable relation. Cosmic shear measurements are strongly affected by sub-grid baryonic physics, and by uncertainties in the processes by which galaxies acquire correlated intrinsic alignments. Finally, even though the clustering pattern of galaxies is one of the cosmological observables with the highest signal-to-noise ratio, the cosmological constraints that can be extracted from it is severely limited by our lack of understanding of the galaxy-dark matter connection. Even the analysis of the temperature anisotropies in the Cosmic Microwave Background (CMB), arguably the cleanest cosmological observable, are currently limited by the impact of astrophysical foregrounds on small scales \TODO{cites everywhere}.
+  
+  The CMB secondary anisotropies, in particular the thermal and kinetic Sunyaev-Zel'dovich effects (tSZ and kSZ respectively), as well as the gravitational lensing of the CMB photons, have gained popularity as a means to address this issue \TODO{cite}. These effects are relatively clean probes of some of the physical quantities that need to be understood in order to mitigate the impact of astrophysical uncertainties: the matter and gas densities, the gas pressure and the velocity field. Since these observables are also sensitive to cosmology, their combination with large-scale structure data can be extremely powerful at disentangling astrophysical and cosmological parameters. This has been explored by a large number of groups: CMB lensing data has been used to constrain the bias of different tracers of the matter distribution \todo{cites}, as well as to calibrate the measurement of galaxy shapes in cosmic shear analyses \todo{cites}. The tSZ effect has been used in cross-correlation with galaxy clustering and weak lensing data to determine the physical properties of the diffuse gas, as well as to potentially improve constraints on the amplitude of matter fluctuations \todo{cites}. The kSZ in turn has been used in cross-correlation with galaxy clustering to constrain the growth of structure and the properties gas density profile around halos \todo{cites}.
+  
+  In this work we will focus on the cross-correlation between galaxy clustering data and maps of the tSZ Compton-$y$ parameter, making use of existing data from the Planck collaboration \todo{cites} and a set of photometric galaxy surveys. Several questions can be addressed through this combined analysis. Through tomography, this cross-correlation can be used to reconstruct the redshift evolution of the thermal gas pressure, as well as the dependence of the mass bias for tSZ cluster studies on redshift and, potentially, halo mass. This is a relevant topic given the current mild tensions between SZ cluster number counts and CMB primary anisotropies \todo{cites}, which could be caused by the assumptions made to model the $y$-mass relation. Conversely, under the assumption that the relation between mass and gas pressure is well understood, the tSZ effect can be thought of as a mass tracer, which can be used to break degeneracies with the galaxy bias parameter.
+
+  This paper is structured as follows: Section \ref{sec:theory} presents the theoretical background used here to describe our two main observables, the projected overdensity of galaxies and the Compton-$y$ parameter, as well as their cross-correlation. Section \ref{sec:data} presents the datasets used for our analysis. The methods used to analyse these data are described in Section \ref{sec:methods}, and Section \ref{sec:results} presents the results. We summarize our conclusions in Section \ref{sec:discussion}.
 
 \section{Theory}\label{sec:theory}
-  \subsection{Projected fields and angular power spectra}\label{ssec:theory.cls}
-    Our study will focus on the cross-correlation of the 2D galaxy overdensity in tomographic redshift bins $\delta_g$ and maps of the tSZ Compton-$y$ parameter. Both of these observables can be described as a projected quantity $u(\nv)$, where $\nv$ is a unit vector on the sphere, related to a three-dimensional field $U({\bf r})$ $V({\bf r})$ through some radial kernel $W_u(\chi)$:
+    Our analysis will focus on the cross-correlation of the projected galaxy overdensity in tomographic redshift bins $\delta_g$ and maps of the tSZ Compton-$y$ parameter.
+    
+    $\delta_g$ is simply the overdensity in the number of galaxies integrated over a redshift bin:
+    \begin{equation}
+      \delta_g(\nv)=\int dz\,\phi_g(z)\,\Delta_g(\chi(z)\,\nv),
+    \end{equation}
+    where $\nv$ is a unit vector on the sphere, $\chi(z)$ is the comoving radial distance to redshift $z$ and $\phi_g(z)$ is the normalized galaxy redshift distribution in the bin. $\Delta_g({\bf x})=n_g({\bf x})/\bar{n}_g-1$ is the 3D galaxy overdensity, where $n_g$ is the galaxy number density.
+    
+    The Compton-$y$ parameter in turn is given by \todo{cite}:
+    \begin{equation}
+      y(\nv)=\frac{\sigma_T}{m_ec^2}\int \frac{d\chi}{(1+z)} P_e(\chi\nv),
+    \end{equation}
+    where $P_e=n_e\,T_e$ is the electron pressure ($n_e$ and $T_e$ are the electron density and temperature respectively), $\sigma_T$ is the Thomson scattering cross-section, and $m_e$ is the electron mass.
+    
+  \subsection{Projected fields and angular power spectra}\label{ssec:theory.cls}    
+    Both $\delta_g$ and $y$ can be described as a projected quantity $u(\nv)$ related to a three-dimensional field $U({\bf r})$ through some radial kernel $W_u(\chi)$:
     \begin{equation}
       u(\nv)=\int d\chi\,W_u(\chi)\,U(\chi\nv).
     \end{equation}
     Any projected quantity can be decomposed into its spherical harmonic coefficients $u_{\ell m}$, the covariance of which is the so-called angular power spectrum $\langle u_{\ell m}v^*_{\ell' m'}\rangle\equiv C^{uv}_\ell\delta_{\ell\ell'}\delta_{mm'}$.
 
-    The angular power spectrum can be related to the 3D power spectrum of the associated 3D fields $P_{UV}$ as:
-    \begin{equation}
+    The angular power spectrum can be related to the 3D power spectrum of the associated 3D fields $P_{UV}$ as\footnote{Note that Eq. \ref{eq:cllimber} is only valid in the {\sl Limber approximation} \todo{cite}, which is accurate for broad radial kernels. This approximation is adequate for the redshift distributions used here.}:
+    \begin{equation}\label{eq:cllimber}
       C_\ell^{uv} = \int d\chi \frac{W_u(\chi)W_v(\chi)}{\chi^2}\,P_{UV}\left( z, k=\frac{\ell+1/2}{\chi} \right).
     \end{equation}
     Here, the 3D power spectrum is analogously defined as the variance of the Fourier-space 3D quantities:
@@ -79,14 +94,14 @@
     \end{equation}
     We will model the 3D power spectrum using the halo model described in \ref{ssec:theory.hm} below.
 
-    In this formalism, the 3D quantities associated to $\delta_g(\nv)$ and $y(\nv)$ are the 3D galaxy overdensity $\Delta_g({\bf x})=n_g({\bf x})/\bar{n}_g-1$ and the electron pressure $P_e({\bf x})$ respectively, where $n_g$ is the galaxy number density. The associated radial kernels are:
+    In this formalism, the 3D quantities associated to $\delta_g(\nv)$ and $y(\nv)$ are the 3D overdensity $\Delta_g({\bf x})$ and the electron pressure $P_e({\bf x})$ respectively. The associated radial kernels are:
     \begin{equation}
       W_g(\chi)=\frac{H(z)}{c}\,\phi_g(z),\hspace{12pt}W_y(\chi)=\frac{\sigma_T}{m_ec^2}\frac{1}{1+z},
     \end{equation}
-    where $\phi_g(z)$ is the normalized galaxy redshift distribution, $H(z)$ is the expansion rate, $\sigma_T$ is the Thomson scattering cross-section, and $m_e$ is the electron mass.
+    where $H(z)$ is the expansion rate.
 
   \subsection{Halo model predictions}\label{ssec:theory.hm}
-    The halo model \TODO{cite} describes the spatial fluctuations of any quantity in terms of the contributions to them of all dark matter haloes, under the assumption that all the matter in the Universe is contained in those haloes. We will only quote here the final results regarding the halo model prediction for power spectra, and refer the reader to \TODO{cite} for further details.
+    The halo model \TODO{cite} describes the spatial fluctuations of any quantity in terms of the contributions to it of all dark matter haloes, under the assumption that all the matter in the Universe is contained in those haloes. We will only quote here the final results regarding the halo model prediction for power spectra, and refer the reader to \TODO{cite} for further details.
     
     Let $U(r|M)$ be the profile of a given quantity as a function of the comoving distance $r$ to the centre of a halo of mass $M$, and let $U(k|M)$ be its Fourier transform:
     \begin{equation}
@@ -149,7 +164,7 @@
         P_*=6.41\,\left(1.65 {\rm eV}\,{\rm cm}^{-3}\right)h_{70}^{8/3}
         \left(\frac{h_{70}(1-b_H)M_{500c}}{3\times10^{14}M_\odot}\right)^{0.79},
       \end{equation}
-      where $h_{70}=H_0/(70 {\rm km}\,{\rm s}^{-1}\,{\rm Mpc}^{-1}$, and $(1-b_H)$ is the so-called hydrostatic bias parameter. The GNFW form factor is
+      where $h_{70}=H_0/(70 {\rm km}\,{\rm s}^{-1}\,{\rm Mpc}^{-1}$, and $(1-b_H)$ is the so-called m bias parameter. The GNFW form factor is
       \begin{equation}
         p(x)=(c_P x)^{-\gamma}\left[1+(c_P x)^\alpha\right]^{(\gamma-\beta)/\alpha},
       \end{equation}
@@ -166,7 +181,9 @@
       \begin{equation}
         \langle u_y(k|M) u_g(k|M)\rangle = (1+\rho_{yg})\langle u_g(k|M)\rangle \langle u_y(k|M)\rangle,
       \end{equation}
-      where $\rho_{yg}$ is a free parameter that determines the sign of the correlation between galaxy abundance and pressure. Marginalising over this parameter has the added advantage of reducing the sensitivity of our final constraints on $1-b_H$ on the details of the cross-spectrum model in the 1-halo regime, where both parameters are completely degenerate.              
+      where $\rho_{yg}$ is a free parameter that determines the sign of the correlation between galaxy abundance and pressure. Marginalising over this parameter has the added advantage of reducing the sensitivity of our final constraints on $1-b_H$ on the details of the cross-spectrum model in the 1-halo regime, where both parameters are completely degenerate.
+      
+      \todo{introduce $\langle bP_e\rangle$.}
       
     \subsubsection{Concentration-mass relation and mass definitions}\label{sssec:theory.hm.cm}
       Halo radii $r_\Delta$ are usually defined as the size of the sphere containing a given mass $M_\Delta$:
