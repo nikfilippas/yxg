@@ -11,4 +11,3 @@ out*/*.npy
 *.npz
 *.mcm
 *.cmcm
-*.h5
