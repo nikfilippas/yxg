@@ -200,11 +200,26 @@
 
 \section{Data}\label{sec:data}
   \subsection{The Compton-$y$ map}\label{ssec:data.y}
-    \TODO{Discuss MILCA and NILC maps, as well as associated masks.}
+    We make use of the maps of the Compton-$y$ parameter made public by the Planck collaboration \todo{cites}. These maps were generated using different flavours of the Internal Linear Combination method \todo{cites}. In a simplified description, the ILC technique selects the linear combination of all frequency channels that preserves the spectrum of the source one wishes to map minimizing the map-level variance. The refined versions of the ILC method used by Planck further optimize the linear weights on different scales and different regions of the map, and project out sources with known spectra that are likely to cause significant contamination. In particular, the Planck collaboration has released two $y$ maps, extracted using the MILCA and NILC variations of the ILC technique. Both method deproject CMB contamination through its well-known spectrum, but differ on the methods used to calculate the optimal scale-dependent and spatially-varying linear weights.
+    
+    The MILCA and NILC maps have been found to be in good agreement in different studies \todo{cites}, although the NILC map has a higher noise level on large scales \todo{cite}. We thus use the MILCA map as our fiducial Compton-$y$ map, but will repeat our analysis on the NILC map as part of our systematics analysis.
+    
+    We use a fiducial mask for the $y$ maps based on a combination of the Planck 60\% Galactic mask and the union of the HFI and LFI point source masks. As part of our study of the mass dependence of the signal on halo mass, we additionally mask out all tSZ sources detected by Planck above 6$\sigma$, based on the Union catalog of \todo{cite}.
+    
+    Finally, in order to evaluate the level of contamination from extragalactic dust in the $\delta_g$-$y$ correlation, we make used of the HFI 545 GHz map, as described in Section \ref{sssec:results.syst.y}.
+    
+    
   \subsection{2MPZ and WI$\times$SC}\label{ssec:data.g1}
-    \TODO{Discuss the catalogs briefly and note the systematics contamination in WISC}
-  \subsection{The SDSS DR12 photometric sample}\label{ssec:data.g2}
-    \TODO{Same as above}
+    We make use of two low-redshift photometric redshift catalogs, the 2MASS photometric redshift survey (2MPZ; \todo{cite}) and the WISE $\times$ SuperCOSMOS catalogue (WI$\times$SC; \todo{cite}). Both surveys were creating by cross-matching full-sky imaging surveys, and their broad photometric coverage allows them to achieve excellent photo-$z$ uncertainties.
+    
+    2MPZ was constructed by cross-matching the extended-source catalog from the 2 Micron All-Sky Survey (2MASS; \todo{cite}) with the photographic plates of SuperCOSMOS \todo{cite} and the photometry of the Wide-field Infrared Survey Explorer (WISE; \todo{cite}). After applying an apparent magnitude cut $K_s<13.9$ to achieve uniformity, 2MPZ include over 940,000 sources observed in 8 bands: SuperCOSMOS's optical $(B,R,I)$, 2MASS's near-infrared $(J,H,K_s)$ and WISE's mid-infrared $(W1,W2)$. Photometric redshifts (photo-$z$s) were extracted using the neural network code ANNz \todo{cite} trained on a large spectroscopic sample from overlapping surveys. The resulting photo-$z$s have a typical error $\sigma_z\simeq0.015$, and the sample has a median redshift $z\sim0.08$.
+    
+    A deeper sample can be achieved by dropping the 2MASS data and cross-matching WISE and SuperCOSMOS only. After removing the sources already contained in 2MPZ, the resulting catalog, WI$\times$SC, is $\sim$3 times deeper, contains $\sim20$ million sources and reaches up to redshift $z\sim0.4$, with a median redshift of $\sim0.2$. The photometric redshifts are less accurate, given the poorer photometric coverage $(B,\,R,\,W1,\,W2)$, with a mean error $\sigma_z/(1+z)\simeq0.035$.
+
+%    \TODO{Discuss the catalogs briefly and note the systematics contamination in WISC}
+
+%  \subsection{The SDSS DR12 photometric sample}\label{ssec:data.g2}
+%    \TODO{Same as above}
 
 \section{Methods}\label{sec:methods}
   \subsection{Estimating power spectra}\label{ssec:methods.cls}
