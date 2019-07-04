@@ -1,6 +1,5 @@
 # Directories
 __pycache__/
-#images/
 data/
 legacy/
 images/fits/legacy/
@@ -8,6 +7,7 @@ other/
 
 # File extensions
 out*/*.npy
+!out*/b_hydro*.npy
 *.npz
 *.mcm
 *.cmcm

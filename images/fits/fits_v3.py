@@ -1,5 +1,5 @@
 import os
-os.chdir("../..")
+#os.chdir("../..")
 import numpy as np
 import pyccl as ccl
 from analysis.params import ParamRun
@@ -57,6 +57,25 @@ if sel is not None:
 surveys = ["2mpz"] + ["wisc%d" % i for i in range(1, 6)]
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
+
+
+# DUST
+cls, ls, nls = [[] for i in range(3)]
+for s in surveys:
+    fname = "output_default/cls_%s_dust_545.npz" % s
+    sname = "output_default/cov_jk_%s_dust_545_%s_dust_545.npz" % (s, s)
+    with np.load(fname) as f:
+        cls.append(f["cls.npy"])
+        ls.append(f["ls.npy"])
+    with np.load(sname) as f:
+        nls.append(np.sqrt(np.diag(f["cov.npy"])))
+
+cls, ls, nls = map(lambda x: np.vstack(x), [cls, ls, nls])
+
+alpha_CIB = 2.3e-7
+cls *= alpha_CIB
+nls *= alpha_CIB
+
 
 
 f = plt.figure(figsize=(8, 12))
@@ -183,8 +202,12 @@ for s, v in enumerate(p.get("data_vectors")):
         ax1.plot(ll, tt, ls=":", c="k")
         ax1.plot(lsd[i], tvd[i], ls="-", c="k", label=r"$\mathrm{1h+2h}$")
 
-
         ax1.errorbar(lsg[i], dv[i], yerr=ev[i], fmt="r.")
+
+        if i == 1:
+            ax1.errorbar(ls[s], cls[s], nls[s], fmt="s",
+                         color="darkorange", alpha=0.3, ms=3,
+                         label=r"$\mathrm{CIB}$")
 
 
         # grey boundaries
@@ -194,7 +217,7 @@ for s, v in enumerate(p.get("data_vectors")):
         ax2.axvspan(lmax, ax1.get_xlim()[1], color="grey", alpha=0.2)
 
         if i == 0:
-            ax1.text(0.02, 0.06, sci[s]+"\n"+"$\\chi^2/{\\rm dof}=%.2lf/%d$" %
+            ax1.text(0.02, 0.06, sci[s]+"\n"+"$\\chi^2/N_{d}=%.2lf/%d$" %
                      (chi2, dof), transform=ax1.transAxes)
 
             ax1.set_ylabel('$C_\\ell$', fontsize=15)
@@ -207,8 +230,7 @@ for s, v in enumerate(p.get("data_vectors")):
             if i == 1:
                 ax1.text(0.45, 1.1, r"$y \times g$", fontsize=15,
                          transform=ax1.transAxes)
-                ax1.legend(loc="lower center", ncol=3, frameon=False,
-                           bbox_to_anchor=(0.52, -0.1))
+                ax1.legend(loc="lower right", ncol=4, fontsize=8)
 
         if s != len(surveys)-1:
             ax2.get_xaxis().set_visible(False)

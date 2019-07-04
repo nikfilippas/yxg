@@ -13,7 +13,14 @@ try:
 except IndexError:
     raise ValueError("Must provide param file name as command-line argument")
 
+
 p = ParamRun(fname_params)
+
+# Jackknives
+try:
+    jk_region = int(sys.argv[2])
+except IndexError:
+    jk_region = None
 
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
@@ -34,11 +41,12 @@ if sel is not None:
     elif sel == 'none':
         sel = None
 
+par = []
 for v in p.get('data_vectors'):
     print(v['name'])
 
     # Construct data vector and covariance
-    d = DataManager(p, v, cosmo)
+    d = DataManager(p, v, cosmo, jk_region=jk_region)
 
     # Theory predictor wrapper
     def th(pars):
@@ -66,6 +74,7 @@ for v in p.get('data_vectors'):
     print(" Best-fit parameters:")
     for n, v, s in zip(sam.parnames, sam.p0, np.sqrt(np.diag(sam.covar))):
         print("  " + n + " : %.3lE +- %.3lE" % (v, s))
+        if n == p.get("mcmc")["save_par"]: par.append(v)
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
 
@@ -73,3 +82,9 @@ for v in p.get('data_vectors'):
         # Monte-carlo
         print(" Sampling:")
         sam.sample(carry_on=p.get('mcmc')['continue_mcmc'], verbosity=1)
+
+if len(par) > 0:
+    is_jk = str(jk_region) if bool(jk_region) else ""
+    fname = p.get_outdir() + "/" + p.get("mcmc")["save_par"] + \
+            "_" + p.get("mcmc")["run_name"] + is_jk
+    np.save(fname, np.array(par))

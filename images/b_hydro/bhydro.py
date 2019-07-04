@@ -1,7 +1,10 @@
 import os
-os.chdir("../../")
+#os.chdir("../../")
 import numpy as np
 from scipy.integrate import simps
+from scipy.interpolate import interp1d
+from analysis.params import ParamRun
+from likelihood.chanal import chan
 import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerBase
 from matplotlib.cm import copper
@@ -23,109 +26,121 @@ class AnyObjectHandler(HandlerBase):
         return [l1, l2]
 
 
-def get_z_Nz(version=""):
-    """Get a version of dn/dz's."""
-    dz, dN = [[[] for j in surveys] for i in range(2)]
-    for i, s in enumerate(surveys):
-        # data manipulation
-        fname = dir1 + ("2MPZ" + version + "_bin1.txt" if s is "2mpz" \
-                        else  s[:4].upper() + version + "_bin%d.txt" % i)
-        zd, Nd = np.loadtxt(fname, unpack=True)
-        Nd /= simps(Nd, x=zd)  # normalise histogram
-        #surveys
-        dz[i] = zd
-        dN[i] = Nd
-
-    dz, dN = map(lambda x: [np.array(y) for y in x], [dz, dN])
-    return dz, dN
-
-
-def plotfunc(ax, a, xerr=None, fmt=None, color=None, label=None):
+def plotfunc(ax, zz, dd, inverted=False,
+             fmt=None, color=None, label=None, offset=0):
     """Plots b_hydro data with error bars."""
-    x, y = a[0: 2]
-    if xerr: xerr = a[2]
-    yerr = a[3:5]
-    ax.errorbar(x, y, xerr=xerr, yerr=yerr,
-                 fmt=fmt, c=color, label=label)
+    yerr = dd[1:] if not inverted else np.flip(dd[1:], axis=0)
+    bh = dd[0] if not inverted else 1-dd[0]
+
+    ax.errorbar(zz+0.004*offset, bh, yerr=yerr, fmt=fmt, c=color, label=label)
 
 
-# dn/dz
-dir1 = "data/dndz/"
 
-wisc = ["wisc_b%d" % i for i in range(1, 6)]
-surveys = ["2mpz"] + wisc
+def get_dndz(fname, width):
+    """Get the modified galaxy number counts."""
+    zd, Nd = np.loadtxt(fname, unpack=True)
+
+    Nd /= simps(Nd, x=zd)
+    zavg = np.average(zd, weights=Nd)
+    nzf = interp1d(zd, Nd, kind="cubic", bounds_error=False, fill_value=0)
+
+    Nd_new = nzf(zavg + (1/width)*(zd-zavg))
+    return zd, Nd_new
+
+
+print(os.system("pwd"))
+param_yml = ["params_default.yml",
+             "params_ynilc.yml",
+             "params_tinker.yml",
+             "params_kmax.yml",
+             "params_masked.yml"]
+#param_yml = ["params_wfixed.yml",
+#             "params_wnarrow.yml",
+#             "params_wbroad.yml"]
+
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
+lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$k_{max}$", "high mass mask"]
+#lbls = ["$w = 1$", r"$w \in [0.8, 1.2]$", r"$w \in [0.2, 2.0]$"]
+colours = ["k", "brown", "darkorange", "orangered", "y"]
+col = [copper(i) for i in np.linspace(0, 1, len(sci))]
+fmts = ["o"]*len(param_yml)
 
-dz1, dN1 = get_z_Nz()
-dz2, dN2 = get_z_Nz(version="_v2")
-bins = np.array([np.argmax(np.array(dN1)[:, i]) for i, _ in enumerate(dz1[0])])
-bounds = np.array([np.where(bins == i)[0][0] for i, _ in enumerate(dz1)])
-zbounds = np.append(dz1[0][bounds], np.max(dz1))
 
 
-# b-hydro
-data = []
+p = ParamRun(param_yml[0])
+temp = [chan(paryml, diff=True, error_type="hpercentile", chains=False)
+         for paryml in param_yml]
+pars = [t[0] for t in temp]
+data = np.array([[p["b_hydro"] for p in par] for par in pars])
+data = [d.T for d in data]
 
-bHdir = "output_default/"
-runs = ['lmin10_kmax1_tinker08_ymilca',
-        'lmin10_kmax1_tinker08_ynilc',
-        'lmin10_kmax1_tinker10_ymilca',
-        'lmin10_kmax05_tinker08_ymilca']
-for run in runs:
-    data.append(np.load(bHdir+run+"_bH.npy"))
-data.append(np.load("output_mask/lmin10_kmax1_tinker08_ymilca_bH.npy"))
 
-z = data[0][0]  # probed redshifts
+dz, dN = [[] for i in range(2)]
+i = 0
+for g in p.get("maps"):
+    if g["type"] == "g":
+        w = pars[0][i]["width"]  # [default][z-bins]["width"]
+        w = w if type(w) is float else w[0]  # for fixed w
+        zz, NN = get_dndz(g["dndz"], w)
+        dz.append(zz)
+        dN.append(NN)
+        i += 1  # g-counter
+
+z = np.array([np.average(zz, weights=NN) for zz, NN in zip(dz, dN)])
+
+# find where probability of next bin > probability of previous bin,
+# past the mode of the previous bin
+mb = [np.argmax(dN[i]) for i, _ in enumerate(dz)]  # bin avg
+bins = np.array([np.where((dN[i] < dN[i+1])[mb[i]:])[0][0] for i in range(len(dz)-1)])
+bins += np.array(mb[:-1])
+zbounds = np.append(np.append(0, dz[0][bins]), dz[0].max())  # add outer bins
 
 
 # Plot
-colours = ["k", "brown", "darkorange", "orangered", "y"]
-fmts = ["o"]*len(data)
-lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$k_{max}$", "high mass mask"]
-col = [copper(i) for i in np.linspace(0, 1, len(surveys))]
-
-
 fig, (hist, ax) = plt.subplots(2, 1, sharex=True, figsize=(10, 12),
                          gridspec_kw={"height_ratios":[1, 3], "hspace":0.05})
 
+ax.set_xlim(0, 0.4)
+ax.tick_params(labelsize="large")
+hist.set_ylim(0, np.ceil(np.max(dN)))
+hist.tick_params(labelsize="large")
 
 ax.axhline(0.58, ls=":", color="grey")
 ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
 ax.axhline(0.72, ls=":", color="cadetblue")
 ax.axhspan(0.72-0.10, 0.72+0.10, color="cadetblue", alpha=0.3)
+ax.axhline(0.44, ls=":", color="slateblue")
+ax.axhspan(0.44-0.03, 0.44+0.03, color="slateblue", alpha=0.3)
+
 props = dict(boxstyle="round", facecolor="w", alpha=0.2)
-ax.text(0.005, 0.600, "CMB + cluster counts",
+ax.text(0.005, 0.595, "CMB + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
-ax.text(0.005, 0.740, "CMB lens. + cluster counts",
+ax.text(0.005, 0.735, "CMB lens. + cluster counts",
         fontsize=12, fontweight="bold", bbox=props)
+ax.text(0.005, 0.460, "constant best-fit",
+        fontsize=12, fontweight="bold", bbox=props)
+
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)
 hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 
-for i, (a, c, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
-    plotfunc(ax, a+0.003*i, xerr=None, fmt=fmt, color=c, label=lbl)
+for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
+    plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True, offset=i)
 
 handles, labels = ax.get_legend_handles_labels()
 ax.legend([object]+handles, ["Planck15"]+labels,
           handler_map={object: AnyObjectHandler()},
           loc="lower right", fontsize=14, ncol=2)
 
-ax.set_xlim(0, 0.4)
-#ax.set_xlim(ax.get_xlim())  # fix xlim
-ax.tick_params(labelsize="large")
 
 [hist.axvspan(zbounds[i], zbounds[i+1],
-              color=col[i], alpha=0.3) for i, _ in enumerate(dz1)]
-[hist.plot(dz1[i], dN1[i],
-           c=col[i], lw=2, label=sci[i]) for i, _ in enumerate(surveys)]
-[hist.plot(dz2[i], dN2[i], ls=":", alpha=0.6,
-           c=col[i], lw=2) for i, _ in enumerate(surveys)]
-hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.16],
-            ncol=len(surveys), fontsize=9.5, frameon=False)
+              color=col[i], alpha=0.3) for i, _ in enumerate(dz)]
+[hist.plot(dz[i], dN[i],
+           c=col[i], lw=2, label=sci[i]) for i, _ in enumerate(sci)]
+hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.15],
+            ncol=len(sci), fontsize=9.5, frameon=False)
 
-hist.set_ylim(0, hist.get_ylim()[1])
-hist.tick_params(labelsize="large")
 
 os.chdir("images/b_hydro/")
 plt.savefig("bhydro.pdf", bbox_inches="tight")
