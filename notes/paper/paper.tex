@@ -16,6 +16,7 @@
 \usepackage{enumitem}
 \usepackage{lipsum}
 \newcommand{\nv}{\hat{\boldsymbol{\theta}}}
+\newcommand{\wisc}{WI$\times$SC}
 \newcommand{\TODO}[1]{{\bf TODO:} #1}
 \newcommand{\todo}[1]{{\bf TODO:} #1}
 \newcommand{\kalo}{Karhunen-Lo\`{e}ve\,}
@@ -208,18 +209,14 @@
     
     Finally, in order to evaluate the level of contamination from extragalactic dust in the $\delta_g$-$y$ correlation, we make used of the HFI 545 GHz map, as described in Section \ref{sssec:results.syst.y}.
     
+  \subsection{2MPZ and \wisc}\label{ssec:data.g1}
+    We make use of two low-redshift photometric redshift catalogs, the 2MASS photometric redshift survey (2MPZ; \cite{2014ApJS..210....9B}) and the WISE $\times$ SuperCOSMOS catalogue (\wisc; \cite{2016ApJS..225....5B}). Both surveys were creating by cross-matching full-sky imaging surveys, and their broad photometric coverage allows them to achieve excellent photo-$z$ uncertainties.
     
-  \subsection{2MPZ and WI$\times$SC}\label{ssec:data.g1}
-    We make use of two low-redshift photometric redshift catalogs, the 2MASS photometric redshift survey (2MPZ; \todo{cite}) and the WISE $\times$ SuperCOSMOS catalogue (WI$\times$SC; \todo{cite}). Both surveys were creating by cross-matching full-sky imaging surveys, and their broad photometric coverage allows them to achieve excellent photo-$z$ uncertainties.
+    2MPZ was constructed by cross-matching the extended-source catalog from the 2 Micron All-Sky Survey (2MASS; \citep{2006AJ....131.1163S,2000AJ....119.2498J}) with the photographic plates of SuperCOSMOS \cite{2001MNRAS.326.1295H,2016MNRAS.462.2085P} and the photometry of the Wide-field Infrared Survey Explorer (WISE; \cite{2010AJ....140.1868W}). After applying an apparent magnitude cut $K_s<13.9$ to achieve uniformity, 2MPZ include over 940,000 sources observed in 8 bands: SuperCOSMOS's optical $(B,R,I)$, 2MASS's near-infrared $(J,H,K_s)$ and WISE's mid-infrared $(W1,W2)$. Photometric redshifts (photo-$z$s) were extracted using the neural network code ANNz \cite{2004PASP..116..345C} trained on a large spectroscopic sample from overlapping surveys. The resulting photo-$z$s have a typical error $\sigma_z\simeq0.015$, and the sample has a median redshift $z\sim0.08$. As we will see, due to the low redshift of this sample, the cross-correlation with the $y$ map is dominated by the 1-halo term for 2MPZ, and little is gained by sub-dividing it into narrow redshift bins. Therefore we use 2MPZ as a single tomographic sample.
     
-    2MPZ was constructed by cross-matching the extended-source catalog from the 2 Micron All-Sky Survey (2MASS; \todo{cite}) with the photographic plates of SuperCOSMOS \todo{cite} and the photometry of the Wide-field Infrared Survey Explorer (WISE; \todo{cite}). After applying an apparent magnitude cut $K_s<13.9$ to achieve uniformity, 2MPZ include over 940,000 sources observed in 8 bands: SuperCOSMOS's optical $(B,R,I)$, 2MASS's near-infrared $(J,H,K_s)$ and WISE's mid-infrared $(W1,W2)$. Photometric redshifts (photo-$z$s) were extracted using the neural network code ANNz \todo{cite} trained on a large spectroscopic sample from overlapping surveys. The resulting photo-$z$s have a typical error $\sigma_z\simeq0.015$, and the sample has a median redshift $z\sim0.08$.
-    
-    A deeper sample can be achieved by dropping the 2MASS data and cross-matching WISE and SuperCOSMOS only. After removing the sources already contained in 2MPZ, the resulting catalog, WI$\times$SC, is $\sim$3 times deeper, contains $\sim20$ million sources and reaches up to redshift $z\sim0.4$, with a median redshift of $\sim0.2$. The photometric redshifts are less accurate, given the poorer photometric coverage $(B,\,R,\,W1,\,W2)$, with a mean error $\sigma_z/(1+z)\simeq0.035$.
+    A deeper sample can be achieved by dropping the 2MASS data and cross-matching WISE and SuperCOSMOS only. After removing the sources already contained in 2MPZ, the resulting catalog, \wisc, is $\sim$3 times deeper, contains $\sim20$ million sources and reaches up to redshift $z\sim0.4$, with a median redshift of $\sim0.2$. The photometric redshifts are less accurate, given the poorer photometric coverage $(B,\,R,\,W1,\,W2)$, with a mean error $\sigma_z/(1+z)\simeq0.035$. We divide the \wisc sample into 5 redshift bins, corresponding to photo-$z$ intervals of equal width $\delta z_{\rm photo}=0.05$ in the range $0.1<z_{\rm photo}<0.35$. We estimate fiducial redshift distribution for each tomographic sample as described in \cite{2018MNRAS.481.1133P}, and we discuss the marginalization over uncertainties in these distributions in Section \ref{sssec:methods.syst.photoz}.
 
-%    \TODO{Discuss the catalogs briefly and note the systematics contamination in WISC}
-
-%  \subsection{The SDSS DR12 photometric sample}\label{ssec:data.g2}
-%    \TODO{Same as above}
+    Both 2MPZ and WISC suffer from contamination from Galactic and observational systematics in different levels. The most relevant Galactic systematic is star contamination, particularly for \wisc \cite{2018arXiv181208182X}. Besides avoiding regions of high dust and star contamination using the sky mask described in \cite{2018MNRAS.481.1133P}, we correct for the effects of stellar contamination by correcting for a smooth non-linear relation between galaxy and star density (also described in \cite{2018MNRAS.481.1133P}). After doing so, three potential sources of systematic uncertainty remain: residual stellar contamination, modulation of the galaxy density due to Galactic dust reddening and modulation due to zero-point fluctuations in the photographic plates used by SuperCOSMOS. We address the first two (dust and stars) by deprojecting them at the map level as described in Section \ref{sssec:methods.syst.deproj}. We address the contamination from fluctuations in the SuperCOSMOS plates by modelling it at the power spectrum level, which we describe in Section \ref{sssec:methods.syst.plates}.
 
 \section{Methods}\label{sec:methods}
   \subsection{Estimating power spectra}\label{ssec:methods.cls}
@@ -269,6 +266,33 @@
     \end{equation}
     where ${\rm Cov}^{\rm JK}$ and ${\rm Cov}^{\rm ana}$ are the jackknife and analytical covariance matrices respectively.
 
+  \subsection{Systematics treatment}\label{ssec:methods.syst}
+    \subsubsection{Map-level deprojection}\label{sssec:methods.syst.deproj}
+      For small levels of contamination, the impact of a given systematic on an observed sky map can be modelled at the linear level:
+      \begin{equation}
+        {\bf m}_{\rm obs}={\bf m}_{\rm true} + \epsilon\,{\bf t}.
+      \end{equation}
+      Here ${\bf m}_{\rm obs}$ and ${\bf m}_{\rm true}$ are vectors corresponding to the observed sky map and the true underlying quantity we wish to map respectively, ${\bf t}$ is a template map describing the contaminant (e.g. a map of the Galactic dust fluctuations), and $\epsilon$ is an unknown amplitude. In order to fully account for the effects of this contaminant one would build a likelihood for ${\bf m}_{\rm obs}$ using the equation above as a model (together with a model for ${\rm m}_{\rm true}$ and marginalize over $\epsilon$. As shown in \cite{2017MNRAS.465.1847E} and \cite{2019MNRAS.484.4127A}, within the pseudo-$C_\ell$ framework, this can be done exactly by projecting ${\bf m}_{\rm obs}$ onto the subspace perpendicular to ${\bf t}$ or, in other words, by ``deprojecting'' ${\bf t}$. The loss of modes due to deprojection then needs to be taken account when estimating the power spectrum, which can be done analytically.
+
+      For our analysis, we deproject two systematic templates from the galaxy and $y$ maps. We create a reddening template using the dust map of \cite{1998ApJ...500..525S}, and remove its associated contamination from the $y$ maps and from all the galaxy overdensity maps. We also generate a star density template from the WISE data, and remove its associated fluctuations from all the galaxy overdensity maps.
+
+    \subsubsection{Photographic plate fluctuations}\label{sssec:methods.syst.plates}
+      We model the systematic fluctuations in the number density of sources in the \wisc sample caused by variations in the zero-point of the SuperCOSMOS photographic plate exposures as Gaussian random variations within the footprint of each exposure with a variance $\sigma^2_{\rm plate}$:
+      \begin{equation}
+        \delta_{\rm plate}(\nv) = \sum_p \delta_p\,S_{\rm plate}\,W(\nv-\nv_p),
+      \end{equation}
+      where $\delta_p$ is the fluctuation in exposure $p$ (with $\langle\delta_p^2\rangle=\sigma^2_{\rm plate}$, $S_{\rm plate}$ is the footprint area of each exposure and $W(\nv)$ is the plate window function. Assuming a roughly homogeneous coverage of the sky, the power spectrum of these fluctuations is given by
+      \begin{equation}
+        C_\ell^{\rm plate}=S_{\rm plate}\sigma_{\rm plate}^2\left|W_\ell\right|^2,
+      \end{equation}
+      where $W_\ell$ is the harmonic transform of the plate window function.
+      
+      SuperCOSMOS used photographic plates covering an area of $5^\circ\times5^\circ$. The corresponding window function can be roughly approximated as $|W_\ell|^2=\exp[-(\ell\,\theta_{\rm plate})^2/12]$, where $\theta_{\rm plate}=5\pi/180$ for 5-degree plates.
+
+
+      
+    \subsubsection{Redshift distribution uncertainties}\label{sssec:methods.syst.photoz}
+
   \subsection{Likelihood}\label{ssec:methods.like}
     In order to connect our measurements with the posterior distribution of the model parameters $\vec{\theta}$, we assume that the measured power spectra follow a Gaussian likelihood:
     \begin{equation}
@@ -286,7 +310,7 @@
       &-1\le\rho_{yg}\le1.
     \end{align}
     We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \TODO{add footnote}.
-
+  
 \section{Results}\label{sec:results}
   \subsection{Fiducial results}\label{ssec:results.fid}
     \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
