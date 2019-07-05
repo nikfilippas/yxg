@@ -285,9 +285,13 @@
       \begin{equation}
         C_\ell^{\rm plate}=S_{\rm plate}\sigma_{\rm plate}^2\left|W_\ell\right|^2,
       \end{equation}
-      where $W_\ell$ is the harmonic transform of the plate window function.
+      where $W_\ell$ is the harmonic transform of the plate window function. SuperCOSMOS used photographic plates covering an area of $5^\circ\times5^\circ$. The corresponding window function can be roughly approximated as $|W_\ell|^2=\exp[-(\ell\,\theta_{\rm plate})^2/12]$, where $\theta_{\rm plate}=5\pi/180$ for 5-degree plates.
       
-      SuperCOSMOS used photographic plates covering an area of $5^\circ\times5^\circ$. The corresponding window function can be roughly approximated as $|W_\ell|^2=\exp[-(\ell\,\theta_{\rm plate})^2/12]$, where $\theta_{\rm plate}=5\pi/180$ for 5-degree plates.
+      The contamination from plate fluctuations can therefore be accounted for as an additive contribution to the model describing the galaxy auto-spectrum proportional to $|W_\ell|^2$ with a free amplitude $A\equiv S_{\rm plate}\sigma_{\rm plate}^2$ that is marginalized over. Since $A$ is a linear parameter, this can be done analytically in a pre-processing step by modifying the covariance matrix of the galaxy auto-spectra as follows \todo{cite}:
+      \begin{equation}
+        
+      \end{equation}
+
 
 
       
