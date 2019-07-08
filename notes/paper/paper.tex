@@ -291,12 +291,20 @@
       \begin{equation}
         {\sf Cov}^{-1}\hspace{6pt}\rightarrow\hspace{6pt} {\sf Cov}^{-1}-\frac{{\sf Cov}^{-1}{\bf T}\cdot{\bf T}^T{\sf Cov}^{-1}}{{\bf T}^T{\sf Cov}^{-1}{\bf T}},
       \end{equation}
-      where ${\bf T}$ is a vector containing the template ${\bf T}_\ell$ for all the scales used in the analysis.
+      where ${\bf T}$ is a vector containing the template $T_\ell$ for all the scales used in the analysis.
 
-
-
-      
     \subsubsection{Redshift distribution uncertainties}\label{sssec:methods.syst.photoz}
+      For each redshift bin we estimate fiducial redshift distributions using the method described in \cite{2018MNRAS.481.1133P}. In short, a true-redshift distribution is estimated from the distribution of photometric redshifts for a given bin using a model for the conditional photo-$z$ distribution:
+      \begin{equation}
+        p(z)=\int dz_{\rm photo}\,p(z|z_{\rm photo})\,p(z_{\rm photo}),
+      \end{equation}
+      where the model for $p(z|z_{\rm photo})$ was calibrated using overlapping spectroscopic data. Although the spectroscopic coverage of 2MPZ and \wisc is high compared to other photometric redshift surveys, the resulting redshift distributions are not infinitely precise, and therefore we need to account for any uncertainty in them that could affect our measurement.
+
+      In particular, our interpretation of the $y\times \delta_g$ cross-correlation is especially sensitive to the width of the redshift distributions. This is because, while the amplitude to the galaxy auto-correlation is strongly affected by the width of the distribution (wider $p(z)$ reduce the clustering amplitude), whereas the cross-correlation with $y$ is almost insensitive to it. We therefore introduce an additional parameter $w_z$ that stretches the support of the redshift distribution while preserving unit total probability. Concretely, given a fiducial distribution $p_{\rm fid}(z)$ with mean redshift $\bar{z}$, $w_z$ is implemented as
+      \begin{equation}
+        p(z)\propto p_{\rm fid}\left(\bar{z}+\frac{z-\bar{z}}{w_z}\right),
+      \end{equation}
+      where the proportionality constant is fixed by making sure that $p(z)$ integrates to unity. We make $w_z$ a free parameter that we marginalize over with a top-hat prior $0.8<w_z<1.2$, which is broader than the actual uncertainty on the distribution widths from photo-$z$ calibration \todo{It would be really good to make this statement more quantitative}.
 
   \subsection{Likelihood}\label{ssec:methods.like}
     In order to connect our measurements with the posterior distribution of the model parameters $\vec{\theta}$, we assume that the measured power spectra follow a Gaussian likelihood:
@@ -307,12 +315,13 @@
 
     We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \TODO{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
 
-    For each redshift bin, our theory model has four free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$ and $\rho_{yg}$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while the last two are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following non-informative top-hat priors on the free parameters:
+    For each redshift bin, our theory model has free free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following non-informative top-hat priors on the free parameters:
     \begin{align}
       &10\le\log_{10}M_{\rm min}/M_\odot\le16,\\
       &10\le\log_{10}M_1'/M_\odot\le16,\\
       &0\le(1-b_H)\le0.99,\\
-      &-1\le\rho_{yg}\le1.
+      &-1\le\rho_{yg}\le1,\\
+      &0.8\le w_z\le1.2.
     \end{align}
     We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \TODO{add footnote}.
   
