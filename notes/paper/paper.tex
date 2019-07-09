@@ -116,15 +116,15 @@
     Each of these can be estimated in terms of the Fourier-space profiles as:
     \begin{align}
       &P^{1h}_{UV}(k)=\int dM\,\frac{dn}{dM}\,\langle U(k|M)\,V(k|M)\rangle,\\
-      &P^{2h}_{UV}(k)=b_U(k)\,b_V(k)\,P_L(k),\\
-      &b_U(k)\equiv\int dM\frac{dn}{dM}\,b_h(M)\,\langle U(k|M)\rangle.
+      &P^{2h}_{UV}(k)=\langle bU\rangle\,\langle bV\rangle\,P_L(k),\\
+      &\langle bU\rangle(k)\equiv\int dM\frac{dn}{dM}\,b_h(M)\,\langle U(k|M)\rangle. \label{eq:hm_bias}
     \end{align}
     Here, $P_L(k)$ is the linear matter power spectrum, $dn/dM$ is the halo mass function and $b_h(M)$ is the halo bias \TODO{cites}. %Further details are discussed in Appendix \ref{app:hm}.
     
     \TODO{describe $1h$-$2h$ transition correction.}
     
     \subsubsection{Galaxies and the halo occupation distribution}\label{sssec:theory.hm.hod}
-      To model the galaxy overdensity $\Delta_g$ we will use a Halo Occupation Distribution (HOD) model as prescribed by \TODO{cite}. The HOD models the galaxy content of dark matter halos as being made up of central and satellite galaxies. Centrals lie at the center of the halo, while satellites are distributed according to a profile $u_s(r|M)$. Halos can have zero or one central, and the mean number of centrals for a halo of mass $M$ is modelled as a smoothed step function
+      To model the galaxy overdensity $\Delta_g$ we will use a Halo Occupation Distribution (HOD) model \cite{2002ApJ...575..587B,2005ApJ...633..791Z,2013MNRAS.430..725V}, as prescribed by \cite{2011ApJ...736...59Z}. The HOD models the galaxy content of dark matter halos as being made up of central and satellite galaxies. Centrals lie at the center of the halo, while satellites are distributed according to a profile $u_s(r|M)$. Halos can have zero or one central, and the mean number of centrals for a halo of mass $M$ is modelled as a smoothed step function
       \begin{equation}
         \langle N_c(M)\rangle=\frac{1}{2}\left[1+{\rm erf}\left(\frac{\log(M/M_{\rm min})}{\sigma_{\rm lnM}}\right)\right].
       \end{equation}
@@ -132,11 +132,11 @@
       \begin{equation}
         \langle N_s(M)\rangle=\Theta(M-M_0)\,\left(\frac{M-M_0}{M_1'}\right)^{\alpha_s}.
       \end{equation}
-      This is the same model used by \TODO{cite}. For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1 \TODO{cite}, leaving only two free parameters: $M_{\rm min}$ and $M_1'$.
+      For simplicity, we will fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1 \cite{2018MNRAS.473.4318A}, leaving only two free parameters: $M_{\rm min}$ and $M_1'$.
       
-      Besides their mean values, we also need to specify the statistics of $N_c$ and $N_s$. Following the standard practice \TODO{cite}, we assume $N_c$ to have a binomial distribution with probability $p=\langle N_c\rangle$, and $N_s$ to be Poisson-distributed.
+      Besides their mean values, we also need to specify the statistics of $N_c$ and $N_s$. Following the standard practice \cite{2013MNRAS.430..725V}, we assume $N_c$ to have a binomial distribution with probability $p=\langle N_c\rangle$, and $N_s$ to be Poisson-distributed.
 
-      Putting everything together, the moments of the galaxy overdensity Fourier profile are \TODO{cite}:
+      Putting everything together, the moments of the galaxy overdensity Fourier profile are \cite{2013MNRAS.430..725V}:
       \begin{align}
         &\langle u_g(k)\rangle=\bar{n}_g^{-1}\langle N_c\rangle\left[1+\langle N_s\rangle\,u_s(k)\right],\\
         &\langle |u_g(k)|^2\rangle=\bar{n}_g^{-2}\langle N_c\rangle\left[\langle N_s\rangle^2u_s^2(k)+2\langle N_s\rangle u_s(k)\right],
@@ -147,7 +147,7 @@
       \end{equation} 
       and we have suppressed the mass dependence of all quantities for simplicity.
 
-      Finally, we will assume that the satellites follow the matter distribution, and therefore $u_s(k|M)$ is given by a truncated Navarro-Frenk and White profile \TODO{cite}:
+      Finally, we will assume that the satellites follow the matter distribution, and therefore $u_s(k|M)$ is given by a truncated Navarro-Frenk and White profile \cite{1996ApJ...462..563N}:
       \begin{align}
         u_s(k|M)=&\left[\log(1+c_\Delta)-\frac{c_\Delta}{(1+c_\Delta)}\right]^{-1}\\
                &\left[\cos(q)\left({\rm Ci}((1+c_\Delta)q)-{\rm Ci}(q)\right)\right.\\\nonumber
@@ -171,7 +171,7 @@
       \end{equation}
       with $(\alpha,\beta,\gamma,c_P)=(1.33,4.13,0.31,1.81)$.
       
-      \TODO{Blah about $(1-b_H)$}. Other pressure profiles have been proposed in the literature (e.g. \TODO{cite}), but we chose this parametrisation in order to be able to relate our measurement of $(1-b_H)$ to the results of \cite{2016A&A...594A..24P}.
+      \TODO{Blah about $(1-b_H)$}. Other pressure profiles have been proposed in the literature (e.g. \cite{2012ApJ...758...75B}), but we choose this parametrisation in order to be able to relate our measurement of $(1-b_H)$ to the results of \cite{2016A&A...594A..24P}.
       
       Within the halo model description, and assuming a log-normal $y$-mass relation, the pressure profile cumulants are given by:
       \begin{align}
@@ -183,8 +183,13 @@
         \langle u_y(k|M) u_g(k|M)\rangle = (1+\rho_{yg})\langle u_g(k|M)\rangle \langle u_y(k|M)\rangle,
       \end{equation}
       where $\rho_{yg}$ is a free parameter that determines the sign of the correlation between galaxy abundance and pressure. Marginalising over this parameter has the added advantage of reducing the sensitivity of our final constraints on $1-b_H$ on the details of the cross-spectrum model in the 1-halo regime, where both parameters are completely degenerate.
-      
-      \todo{introduce $\langle bP_e\rangle$.}
+
+      It is also worth exploring the halo model bias (Eq. \ref{eq:hm_bias}) for the Compton-$y$ paramete. At $k\rightarrow0$ this is given by:
+      \begin{align}\nonumber
+        \langle bP_e\rangle&=\int dM\,\frac{dn}{dM}\,b_h(M)\,\int_0^\infty dr\,4\pi r^2\,P_e(r|M)\\
+               &=\int dM\,\frac{dn}{dM}\,b_h(M)\,E_T(M),
+      \end{align}
+      where $E_T(M)$ is the thermal energy in a halo of mass $M$ \cite{2017MNRAS.467.2315V,2019arXiv190413347P}. A measurement of $\langle bP_e\rangle$ can be related to the thermodynamics of gas inside halos.
       
     \subsubsection{Concentration-mass relation and mass definitions}\label{sssec:theory.hm.cm}
       Halo radii $r_\Delta$ are usually defined as the size of the sphere containing a given mass $M_\Delta$:
@@ -201,11 +206,11 @@
 
 \section{Data}\label{sec:data}
   \subsection{The Compton-$y$ map}\label{ssec:data.y}
-    We make use of the maps of the Compton-$y$ parameter made public by the Planck collaboration \todo{cites}. These maps were generated using different flavours of the Internal Linear Combination method \todo{cites}. In a simplified description, the ILC technique selects the linear combination of all frequency channels that preserves the spectrum of the source one wishes to map minimizing the map-level variance. The refined versions of the ILC method used by Planck further optimize the linear weights on different scales and different regions of the map, and project out sources with known spectra that are likely to cause significant contamination. In particular, the Planck collaboration has released two $y$ maps, extracted using the MILCA and NILC variations of the ILC technique. Both method deproject CMB contamination through its well-known spectrum, but differ on the methods used to calculate the optimal scale-dependent and spatially-varying linear weights.
+    We make use of the maps of the Compton-$y$ parameter made public by the Planck collaboration \cite{2016A&A...594A..22P}. These maps were generated using different flavours of the Internal Linear Combination method \cite{2004ApJ...612..633E,2008arXiv0811.4277V}. In a simplified description, the ILC technique selects the linear combination of all frequency channels that preserves the spectrum of the source one wishes to map minimizing the map-level variance. The refined versions of the ILC method used by Planck further optimize the linear weights on different scales and different regions of the map, and project out sources with known spectra that are likely to cause significant contamination. In particular, the Planck collaboration has released two $y$ maps, extracted using the MILCA \citep{2013A&A...558A.118H} and NILC \cite{2011MNRAS.410.2481R} variations of the ILC technique. Both methods deproject CMB contamination through its well-known spectrum, but differ on the methods used to calculate the optimal scale-dependent and spatially-varying linear weights.
     
-    The MILCA and NILC maps have been found to be in good agreement in different studies \todo{cites}, although the NILC map has a higher noise level on large scales \todo{cite}. We thus use the MILCA map as our fiducial Compton-$y$ map, but will repeat our analysis on the NILC map as part of our systematics analysis.
+    The MILCA and NILC maps have been found to be in good agreement in different studies \citep{2016A&A...594A..22P}, although the NILC map has a higher noise level on large scales \citep{2016A&A...594A..22P}. We thus use the MILCA map as our fiducial Compton-$y$ map, but will repeat our analysis on the NILC map as part of our systematics analysis.
     
-    We use a fiducial mask for the $y$ maps based on a combination of the Planck 60\% Galactic mask and the union of the HFI and LFI point source masks. As part of our study of the mass dependence of the signal on halo mass, we additionally mask out all tSZ sources detected by Planck above 6$\sigma$, based on the Union catalog of \todo{cite}.
+    We use a fiducial mask for the $y$ maps based on a combination of the Planck 60\% Galactic mask and the union of the HFI and LFI point source masks. As part of our study of the mass dependence of the signal on halo mass, we additionally mask out all tSZ sources detected by Planck above 6$\sigma$, based on the Union catalog of \cite{2016A&A...594A..27P}.
     
     Finally, in order to evaluate the level of contamination from extragalactic dust in the $\delta_g$-$y$ correlation, we make used of the HFI 545 GHz map, as described in Section \ref{sssec:results.syst.y}.
     
@@ -287,7 +292,7 @@
       \end{equation}
       where $W_\ell$ is the harmonic transform of the plate window function. SuperCOSMOS used photographic plates covering an area of $5^\circ\times5^\circ$. The corresponding window function can be roughly approximated as $|W_\ell|^2=\exp[-(\ell\,\theta_{\rm plate})^2/12]$, where $\theta_{\rm plate}=5\pi/180$ for 5-degree plates.
       
-      The contamination from plate fluctuations can therefore be accounted for as an additive contribution to the model describing the galaxy auto-spectrum proportional to a template $T_\ell\equiv|W_\ell|^2$ with a free amplitude $A\equiv S_{\rm plate}\sigma_{\rm plate}^2$ that is marginalized over. Since $A$ is a linear parameter, this can be done analytically in a pre-processing step by modifying the inverse covariance matrix of the galaxy auto-spectra as follows \todo{cite}:
+      The contamination from plate fluctuations can therefore be accounted for as an additive contribution to the model describing the galaxy auto-spectrum proportional to a template $T_\ell\equiv|W_\ell|^2$ with a free amplitude $A\equiv S_{\rm plate}\sigma_{\rm plate}^2$ that is marginalized over. Since $A$ is a linear parameter, this can be done analytically in a pre-processing step by modifying the inverse covariance matrix of the galaxy auto-spectra as follows \cite{1992ApJ...398..169R}:
       \begin{equation}
         {\sf Cov}^{-1}\hspace{6pt}\rightarrow\hspace{6pt} {\sf Cov}^{-1}-\frac{{\sf Cov}^{-1}{\bf T}\cdot{\bf T}^T{\sf Cov}^{-1}}{{\bf T}^T{\sf Cov}^{-1}{\bf T}},
       \end{equation}
@@ -315,7 +320,7 @@
 
     We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \TODO{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
 
-    For each redshift bin, our theory model has free free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following non-informative top-hat priors on the free parameters:
+    For each redshift bin, our theory model has free free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $1-b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following non-informative top-hat priors on the free parameters:
     \begin{align}
       &10\le\log_{10}M_{\rm min}/M_\odot\le16,\\
       &10\le\log_{10}M_1'/M_\odot\le16,\\
@@ -326,6 +331,32 @@
     We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \TODO{add footnote}.
   
 \section{Results}\label{sec:results}
+  \begin{figure*}
+    \centering
+    \includegraphics[width=0.9\textwidth]{./figures/fits.pdf}
+    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+    \label{fig:cls}
+  \end{figure*}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{./figures/bhydro.pdf}
+    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+    \label{fig:bh}
+  \end{figure}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{./figures/by.pdf}
+    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+    \label{fig:by}
+  \end{figure}
+  \begin{figure*}
+    \centering
+    \includegraphics[width=0.47\textwidth]{./figures/fiducial_2mpz.pdf}
+    \includegraphics[width=0.47\textwidth]{./figures/fiducial_wisc3.pdf}
+    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+    \label{fig:triangle}
+  \end{figure*}
+
   \subsection{Fiducial results}\label{ssec:results.fid}
     \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
     \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
