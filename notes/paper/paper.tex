@@ -281,7 +281,7 @@
 
       For our analysis, we deproject two systematic templates from the galaxy and $y$ maps. We create a reddening template using the dust map of \cite{1998ApJ...500..525S}, and remove its associated contamination from the $y$ maps and from all the galaxy overdensity maps. We also generate a star density template from the WISE data, and remove its associated fluctuations from all the galaxy overdensity maps.
 
-    \subsubsection{Photographic plate fluctuations}\label{sssec:methods.syst.plates}
+    \subsubsection{$C_\ell$-level deprojection}\label{sssec:methods.syst.plates}
       We model the systematic fluctuations in the number density of sources in the \wisc sample caused by variations in the zero-point of the SuperCOSMOS photographic plate exposures as Gaussian random variations within the footprint of each exposure with a variance $\sigma^2_{\rm plate}$:
       \begin{equation}
         \delta_{\rm plate}(\nv) = \sum_p \delta_p\,S_{\rm plate}\,W(\nv-\nv_p),
@@ -298,6 +298,9 @@
       \end{equation}
       where ${\bf T}$ is a vector containing the template $T_\ell$ for all the scales used in the analysis.
 
+    \subsubsection{Scale cuts}\label{sssec:methods.syst.scales}
+      After deprojecting dust and stars at the map level, and the imprint of the SuperCOSMOS plates at the power spectrum level, we still observe an unacceptably large amount of power on scales $\ell<10$ in all galaxy auto-correlations involving \wisc. These may be due to residual star contamination that is not simply removed with a linear template, or 	To avoid biasing our results we therefore remove the lowest bandpower from these a
+      
     \subsubsection{Redshift distribution uncertainties}\label{sssec:methods.syst.photoz}
       For each redshift bin we estimate fiducial redshift distributions using the method described in \cite{2018MNRAS.481.1133P}. In short, a true-redshift distribution is estimated from the distribution of photometric redshifts for a given bin using a model for the conditional photo-$z$ distribution:
       \begin{equation}
@@ -320,7 +323,7 @@
 
     We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \TODO{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
 
-    For each redshift bin, our theory model has free free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $1-b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following non-informative top-hat priors on the free parameters:
+    For each redshift bin, our theory model has free free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $1-b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following top-hat priors on the free parameters:
     \begin{align}
       &10\le\log_{10}M_{\rm min}/M_\odot\le16,\\
       &10\le\log_{10}M_1'/M_\odot\le16,\\
@@ -328,7 +331,7 @@
       &-1\le\rho_{yg}\le1,\\
       &0.8\le w_z\le1.2.
     \end{align}
-    We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \TODO{add footnote}.
+    We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \citep{2013PASP..125..306F}\footnote{\url{https://emcee.readthedocs.io/en/v2.2.1/}.}.
   
 \section{Results}\label{sec:results}
   \begin{figure*}
