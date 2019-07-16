@@ -206,6 +206,13 @@
 
 \section{Data}\label{sec:data}
   \subsection{The Compton-$y$ map}\label{ssec:data.y}
+    \begin{figure}
+      \centering
+      \includegraphics[width=0.5\textwidth]{./figures/mask_y.pdf}
+      \includegraphics[width=0.5\textwidth]{./figures/mask_g.pdf}
+      \caption{Sky masks used for the Compton-$y$ map (top) and for the 2MPZ and \wisc galaxy surveys (bottom). The top panel shows, in turquoise, the regions masked additionally when removing sky patches around the position of the tSZ sources detected by Planck above 6$\sigma$.}
+      \label{fig:msk}
+    \end{figure}
     We make use of the maps of the Compton-$y$ parameter made public by the Planck collaboration \cite{2016A&A...594A..22P}. These maps were generated using different flavours of the Internal Linear Combination method \cite{2004ApJ...612..633E,2008arXiv0811.4277V}. In a simplified description, the ILC technique selects the linear combination of all frequency channels that preserves the spectrum of the source one wishes to map minimizing the map-level variance. The refined versions of the ILC method used by Planck further optimize the linear weights on different scales and different regions of the map, and project out sources with known spectra that are likely to cause significant contamination. In particular, the Planck collaboration has released two $y$ maps, extracted using the MILCA \citep{2013A&A...558A.118H} and NILC \cite{2011MNRAS.410.2481R} variations of the ILC technique. Both methods deproject CMB contamination through its well-known spectrum, but differ on the methods used to calculate the optimal scale-dependent and spatially-varying linear weights.
     
     The MILCA and NILC maps have been found to be in good agreement in different studies \citep{2016A&A...594A..22P}, although the NILC map has a higher noise level on large scales \citep{2016A&A...594A..22P}. We thus use the MILCA map as our fiducial Compton-$y$ map, but will repeat our analysis on the NILC map as part of our systematics analysis.
@@ -215,6 +222,29 @@
     Finally, in order to evaluate the level of contamination from extragalactic dust in the $\delta_g$-$y$ correlation, we make used of the HFI 545 GHz map, as described in Section \ref{sssec:results.syst.y}.
     
   \subsection{2MPZ and \wisc}\label{ssec:data.g1}
+    \begin{figure}
+      \centering
+      \includegraphics[width=0.5\textwidth]{./figures/nzs.pdf}
+      \caption{Fiducial redshift distributions of the different galaxy samples used in this analysis. See Table \ref{tab:z_bins} for further details.}
+      \label{fig:dndz}
+    \end{figure}
+    \begin{table}
+      \begin{center}
+        \begin{tabular}{l|ccc}
+          \hline
+          Sample & $[z_{{\rm ph},i},z_{{\rm ph},f}]$ & $\bar{z}$ & $\bar{n}_g\,[{\rm deg}^{-2}]$\\
+          \hline
+          2MPZ    & N.A.         & 0.07 &  25.5 \\
+          \wisc-1 & $[0.1,0.15]$ & 0.13 & 106   \\
+          \wisc-2 & $[0.15,0.2]$ & 0.18 & 126   \\
+          \wisc-3 & $[0.2,0.25]$ & 0.23 & 136   \\
+          \wisc-4 & $[0.25,0.3]$ & 0.27 & 118   \\
+          \wisc-5 & $[0.3,0.35]$ & 0.32 & 41    \\
+          \hline
+        \end{tabular}
+        \caption{Galaxy samples used in this analysis, corresponding to the full 2MPZ survey and five tomographic redshift bins of the \wisc survey. The second, third and last columns list the photometric redshift interval defining the sample, its mean redshift and its number density respectively.}\label{tab:z_bins}
+      \end{center}
+    \end{table} 
     We make use of two low-redshift photometric redshift catalogs, the 2MASS photometric redshift survey (2MPZ; \cite{2014ApJS..210....9B}) and the WISE $\times$ SuperCOSMOS catalogue (\wisc; \cite{2016ApJS..225....5B}). Both surveys were creating by cross-matching full-sky imaging surveys, and their broad photometric coverage allows them to achieve excellent photo-$z$ uncertainties.
     
     2MPZ was constructed by cross-matching the extended-source catalog from the 2 Micron All-Sky Survey (2MASS; \citep{2006AJ....131.1163S,2000AJ....119.2498J}) with the photographic plates of SuperCOSMOS \cite{2001MNRAS.326.1295H,2016MNRAS.462.2085P} and the photometry of the Wide-field Infrared Survey Explorer (WISE; \cite{2010AJ....140.1868W}). After applying an apparent magnitude cut $K_s<13.9$ to achieve uniformity, 2MPZ include over 940,000 sources observed in 8 bands: SuperCOSMOS's optical $(B,R,I)$, 2MASS's near-infrared $(J,H,K_s)$ and WISE's mid-infrared $(W1,W2)$. Photometric redshifts (photo-$z$s) were extracted using the neural network code ANNz \cite{2004PASP..116..345C} trained on a large spectroscopic sample from overlapping surveys. The resulting photo-$z$s have a typical error $\sigma_z\simeq0.015$, and the sample has a median redshift $z\sim0.08$. As we will see, due to the low redshift of this sample, the cross-correlation with the $y$ map is dominated by the 1-halo term for 2MPZ, and little is gained by sub-dividing it into narrow redshift bins. Therefore we use 2MPZ as a single tomographic sample.
@@ -256,7 +286,7 @@
 
     We compute the connected (i.e. non-Gaussian) contribution to the covariance matrix using the halo model as the 1-halo trispectrum \TODO{cite}, given by:
     \begin{align}\nonumber
-      {\rm Cov}^{\rm NG}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\int &d\chi\,\frac{W_u(\chi)W_v(\chi)W_w(\chi)W_z(\chi)}{4\pi f_{\rm sky}\,\chi^6}\times\\
+      {\rm Cov}^{\rm NG}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\int &d\chi\,\frac{W_u(\chi)W_v(\chi)W_w(\chi)W_z(\chi)}{4\pi f_{\rm sky}\,\chi^6}\times\\\label{eq:cov_ng}
       &T^{1h}_{uvwz}\left(k=\frac{\ell+1/2}{\chi}\right),
     \end{align}
     where
@@ -272,6 +302,12 @@
     where ${\rm Cov}^{\rm JK}$ and ${\rm Cov}^{\rm ana}$ are the jackknife and analytical covariance matrices respectively.
 
   \subsection{Systematics treatment}\label{ssec:methods.syst}
+    \begin{figure}
+      \centering
+      \includegraphics[width=0.48\textwidth]{./figures/cl_syst_summary.pdf}
+      \caption{Fiducial redshift distributions of the different galaxy samples used in this analysis. See Table \ref{tab:z_bins} for further details.}
+      \label{fig:clsyst}
+    \end{figure}
     \subsubsection{Map-level deprojection}\label{sssec:methods.syst.deproj}
       For small levels of contamination, the impact of a given systematic on an observed sky map can be modelled at the linear level:
       \begin{equation}
@@ -299,7 +335,7 @@
       where ${\bf T}$ is a vector containing the template $T_\ell$ for all the scales used in the analysis.
 
     \subsubsection{Scale cuts}\label{sssec:methods.syst.scales}
-      After deprojecting dust and stars at the map level, and the imprint of the SuperCOSMOS plates at the power spectrum level, we still observe an unacceptably large amount of power on scales $\ell<10$ in all galaxy auto-correlations involving \wisc. These may be due to residual star contamination that is not simply removed with a linear template, or 	To avoid biasing our results we therefore remove the lowest bandpower from these a
+      After deprojecting dust and stars at the map level, and the imprint of the SuperCOSMOS plates at the power spectrum level, we still observe an unacceptably large amount of power on scales $\ell<10$ in all galaxy auto-correlations involving \wisc. These may be due to residual star contamination that is not simply removed with a linear template, or To avoid biasing our results we therefore remove the lowest bandpower from these a
       
     \subsubsection{Redshift distribution uncertainties}\label{sssec:methods.syst.photoz}
       For each redshift bin we estimate fiducial redshift distributions using the method described in \cite{2018MNRAS.481.1133P}. In short, a true-redshift distribution is estimated from the distribution of photometric redshifts for a given bin using a model for the conditional photo-$z$ distribution:
@@ -323,7 +359,7 @@
 
     We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \TODO{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
 
-    For each redshift bin, our theory model has free free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $1-b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following top-hat priors on the free parameters:
+    For each redshift bin, our theory model has five free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $1-b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following top-hat priors on the free parameters:
     \begin{align}
       &10\le\log_{10}M_{\rm min}/M_\odot\le16,\\
       &10\le\log_{10}M_1'/M_\odot\le16,\\
@@ -334,11 +370,58 @@
     We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \citep{2013PASP..125..306F}\footnote{\url{https://emcee.readthedocs.io/en/v2.2.1/}.}.
   
 \section{Results}\label{sec:results}
+  \begin{enumerate}
+    \item Fiducial results
+    \item Constant fit
+    \item $\langle bP_e\rangle$
+    \item Derive anything from the above?
+    \item Systematics:
+    \begin{itemize}
+      \item CIB
+      \item NILC
+      \item 
+    \end{itemize}
+  \end{enumerate}
+
+  \subsection{Power spectra and covariances}\label{ssec:results.cls}
+    We estimate the galaxy auto-power spectrum, the galaxy-tSZ cross-spectrum, and their covariance matrix for each of the redshift bins shown in Figure \ref{fig:dndz} using the methods described in Section \ref{sec:methods}. The resulting measured power spectra and errors are shown in red in Figure \ref{fig:cls}, together with their best-fit halo model prediction in black, decomposed into its 1-halo and 2-halo contributions (green and grey respectively). The bottom part of each panel shows the residuals with respect to the best-fit prediction normalized by the 1$\sigma$ errors. The grey bands cover the data points not used in the analysis due to scale cuts.
+    
+    Figure \ref{fig:covs} shows the correlation matrix of the combined data vector $(C^{gg}_\ell,C^{gy}_\ell)$ for each redshift bin (where the correlation matrix $r_{ij}$ is related to the covariance $C_{ij}$ as $r_{ij}=C_{ij}/\sqrt{C_{ii}C_{jj}}$). At low redshifts, 2MPZ shows strong correlations between different scales, mostly caused by the non-Gaussian contribution to the covariance matrix (Eq. \ref{eq:cov_ng}). These become less relevant at higher redshifts, where non-linear effects are weaker, and where the radial projection pushes the non-linear scale into larger multipole values.
+    
+    Overall, we find a good agreement between theory and data over the scales used in this analysis. We discuss this agreement and the associated scientific results in the following sections.
+
+  \subsection{Fiducial results}\label{ssec:results.fid}
+    
+    
+    \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
+    \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
+
+  \subsection{Systematics analysis}\label{ssec:results.syst}
+    \subsubsection{Large-scale galaxy clustering systematics}\label{sssec:results.syst.gg}
+      \TODO{Describe different efforts to understand/mitigate/remove systematics in WISC (removing first point, fitting for $C_\ell$ template, template deprojection of stars and other stuff).}
+      \TODO{Compare with SDSS results if available}
+    \subsubsection{Photometric redshift systematics}\label{sssec:results.syst.pz}
+      \TODO{Compare results with different $N(z)$ choices.}
+    \subsubsection{tSZ contamination}\label{sssec:results.syst.y}
+      \TODO{Compare results with NILC map}
+      \TODO{Quantify CIB contamination}
+
   \begin{figure*}
     \centering
-    \includegraphics[width=0.9\textwidth]{./figures/fits.pdf}
+    \includegraphics[width=0.8\textwidth]{./figures/fits.pdf}
     \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
     \label{fig:cls}
+  \end{figure*}
+  \begin{figure*}
+    \centering
+    \includegraphics[width=0.3\textwidth]{./figures/cov_2mpz.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc1.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc2.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc3.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc4.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc5.pdf}
+    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+    \label{fig:covs}
   \end{figure*}
   \begin{figure}
     \centering
@@ -359,20 +442,6 @@
     \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
     \label{fig:triangle}
   \end{figure*}
-
-  \subsection{Fiducial results}\label{ssec:results.fid}
-    \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
-    \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
-
-  \subsection{Systematics analysis}\label{ssec:results.syst}
-    \subsubsection{Large-scale galaxy clustering systematics}\label{sssec:results.syst.gg}
-      \TODO{Describe different efforts to understand/mitigate/remove systematics in WISC (removing first point, fitting for $C_\ell$ template, template deprojection of stars and other stuff).}
-      \TODO{Compare with SDSS results if available}
-    \subsubsection{Photometric redshift systematics}\label{sssec:results.syst.pz}
-      \TODO{Compare results with different $N(z)$ choices.}
-    \subsubsection{tSZ contamination}\label{sssec:results.syst.y}
-      \TODO{Compare results with NILC map}
-      \TODO{Quantify CIB contamination}
 
 \section{Discussion}\label{sec:discussion}
   \lipsum[2]

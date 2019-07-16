@@ -329,9 +329,16 @@ class Likelihood(object):
 
         nsamples = len(chain)
         # Generate samples
+        ranges={}
+        for n,pr in zip(self.p_free_names,self.p_free_prior):
+            if pr['type']=='TopHat':
+                ranges[n]=pr['values']
         samples = MCSamples(samples=chain[nsamples//4:],
                             names=self.p_free_names,
-                            labels=self.p_free_labels)
+                            labels=self.p_free_labels,
+                            ranges=ranges)
+        samples.smooth_scale_2D=0.2
+
         # Triangle plot
         g = gplots.getSubplotPlotter()
         g.triangle_plot([samples], filled=True)
