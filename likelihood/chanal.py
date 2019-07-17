@@ -97,7 +97,8 @@ def sampler2kwargs(sam, lik, diff=False, error_type=None):
     return kwargs
 
 
-def chan(fname_params, diff=False, error_type=None, b_hydro=None, chains=True):
+def chan(fname_params, diff=False, error_type=None, b_hydro=None,
+         chains=True, by_subsample=100):
     """
     Given a parameter file, looks up corresponding sampler and calculates
     best-fit parameters, and min & max values.
@@ -129,13 +130,13 @@ def chan(fname_params, diff=False, error_type=None, b_hydro=None, chains=True):
     sel = selfunc(p)
     hm_correction = halmodcor(p, cosmo)
 
-    params, chi2, dof = [[] for i in range(3)]
+    params, chi2, dof, bf = [[] for i in range(4)]
     chains = [[],[]]
     for s, v in enumerate(p.get("data_vectors")):
 
         # Construct data vector and covariance
         d = DataManager(p, v, cosmo, all_data=False)
-        lik = Likelihood(p.get('params'), d.data_vector, d.covar, th)
+        lik = Likelihood(p.get('params'), d.data_vector, d.covar, th, template=d.templates)
         sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
                       p.get_sampler_prefix(v['name']), p.get('mcmc'))
 
@@ -155,9 +156,10 @@ def chan(fname_params, diff=False, error_type=None, b_hydro=None, chains=True):
 
         # p0 or user-input b_hydro
         if b_hydro is None:
-            bys = np.array([hm_bias(cosmo, 1/(1 + zarr),
-                        d.tracers[1][1].profile,
-                        **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
+            bys = np.mean(np.array([hm_bias(cosmo, 1/(1 + zarr),
+                                            d.tracers[1][1].profile,
+                                            **(lik.build_kwargs(p0)))
+                                    for p0 in sam.chain[::by_subsample]]),axis=1)
             bymin, by, bymax = np.percentile(bys, [16, 50, 84])
             if diff: bymin=by-bymin; bymax=bymax-by
             kwargs["by"] = [by, bymin, bymax]
@@ -172,8 +174,9 @@ def chan(fname_params, diff=False, error_type=None, b_hydro=None, chains=True):
         params.append(kwargs)
         chi2.append(lik.chi2(sam.p0))
         dof.append(len(lik.dv))
+        bf.append(sam.p0)
         if chains:
             chains[0].append(sam.chain)
             chains[1].append(bys.flatten())
 
-    return (params, (chi2, dof), chains) if chains else (params, (chi2, dof))
+    return (params, (chi2, dof, bf), chains) if chains else (params, (chi2, dof))

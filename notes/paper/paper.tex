@@ -349,6 +349,23 @@
         p(z)\propto p_{\rm fid}\left(\bar{z}+\frac{z-\bar{z}}{w_z}\right),
       \end{equation}
       where the proportionality constant is fixed by making sure that $p(z)$ integrates to unity. We make $w_z$ a free parameter that we marginalize over with a top-hat prior $0.8<w_z<1.2$, which is broader than the actual uncertainty on the distribution widths from photo-$z$ calibration \todo{It would be really good to make this statement more quantitative}.
+  \begin{figure*}
+    \centering
+    \includegraphics[width=0.8\textwidth]{./figures/fits.pdf}
+    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+    \label{fig:cls}
+  \end{figure*}
+  \begin{figure*}
+    \centering
+    \includegraphics[width=0.3\textwidth]{./figures/cov_2mpz.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc1.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc2.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc3.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc4.pdf}
+    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc5.pdf}
+    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+    \label{fig:covs}
+  \end{figure*}
 
   \subsection{Likelihood}\label{ssec:methods.like}
     In order to connect our measurements with the posterior distribution of the model parameters $\vec{\theta}$, we assume that the measured power spectra follow a Gaussian likelihood:
@@ -368,8 +385,15 @@
       &0.8\le w_z\le1.2.
     \end{align}
     We sample the resulting posterior distributions using the Markov chain Monte Carlo method (MCMC) as implemented in the {\tt emcee} software package \citep{2013PASP..125..306F}\footnote{\url{https://emcee.readthedocs.io/en/v2.2.1/}.}.
-  
+
 \section{Results}\label{sec:results}
+  \subsection{Power spectra and covariances}\label{ssec:results.cls}
+    We estimate the galaxy auto-power spectrum, the galaxy-tSZ cross-spectrum, and their covariance matrix for each of the redshift bins shown in Figure \ref{fig:dndz} using the methods described in Section \ref{sec:methods}. The resulting measured power spectra and errors are shown in red in Figure \ref{fig:cls}, together with their best-fit halo model prediction in black, decomposed into its 1-halo and 2-halo contributions (green and grey respectively). The bottom part of each panel shows the residuals with respect to the best-fit prediction normalized by the 1$\sigma$ errors. The grey bands cover the data points not used in the analysis due to scale cuts.
+    
+    Figure \ref{fig:covs} shows the correlation matrix of the combined data vector $(C^{gg}_\ell,C^{gy}_\ell)$ for each redshift bin (where the correlation matrix $r_{ij}$ is related to the covariance $C_{ij}$ as $r_{ij}=C_{ij}/\sqrt{C_{ii}C_{jj}}$). At low redshifts, 2MPZ shows strong correlations between different scales, mostly caused by the non-Gaussian contribution to the covariance matrix (Eq. \ref{eq:cov_ng}). These become less relevant at higher redshifts, where non-linear effects are weaker, and where the radial projection pushes the non-linear scale into larger multipole values.
+    
+    Overall, we find a good agreement between theory and data over the scales used in this analysis. We discuss this agreement and the associated scientific results in the following sections.
+
   \begin{enumerate}
     \item Fiducial results
     \item Constant fit
@@ -383,16 +407,24 @@
     \end{itemize}
   \end{enumerate}
 
-  \subsection{Power spectra and covariances}\label{ssec:results.cls}
-    We estimate the galaxy auto-power spectrum, the galaxy-tSZ cross-spectrum, and their covariance matrix for each of the redshift bins shown in Figure \ref{fig:dndz} using the methods described in Section \ref{sec:methods}. The resulting measured power spectra and errors are shown in red in Figure \ref{fig:cls}, together with their best-fit halo model prediction in black, decomposed into its 1-halo and 2-halo contributions (green and grey respectively). The bottom part of each panel shows the residuals with respect to the best-fit prediction normalized by the 1$\sigma$ errors. The grey bands cover the data points not used in the analysis due to scale cuts.
-    
-    Figure \ref{fig:covs} shows the correlation matrix of the combined data vector $(C^{gg}_\ell,C^{gy}_\ell)$ for each redshift bin (where the correlation matrix $r_{ij}$ is related to the covariance $C_{ij}$ as $r_{ij}=C_{ij}/\sqrt{C_{ii}C_{jj}}$). At low redshifts, 2MPZ shows strong correlations between different scales, mostly caused by the non-Gaussian contribution to the covariance matrix (Eq. \ref{eq:cov_ng}). These become less relevant at higher redshifts, where non-linear effects are weaker, and where the radial projection pushes the non-linear scale into larger multipole values.
-    
-    Overall, we find a good agreement between theory and data over the scales used in this analysis. We discuss this agreement and the associated scientific results in the following sections.
-
-  \subsection{Fiducial results}\label{ssec:results.fid}
-    
-    
+  \subsection{Fiducial results}\label{ssec:results.fid}  
+    \begin{table*}
+      \begin{center}
+        \begin{tabular}{l|cccccc}
+          \hline
+          Sample & $\bar{z}$ & $1-b\,\,({\rm best\,\,fit})$ & $1-b\,\,(68\%\,{\rm C.L.})$ & $\langle bP_e\rangle\,[{\rm eV}\,\,{\rm cm}^{-3}]$ & $\chi^2/{\rm d.o.f.}$ & ${\rm PTE}(\chi^2)$\\
+          \hline
+          2MPZ    & 0.07     & 0.33                         & $0.21^{+0.31}_{-0.05}$      & $0.087^{+0.052}_{-0.031}$                          & 0.92                  & 0.57               \\
+          \wisc-1 & 0.13     & 0.71                         & $0.62^{+0.14}_{-0.08}$      & $0.176^{+0.020}_{-0.025}$                          & 1.35                  & 0.09               \\
+          \wisc-2 & 0.18     & 0.73                         & $0.62^{+0.10}_{-0.07}$      & $0.188^{+0.013}_{-0.024}$                          & 0.87                  & 0.69               \\
+          \wisc-3 & 0.23     & 0.64                         & $0.64^{+0.07}_{-0.08}$      & $0.203^{+0.018}_{-0.023}$                          & 1.17                  & 0.22               \\
+          \wisc-4 & 0.27     & 0.55                         & $0.58^{+0.07}_{-0.07}$      & $0.197^{+0.020}_{-0.016}$                          & 1.04                  & 0.40               \\
+          \wisc-5 & 0.32     & 0.58                         & $0.61^{+0.09}_{-0.07}$      & $0.210^{+0.033}_{-0.010}$                          & 1.26                  & 0.12               \\
+          \hline
+        \end{tabular}
+        \caption{Galaxy samples used in this analysis, corresponding to the full 2MPZ survey and five tomographic redshift bins of the \wisc survey. The second, third and last columns list the photometric redshift interval defining the sample, its mean redshift and its number density respectively.}\label{tab:results}
+      \end{center}
+    \end{table*} 
     \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
     \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
 
@@ -400,29 +432,14 @@
     \subsubsection{Large-scale galaxy clustering systematics}\label{sssec:results.syst.gg}
       \TODO{Describe different efforts to understand/mitigate/remove systematics in WISC (removing first point, fitting for $C_\ell$ template, template deprojection of stars and other stuff).}
       \TODO{Compare with SDSS results if available}
+
     \subsubsection{Photometric redshift systematics}\label{sssec:results.syst.pz}
       \TODO{Compare results with different $N(z)$ choices.}
+
     \subsubsection{tSZ contamination}\label{sssec:results.syst.y}
       \TODO{Compare results with NILC map}
       \TODO{Quantify CIB contamination}
 
-  \begin{figure*}
-    \centering
-    \includegraphics[width=0.8\textwidth]{./figures/fits.pdf}
-    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
-    \label{fig:cls}
-  \end{figure*}
-  \begin{figure*}
-    \centering
-    \includegraphics[width=0.3\textwidth]{./figures/cov_2mpz.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc1.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc2.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc3.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc4.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc5.pdf}
-    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
-    \label{fig:covs}
-  \end{figure*}
   \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{./figures/bhydro.pdf}
