@@ -271,7 +271,7 @@
     We combine two different methods to estimate the power spectrum covariance matrix. 
     
     We make a first estimate of the covariance using the jackknife resampling method. We divide the common footprint covered by the masks of both the galaxy overdensity and Compton-$y$ maps into $N_{\rm JK}$ regions with roughly equal area. We mask out each region in turn and compute the power spectrum  using the remaining available footprint. The covariance matrix is then estimated as:
-    \begin{equation}
+    \begin{equation}\label{eq:cov_jk}
       {\rm Cov}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\frac{N_{\rm JK}-1}{N_{\rm JK}}\sum_{n=1}^{N_{\rm JK}}\Delta C^{uv,(n)}_\ell\,\Delta C^{wz,(n)}_{\ell'},
     \end{equation}
     where $\Delta C^{uv,(n)}_\ell$ is the difference between the power spectrum estimated when removing the $n$-th jackknife region and the power spectrum averaged over all jackknife regions. We use 461 jackknife regions defined as {\tt HEALPix} pixels with resolution $N_{\rm side}=8$.
@@ -394,9 +394,55 @@
     
     Overall, we find a good agreement between theory and data over the scales used in this analysis. We discuss this agreement and the associated scientific results in the following sections.
 
+  \subsection{Fiducial results}\label{ssec:results.fid}  
+    
+    \subsubsection{Tomographic measurement of the mass bias}\label{ssec:results.fid.1mb}
+      \begin{figure}
+        \centering
+        \includegraphics[width=0.47\textwidth]{./figures/fiducial_wisc3.pdf}
+        \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+        \label{fig:triangle}
+      \end{figure}
+      \begin{table*}
+        \begin{center}
+          \begin{tabular}{l|cccccc}
+            \hline
+            Sample & $\bar{z}$ & $1-b\,\,({\rm best\,\,fit})$ & $1-b\,\,(68\%\,{\rm C.L.})$ & $\langle bP_e\rangle\,[{\rm eV}\,\,{\rm cm}^{-3}]$ & $\chi^2/{\rm d.o.f.}$ & ${\rm PTE}(\chi^2)$\\
+            \hline
+            2MPZ    & 0.07     & 0.33                         & $0.21^{+0.31}_{-0.05}$      & $0.087^{+0.052}_{-0.031}$                          & 0.92                  & 0.57               \\
+            \wisc-1 & 0.13     & 0.71                         & $0.62^{+0.14}_{-0.08}$      & $0.176^{+0.020}_{-0.025}$                          & 1.35                  & 0.09               \\
+            \wisc-2 & 0.18     & 0.73                         & $0.62^{+0.10}_{-0.07}$      & $0.188^{+0.013}_{-0.024}$                          & 0.87                  & 0.69               \\
+            \wisc-3 & 0.23     & 0.64                         & $0.64^{+0.07}_{-0.08}$      & $0.203^{+0.018}_{-0.023}$                          & 1.17                  & 0.22               \\
+            \wisc-4 & 0.27     & 0.55                         & $0.58^{+0.07}_{-0.07}$      & $0.197^{+0.020}_{-0.016}$                          & 1.04                  & 0.40               \\
+            \wisc-5 & 0.32     & 0.58                         & $0.61^{+0.09}_{-0.07}$      & $0.210^{+0.033}_{-0.010}$                          & 1.26                  & 0.12               \\
+            \hline
+          \end{tabular}
+          \caption{Galaxy samples used in this analysis, corresponding to the full 2MPZ survey and five tomographic redshift bins of the \wisc survey. The second, third and last columns list the photometric redshift interval defining the sample, its mean redshift and its number density respectively.}\label{tab:results}
+        \end{center}
+      \end{table*}
+      We use the measured power spectra to constrain the free parameters of the model described in Section \ref{sec:theory}, with the main aim of providing an alternative measurement of the mass bias $(1-b)$ as a function of redshift. Figure \ref{fig:triangle} shows an example of the posterior parameter contours for our 5 free parameters, $\{M_{\rm min},M_1,b_H,\rho_{gy},w_z\}$, in the \wisc-3 sample ($z\sim0.23$). As the figure shows, there are strong degeneracies between $M_{\rm min}$, $M_1$ and $w_z$. This is easy to understand, given that all of these parameters affect the overall amplitude of the galaxy auto-correlation: since we do not go to scales that are sufficiently small to fully resolve the 1-halo term and break the degeneracy between $M_{\rm min}$ and $M_1$, which regulate the abundance of centrals and satellites, and therefore the constraint on these parameters mostly comes from the 2-halo amplitude (i.e. the galaxy bias), and the halo shot-noise level. On the other hand, the width of the redshift distribution also has a strong impact on the amplitude of the angular power spectrum at all scales due to projection effects. Since a measurement of the galaxy bias from the galaxy auto-correlation is effectively used to constrain $b_H$ from the galaxy-$y$ cross-correlation, the mass bias also shows some degeneracy with the HOD parameters and $w_z$, albeit at a much milder level. More interestingly, the mass-bias parameter $b_H$ shows a visible degeneracy with $\rho_{gy}$. This is also expected: the effects of $\rho_{gy}$ and $b_H$ on the 1-halo term of the galaxy-$y$ power spectrum are completely degenerate, and thus a free $\rho_{gy}$ ensures that any information obtained on $b_H$ comes entirely from the 2-halo contribution. The corresponding constraints on $1-b_H$ are shown in the bottom panel of Figure \ref{fig:bh} as black circles with error bars. The values shown in the figure and given explicity in column 4 of Table \ref{tab:results} correspond to the peak of the 1-dimensional distribution of $1-b_H$ and to the equal-probability values encompassing a total probability of 0.68. The overall best-fit value of $1-b_H$ is provided in column 3 of the same Table. Columns 6 and 7 of the same table list the reduced $\chi^2$ values for each sample and its associated probability-to-exceed (PTE) respectively. In all cases we find that the model described in Section \ref{sec:theory} is able to describe the data with no evidence for a significant statistical tension. The upper panel of Figure \ref{fig:bh} shows the redshift distributions of the different bins used in this analysis, and can be used to visually assess the level of correlation between the different measurements.
+      
+      We see that, while we are able to measure $1-b_H$ to a reasonable accuracy ($\sim12\%$) in all of the \wisc redshift bins, the sensitivity for the 2MPZ sample is much poorer. This is not entirely unexpected: even though the cross-correlation between the Compton-$y$ map and the 2MPZ catalog yields the highest signal-to-noise of all the samples used here, the low redshift range covered by this sample implies that the signal is strongly dominated by the one-halo term. This can be seen in the top right panel of Figure \ref{fig:cls}. This degrades the constraining power of the 2MPZ cross-correlation significance since, as we have described above, we can only obtain reliable constraints on $1-b_H$ from the two-halo contribution.
+            
+      Our results are in broad agreement with the estimate of a redshift-independent $1-b_H$ found by \todo{cite} by calibrating cluster masses with CMB lensing (\todo{give value}), shown in Figure \ref{fig:bh} as a green semi-transparent band. In turn, the grey band in the same figure shows the constraints on $1-b$ found by combining tSZ cluster counts and the $TT$ CMB power spectrum measured by Planck \todo{cite} \todo{give value}. This is the value of $1-b$ needed to explain the amplitude of density perturbations predicted by the CMB in comparison with the abundance of massive clusters. Our measurements are visually in agreement with both of these estimates, which themselves are not in significant tension with each other. We can however use our results to quantify whether approximating $1-b$ to be constant with redshift is supported by the data. To do so, we combine our six measurements under the assumption that they correspond to the same redshift-independent quantity. We do so by finding the quantity $\bar{b}_H$ that minimizes the $\chi^2$:
+      \begin{equation}
+        \chi^2=\sum_{i,j=1}^6 (b_{H,i}-\bar{b}_H){\sf Cov}^{-1}_{b,ij}(b_{H,j}-\bar{b}_H),
+      \end{equation}
+      where $b_{H,i}$ is the mass bias measured in the $i$-th redshift bin, and ${\sf Cov}_b$ is the covariance matrix of these measurements. Since the galaxy samples used in this analysis have significant redshift overlap, the off-diagonal elements of ${\sf Cov}_b$ cannot be ignored. We estimate ${\sf Cov}_b$ through jackknife resampling: we use the power spectra measured in each jackknife region described in Section \ref{ssec:methods.cov} to estimate the best-fit value of $b_{H,i}$ for each of them, and then calculating the covariance through Equation \ref{eq:cov_jk}.
+
+      Since $\bar{b}_H$ is a linear parameter, its best-fit and standard deviation can be found analytically as:
+      \begin{equation}
+        \bar{b}_H=\frac{\sum_{ij}{\sf Cov}_{b,ij}^{-1}b_i}{\sum_{ij}{\sf Cov}^{-1}_{b,ij}},
+        \hspace{12pt}
+        \sigma(\bar{b}_H)=\left(\sum_{ij}{\sf Cov}^{-1}_{b,ij}\right)^{-1/2}.
+      \end{equation}
+      At this point it is worth acknowledging that this estimate $\bar{b}_H$ is only strictly consistent if the posterior distribution of the $b_{H,i}$ is Gaussian. We find that, with the exception of the 2MPZ sample, which has a comparatively small statistical power, the marginalized distributions in all redshift bins are sufficiently well-behaved that this is a reasonable approximation (e.g. see Figure \ref{fig:triangle}). Our combined constraint on $\bar{b}_H$ following this procedure is:
+      \begin{equation}
+        1-\bar{b}_H=0.59\pm0.03.
+      \end{equation}
+      More interestingly, the $\chi^2$ value associated to this measurement is $\chi^2=2.1$, which has an associated PTE$\simeq0.8$. We therefore find that the assumption of a constant mass bias with redshift is compatible with our measurements. This agrees with the results of \todo{cite}, found using tSZ-selected clusters \todo{in combination with?}.
+
   \begin{enumerate}
-    \item Fiducial results
-    \item Constant fit
     \item $\langle bP_e\rangle$
     \item Derive anything from the above?
     \item Systematics:
@@ -406,29 +452,12 @@
       \item 
     \end{itemize}
   \end{enumerate}
-
-  \subsection{Fiducial results}\label{ssec:results.fid}  
-    \begin{table*}
-      \begin{center}
-        \begin{tabular}{l|cccccc}
-          \hline
-          Sample & $\bar{z}$ & $1-b\,\,({\rm best\,\,fit})$ & $1-b\,\,(68\%\,{\rm C.L.})$ & $\langle bP_e\rangle\,[{\rm eV}\,\,{\rm cm}^{-3}]$ & $\chi^2/{\rm d.o.f.}$ & ${\rm PTE}(\chi^2)$\\
-          \hline
-          2MPZ    & 0.07     & 0.33                         & $0.21^{+0.31}_{-0.05}$      & $0.087^{+0.052}_{-0.031}$                          & 0.92                  & 0.57               \\
-          \wisc-1 & 0.13     & 0.71                         & $0.62^{+0.14}_{-0.08}$      & $0.176^{+0.020}_{-0.025}$                          & 1.35                  & 0.09               \\
-          \wisc-2 & 0.18     & 0.73                         & $0.62^{+0.10}_{-0.07}$      & $0.188^{+0.013}_{-0.024}$                          & 0.87                  & 0.69               \\
-          \wisc-3 & 0.23     & 0.64                         & $0.64^{+0.07}_{-0.08}$      & $0.203^{+0.018}_{-0.023}$                          & 1.17                  & 0.22               \\
-          \wisc-4 & 0.27     & 0.55                         & $0.58^{+0.07}_{-0.07}$      & $0.197^{+0.020}_{-0.016}$                          & 1.04                  & 0.40               \\
-          \wisc-5 & 0.32     & 0.58                         & $0.61^{+0.09}_{-0.07}$      & $0.210^{+0.033}_{-0.010}$                          & 1.26                  & 0.12               \\
-          \hline
-        \end{tabular}
-        \caption{Galaxy samples used in this analysis, corresponding to the full 2MPZ survey and five tomographic redshift bins of the \wisc survey. The second, third and last columns list the photometric redshift interval defining the sample, its mean redshift and its number density respectively.}\label{tab:results}
-      \end{center}
-    \end{table*} 
-    \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
-    \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
+    \subsubsection{Tomographic measurement of thermal gas pressure}\label{ssec:results.fid.bpe}
+      \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
+      \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
 
   \subsection{Systematics analysis}\label{ssec:results.syst}
+    \subsubsection{Mass function sensitivity}\label{ssec:results.syst.massfunc}
     \subsubsection{Large-scale galaxy clustering systematics}\label{sssec:results.syst.gg}
       \TODO{Describe different efforts to understand/mitigate/remove systematics in WISC (removing first point, fitting for $C_\ell$ template, template deprojection of stars and other stuff).}
       \TODO{Compare with SDSS results if available}
@@ -452,13 +481,6 @@
     \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
     \label{fig:by}
   \end{figure}
-  \begin{figure*}
-    \centering
-    \includegraphics[width=0.47\textwidth]{./figures/fiducial_2mpz.pdf}
-    \includegraphics[width=0.47\textwidth]{./figures/fiducial_wisc3.pdf}
-    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
-    \label{fig:triangle}
-  \end{figure*}
 
 \section{Discussion}\label{sec:discussion}
   \lipsum[2]
