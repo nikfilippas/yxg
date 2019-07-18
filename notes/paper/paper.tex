@@ -184,7 +184,7 @@
       \end{equation}
       where $\rho_{yg}$ is a free parameter that determines the sign of the correlation between galaxy abundance and pressure. Marginalising over this parameter has the added advantage of reducing the sensitivity of our final constraints on $1-b_H$ on the details of the cross-spectrum model in the 1-halo regime, where both parameters are completely degenerate.
 
-      It is also worth exploring the halo model bias (Eq. \ref{eq:hm_bias}) for the Compton-$y$ paramete. At $k\rightarrow0$ this is given by:
+      It is also worth exploring the halo model bias (Eq. \ref{eq:hm_bias}) for the Compton-$y$ parameter. At $k\rightarrow0$ this is given by:
       \begin{align}\nonumber
         \langle bP_e\rangle&=\int dM\,\frac{dn}{dM}\,b_h(M)\,\int_0^\infty dr\,4\pi r^2\,P_e(r|M)\\
                &=\int dM\,\frac{dn}{dM}\,b_h(M)\,E_T(M),
@@ -442,6 +442,13 @@
       \end{equation}
       More interestingly, the $\chi^2$ value associated to this measurement is $\chi^2=2.1$, which has an associated PTE$\simeq0.8$. We therefore find that the assumption of a constant mass bias with redshift is compatible with our measurements. This agrees with the results of \todo{cite}, found using tSZ-selected clusters \todo{in combination with?}.
 
+      \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
+
+    \subsubsection{Tomographic measurement of thermal gas pressure}\label{ssec:results.fid.bpe}
+      So far we have presented our constraints in terms of a the mass-bias parameter $1-b_H$, since this is the main source of systematic uncertainty in the cosmological analysis of cluster number counts carried out by Planck \todo{cite}. However, the physical interpretation of this parameter (the fraction of missing mass estimated from X-ray measurements under the assumption of hydrostatic equilibrium) is not directly related to the physical process that allows us to constrain it through the cross-correlation of $y$ and $\delta_g$: the fact that galaxy density and pressure trace the same underlying dark-matter fluctuations. In this sense, a more direct observable is bias-weighted pressure $\langle bP_e\rangle$. This quantity can be interpreted both as the relation between large-scale matter and pressure fluctuations or as the halo-bias-weighted thermal energy density of all halos at a given redshift \todo{cite}. This quantity has been measured at very low redshifts by \cite{2017MNRAS.467.2315V} making use of galaxy groups, and at higher redshifts by the Dark Energy Science Collaboration \cite{2019arXiv190413347P}. The redshift range $0.1\lesssim z\lesssim0.4$, containing a large fraction of the tSZ sources detected by Planck \citep{2016A&A...594A..27P}, is fairly unconstrained.
+
+      We derive constraints on $\langle bP_e\rangle$ from our data by reprocessing our Monte-Carlo chains, computing $\langle bP_e\rangle$ at each sample to find its marginalized posterior distribution. The results are shown in Figure \ref{fig:by}, together with the measurements of \citep{2016A&A...594A..27P} and \cite{2019arXiv190413347P}. Our results are in good qualitative agreement with the trend of these previous measurements, which 
+
   \begin{enumerate}
     \item $\langle bP_e\rangle$
     \item Derive anything from the above?
@@ -452,9 +459,6 @@
       \item 
     \end{itemize}
   \end{enumerate}
-    \subsubsection{Tomographic measurement of thermal gas pressure}\label{ssec:results.fid.bpe}
-      \TODO{Describe fiducial measurement of $(1-b)$ from 2MPZ $+$ WISC, using whatever mass function was used for the Planck clusters analysis.}
-      \TODO{Discuss these results: is it compatible with a constant, discuss mass dependence (from SZ source masking), translate into $\langle bP_e \rangle$ and place in context of existing measurements.}
 
   \subsection{Systematics analysis}\label{ssec:results.syst}
     \subsubsection{Mass function sensitivity}\label{ssec:results.syst.massfunc}
