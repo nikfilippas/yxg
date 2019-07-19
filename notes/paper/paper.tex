@@ -230,19 +230,19 @@
     \end{figure}
     \begin{table}
       \begin{center}
-        \begin{tabular}{l|ccc}
+        \begin{tabular}{l|cccc}
           \hline
-          Sample & $[z_{{\rm ph},i},z_{{\rm ph},f}]$ & $\bar{z}$ & $\bar{n}_g\,[{\rm deg}^{-2}]$\\
+          Sample & $[z_{{\rm ph},i},z_{{\rm ph},f}]$ & $\bar{z}$ & $\bar{n}_g\,[{\rm deg}^{-2}]$ & $\ell_{\rm max}$\\
           \hline
-          2MPZ    & N.A.         & 0.07 &  25.5 \\
-          \wisc-1 & $[0.1,0.15]$ & 0.13 & 106   \\
-          \wisc-2 & $[0.15,0.2]$ & 0.18 & 126   \\
-          \wisc-3 & $[0.2,0.25]$ & 0.23 & 136   \\
-          \wisc-4 & $[0.25,0.3]$ & 0.27 & 118   \\
-          \wisc-5 & $[0.3,0.35]$ & 0.32 & 41    \\
+          2MPZ    & N.A.         & 0.07 &  25.5 &  280 \\
+          \wisc-1 & $[0.1,0.15]$ & 0.13 & 106   &  540 \\
+          \wisc-2 & $[0.15,0.2]$ & 0.18 & 126   &  745 \\
+          \wisc-3 & $[0.2,0.25]$ & 0.23 & 136   &  945 \\
+          \wisc-4 & $[0.25,0.3]$ & 0.27 & 118   & 1130 \\
+          \wisc-5 & $[0.3,0.35]$ & 0.32 & 41    & 1310 \\
           \hline
         \end{tabular}
-        \caption{Galaxy samples used in this analysis, corresponding to the full 2MPZ survey and five tomographic redshift bins of the \wisc survey. The second, third and last columns list the photometric redshift interval defining the sample, its mean redshift and its number density respectively.}\label{tab:z_bins}
+        \caption{Galaxy samples used in this analysis, corresponding to the full 2MPZ survey and five tomographic redshift bins of the \wisc survey. The second, third and last columns list the photometric redshift interval defining the sample, its mean redshift and its number density respectively. The largest multipole used in the analysis of each sample (corresponding to a comoving scale of $k_{\rm max}\sim 1\,{\rm Mpc}^{-1}$) is shown in the last column.}\label{tab:z_bins}
       \end{center}
     \end{table} 
     We make use of two low-redshift photometric redshift catalogs, the 2MASS photometric redshift survey (2MPZ; \cite{2014ApJS..210....9B}) and the WISE $\times$ SuperCOSMOS catalogue (\wisc; \cite{2016ApJS..225....5B}). Both surveys were creating by cross-matching full-sky imaging surveys, and their broad photometric coverage allows them to achieve excellent photo-$z$ uncertainties.
@@ -421,18 +421,18 @@
         \end{center}
       \end{table*}
       We use the measured power spectra to constrain the free parameters of the model described in Section \ref{sec:theory}, with the main aim of providing an alternative measurement of the mass bias $(1-b)$ as a function of redshift. Figure \ref{fig:triangle} shows an example of the posterior parameter contours for our 5 free parameters, $\{M_{\rm min},M_1,b_H,\rho_{gy},w_z\}$, in the \wisc-3 sample ($z\sim0.23$). As the figure shows, there are strong degeneracies between $M_{\rm min}$, $M_1$ and $w_z$. This is easy to understand, given that all of these parameters affect the overall amplitude of the galaxy auto-correlation: since we do not go to scales that are sufficiently small to fully resolve the 1-halo term and break the degeneracy between $M_{\rm min}$ and $M_1$, which regulate the abundance of centrals and satellites, and therefore the constraint on these parameters mostly comes from the 2-halo amplitude (i.e. the galaxy bias), and the halo shot-noise level. On the other hand, the width of the redshift distribution also has a strong impact on the amplitude of the angular power spectrum at all scales due to projection effects. Since a measurement of the galaxy bias from the galaxy auto-correlation is effectively used to constrain $b_H$ from the galaxy-$y$ cross-correlation, the mass bias also shows some degeneracy with the HOD parameters and $w_z$, albeit at a much milder level. More interestingly, the mass-bias parameter $b_H$ shows a visible degeneracy with $\rho_{gy}$. This is also expected: the effects of $\rho_{gy}$ and $b_H$ on the 1-halo term of the galaxy-$y$ power spectrum are completely degenerate, and thus a free $\rho_{gy}$ ensures that any information obtained on $b_H$ comes entirely from the 2-halo contribution. The corresponding constraints on $1-b_H$ are shown in the bottom panel of Figure \ref{fig:bh} as black circles with error bars. The values shown in the figure and given explicity in column 4 of Table \ref{tab:results} correspond to the peak of the 1-dimensional distribution of $1-b_H$ and to the equal-probability values encompassing a total probability of 0.68. The overall best-fit value of $1-b_H$ is provided in column 3 of the same Table. Columns 6 and 7 of the same table list the reduced $\chi^2$ values for each sample and its associated probability-to-exceed (PTE) respectively. In all cases we find that the model described in Section \ref{sec:theory} is able to describe the data with no evidence for a significant statistical tension. The upper panel of Figure \ref{fig:bh} shows the redshift distributions of the different bins used in this analysis, and can be used to visually assess the level of correlation between the different measurements.
-  \begin{figure*}
-    \centering
-    \includegraphics[width=0.7\textwidth]{./figures/bhydro.pdf}
-    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
-    \label{fig:bh}
-  \end{figure*}
-  \begin{figure*}
-    \centering
-    \includegraphics[width=0.7\textwidth]{./figures/by.pdf}
-    \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
-    \label{fig:by}
-  \end{figure*}
+      \begin{figure*}
+        \centering
+        \includegraphics[width=0.7\textwidth]{./figures/bhydro.pdf}
+        \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+        \label{fig:bh}
+      \end{figure*}
+      \begin{figure*}
+        \centering
+        \includegraphics[width=0.7\textwidth]{./figures/by.pdf}
+        \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
+        \label{fig:by}
+      \end{figure*}
       
       We see that, while we are able to measure $1-b_H$ to a reasonable accuracy ($\sim12\%$) in all of the \wisc redshift bins, the sensitivity for the 2MPZ sample is much poorer. This is not entirely unexpected: even though the cross-correlation between the Compton-$y$ map and the 2MPZ catalog yields the highest signal-to-noise of all the samples used here, the low redshift range covered by this sample implies that the signal is strongly dominated by the one-halo term. This can be seen in the top right panel of Figure \ref{fig:cls}. This degrades the constraining power of the 2MPZ cross-correlation significance since, as we have described above, we can only obtain reliable constraints on $1-b_H$ from the two-halo contribution.
             
@@ -457,11 +457,9 @@
     \subsubsection{Tomographic measurement of thermal gas pressure}\label{ssec:results.fid.bpe}
       So far we have presented our constraints in terms of a the mass-bias parameter $1-b_H$, since this is the main source of systematic uncertainty in the cosmological analysis of cluster number counts carried out by Planck \todo{cite}. However, the physical interpretation of this parameter (the fraction of missing mass estimated from X-ray measurements under the assumption of hydrostatic equilibrium) is not directly related to the physical process that allows us to constrain it through the cross-correlation of $y$ and $\delta_g$: the fact that galaxy density and pressure trace the same underlying dark-matter fluctuations. In this sense, a more direct observable is bias-weighted pressure $\langle bP_e\rangle$. This quantity can be interpreted both as the relation between large-scale matter and pressure fluctuations or as the halo-bias-weighted thermal energy density of all halos at a given redshift \todo{cite}. This quantity has been measured at very low redshifts by \cite{2017MNRAS.467.2315V} making use of galaxy groups, and at higher redshifts by the Dark Energy Science Collaboration \cite{2019arXiv190413347P}. The redshift range $0.1\lesssim z\lesssim0.4$, containing a large fraction of the tSZ sources detected by Planck \citep{2016A&A...594A..27P}, is fairly unconstrained.
 
-      We derive constraints on $\langle bP_e\rangle$ from our data by reprocessing our Monte-Carlo chains, computing $\langle bP_e\rangle$ at each sample to find its marginalized posterior distribution. The results are shown in Figure \ref{fig:by}, together with the measurements of \citep{2016A&A...594A..27P} and \cite{2019arXiv190413347P}. Our results are in good qualitative agreement with the trend of these previous measurements, as well as with the predictions of the shock heating models of \todo{cite}. In these models, the thermal energy entering Eq. \ref{eq:by} is estimated by integrating the pressure profile of \todo{cite} up to a radius $r_{\rm max}=N\,r_{200c}$. The results for $N=2,\,3,\,4$ and $5$ are shown as solid, dashed, dot-dashed and dotted grey lines in Figure \ref{fig:by}.
+      We derive constraints on $\langle bP_e\rangle$ from our data by reprocessing our Monte-Carlo chains, computing $\langle bP_e\rangle$ at each sample to find its marginalized posterior distribution. The results are shown in Figure \ref{fig:by}, together with the measurements of \citep{2016A&A...594A..27P} and \cite{2019arXiv190413347P}. Our results are in good qualitative agreement with the trend of these previous measurements, as well as with the predictions of the shock heating models of \todo{cite}. In these models, the thermal energy entering Eq. \ref{eq:by} is estimated by integrating the pressure profile of \todo{cite} up to a radius $r_{\rm max}=N\,r_{200c}$. As a visual aid to evaluate the agreement of our results with these models, the predictions for $N=2,\,3,\,5$ and $\infty$ are shown as solid, dashed, dot-dashed and dotted grey lines in Figure \ref{fig:by}.
 
   \begin{enumerate}
-    \item $\langle bP_e\rangle$
-    \item Derive anything from the above?
     \item Systematics:
     \begin{itemize}
       \item CIB
@@ -471,6 +469,31 @@
   \end{enumerate}
 
   \subsection{Systematics analysis}\label{ssec:results.syst}
+    \subsubsection{tSZ contamination}\label{sssec:results.syst.y}
+      No component separation method is perfect, and the MILCA Compton-$y$ map used in our fiducial analysis is known to suffer from small levels of contamination from various other astrophysical components. The most relevant for this analysis is the presence fo Galactic and extra-Galactic dust. As described in Section \ref{sssec:methods.syst.deproj}, we remove contamination from Galactic dust at the map level in both $y$ and $\delta_g$. The extra-Galactic component, the so-called Cosmic Infrared Background (CIB), is however a more relevant concern, given that it traces the large-scale structure and is therefore statistically correlated with both of our observables. Since the CIB is most relevant near the peak of star formation ($z\sim2$), we expect this contamination to be small, but it must however be quantified carefully.
+      
+      To do so, we follow the same method used in \todo{cites}. We model the CIB contamination in the $y$ map as:
+      \begin{equation}
+        y_{\rm obs}(\nv)=y_{\rm true}(\nv)+\epsilon\,c(\nv),
+      \end{equation}
+      where $y_{\rm obs}$ and $y_{\rm true}$ are the observed and true Compton-$y$ maps, $\epsilon$ is a free parameter, and $c(\nv)$ is a template for the CIB emission. For our analysis we used the 545 GHz map released by Planck as a proxy for CIB emission. The different cross-correlation between $y_{\rm obs}$ and both $\delta_g$ and $c$ are then given by:
+      \begin{align}\label{eq:cl_yc}
+        &C^{yc,{\rm obs}}_\ell= C^{yc}_\ell+\epsilon\,C^{cc}_\ell,\\
+        &C^{yg,{\rm obs}}_\ell= C^{yg}_\ell+\epsilon\,C^{cg}_\ell,
+      \end{align}
+      where $C^{cc}_\ell$, $C^{yc}_\ell$,  and  $C^{cg}_\ell$ are the auto-correlation of the CIB, and its intrinsic cross-correlations with $y$ and $\delta_g$ respectively. Since $C^{cg}_\ell$ can be estimated directly by cross-correlating our galaxy overdensity maps with the 545 GHz map, the only remaining step to quantify the contamination to the $y$-$\delta_g$ correlation is to estimate $\epsilon$. To do so, we measure the cross-correlation between the MILCA $y$ map and the 545 GHz map and fit a model of the form of Eq. \ref{eq:cl_yc}, with a single free parameter $\epsilon$, and $C^{yc}_\ell$ and $C^{cc}_\ell$ given by the best-fit models for the CIB auto- and cross-correlation provided by \todo{cite}. As reported in \todo{cites}, this procedure yields an estimate of the CIB contamination
+      \begin{equation}
+        \epsilon=(2.3\pm6.6)\times10^{-7}\,({\rm MJy}/{\rm sr})^{-1}.
+      \end{equation}
+      In order to reduce the noise variance from the Galactic component of the 545 GHz map, all cross-correlations computed here ($C^{yc,{\rm obs}}_\ell$ and $C^{cg}_\ell$) were estimated using Planck's 20\% Galactic mask.
+      
+      Using this measurement of $\epsilon$ and the estimate of $C^{cg}_\ell$ from the cross-correlation with the 545 GHz map, Figure \ref{fig:cls} shows, in the right panels, the estimated level of contamination from the CIB in our $y$-$\delta_g$ cross-correlation. In all cases the level of contamination is small, at the level of $\sim1\%$ of the signal, and therefore can be neglected in our analysis.
+
+
+      
+
+      \TODO{Quantify CIB contamination}
+
     \subsubsection{Mass function sensitivity}\label{ssec:results.syst.massfunc}
     \subsubsection{Large-scale galaxy clustering systematics}\label{sssec:results.syst.gg}
       \TODO{Describe different efforts to understand/mitigate/remove systematics in WISC (removing first point, fitting for $C_\ell$ template, template deprojection of stars and other stuff).}
@@ -479,9 +502,6 @@
     \subsubsection{Photometric redshift systematics}\label{sssec:results.syst.pz}
       \TODO{Compare results with different $N(z)$ choices.}
 
-    \subsubsection{tSZ contamination}\label{sssec:results.syst.y}
-      \TODO{Compare results with NILC map}
-      \TODO{Quantify CIB contamination}
 
 
 \section{Discussion}\label{sec:discussion}
