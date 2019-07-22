@@ -17,7 +17,7 @@
 \usepackage{lipsum}
 \newcommand{\nv}{\hat{\boldsymbol{\theta}}}
 \newcommand{\wisc}{WI$\times$SC}
-\newcommand{\TODO}[1]{{\bf TODO:} #1}
+\newcommand{\cites}{{\bf CITES}}
 \newcommand{\todo}[1]{{\bf TODO:} #1}
 \newcommand{\kalo}{Karhunen-Lo\`{e}ve\,}
 \newcommand{\jcap}{JCAP}
@@ -55,9 +55,9 @@
 \end{keywords}
 
 \section{Introduction}\label{sec:intro}
-  Modern observational cosmology has reached a stage where the constraining power of most current and future datasets are limited by astrophysical systematic uncertainties, i.e. our lack of understanding of the physics behind the luminous components of the Universe, galaxies and gas \TODO{cites}, especially on the smallest scales. The limiting factor for cluster number counts is the uncertainty in the mass-observable relation. Cosmic shear measurements are strongly affected by sub-grid baryonic physics, and by uncertainties in the processes by which galaxies acquire correlated intrinsic alignments. Finally, even though the clustering pattern of galaxies is one of the cosmological observables with the highest signal-to-noise ratio, the cosmological constraints that can be extracted from it is severely limited by our lack of understanding of the galaxy-dark matter connection. Even the analysis of the temperature anisotropies in the Cosmic Microwave Background (CMB), arguably the cleanest cosmological observable, are currently limited by the impact of astrophysical foregrounds on small scales \TODO{cites everywhere}.
+  Modern observational cosmology has reached a stage where the constraining power of most current and future datasets are limited by astrophysical systematic uncertainties, i.e. our lack of understanding of the physics behind the luminous components of the Universe, galaxies and gas \cites, especially on the smallest scales. The limiting factor for cluster number counts is the uncertainty in the mass-observable relation. Cosmic shear measurements are strongly affected by sub-grid baryonic physics, and by uncertainties in the processes by which galaxies acquire correlated intrinsic alignments. Finally, even though the clustering pattern of galaxies is one of the cosmological observables with the highest signal-to-noise ratio, the cosmological constraints that can be extracted from it is severely limited by our lack of understanding of the galaxy-dark matter connection. Even the analysis of the temperature anisotropies in the Cosmic Microwave Background (CMB), arguably the cleanest cosmological observable, are currently limited by the impact of astrophysical foregrounds on small scales \cites.
   
-  The CMB secondary anisotropies, in particular the thermal and kinetic Sunyaev-Zel'dovich effects (tSZ and kSZ respectively), as well as the gravitational lensing of the CMB photons, have gained popularity as a means to address this issue \TODO{cite}. These effects are relatively clean probes of some of the physical quantities that need to be understood in order to mitigate the impact of astrophysical uncertainties: the matter and gas densities, the gas pressure and the velocity field. Since these observables are also sensitive to cosmology, their combination with large-scale structure data can be extremely powerful at disentangling astrophysical and cosmological parameters. This has been explored by a large number of groups: CMB lensing data has been used to constrain the bias of different tracers of the matter distribution \todo{cites}, as well as to calibrate the measurement of galaxy shapes in cosmic shear analyses \todo{cites}. The tSZ effect has been used in cross-correlation with galaxy clustering and weak lensing data to determine the physical properties of the diffuse gas, as well as to potentially improve constraints on the amplitude of matter fluctuations \todo{cites}. The kSZ in turn has been used in cross-correlation with galaxy clustering to constrain the growth of structure and the properties gas density profile around halos \todo{cites}.
+  The CMB secondary anisotropies, in particular the thermal and kinetic Sunyaev-Zel'dovich effects (tSZ and kSZ respectively), as well as the gravitational lensing of the CMB photons, have gained popularity as a means to address this issue \cites. These effects are relatively clean probes of some of the physical quantities that need to be understood in order to mitigate the impact of astrophysical uncertainties: the matter and gas densities, the gas pressure and the velocity field. Since these observables are also sensitive to cosmology, their combination with large-scale structure data can be extremely powerful at disentangling astrophysical and cosmological parameters. This has been explored by a large number of groups: CMB lensing data has been used to constrain the bias of different tracers of the matter distribution \cites, as well as to calibrate the measurement of galaxy shapes in cosmic shear analyses \cites. The tSZ effect has been used in cross-correlation with galaxy clustering and weak lensing data to determine the physical properties of the diffuse gas, as well as to potentially improve constraints on the amplitude of matter fluctuations \todo{cites}. The kSZ in turn has been used in cross-correlation with galaxy clustering to constrain the growth of structure and the properties gas density profile around halos \cites.
   
   In this work we will focus on the cross-correlation between galaxy clustering data and maps of the tSZ Compton-$y$ parameter, making use of existing data from the Planck collaboration \todo{cites} and a set of photometric galaxy surveys. Several questions can be addressed through this combined analysis. Through tomography, this cross-correlation can be used to reconstruct the redshift evolution of the thermal gas pressure, as well as the dependence of the mass bias for tSZ cluster studies on redshift and, potentially, halo mass. This is a relevant topic given the current mild tensions between SZ cluster number counts and CMB primary anisotropies \todo{cites}, which could be caused by the assumptions made to model the $y$-mass relation. Conversely, under the assumption that the relation between mass and gas pressure is well understood, the tSZ effect can be thought of as a mass tracer, which can be used to break degeneracies with the galaxy bias parameter.
 
@@ -102,7 +102,7 @@
     where $H(z)$ is the expansion rate.
 
   \subsection{Halo model predictions}\label{ssec:theory.hm}
-    The halo model \TODO{cite} describes the spatial fluctuations of any quantity in terms of the contributions to it of all dark matter haloes, under the assumption that all the matter in the Universe is contained in those haloes. We will only quote here the final results regarding the halo model prediction for power spectra, and refer the reader to \TODO{cite} for further details.
+    The halo model \cites describes the spatial fluctuations of any quantity in terms of the contributions to it of all dark matter haloes, under the assumption that all the matter in the Universe is contained in those haloes. We will only quote here the final results regarding the halo model prediction for power spectra, and refer the reader to \cites for further details.
     
     Let $U(r|M)$ be the profile of a given quantity as a function of the comoving distance $r$ to the centre of a halo of mass $M$, and let $U(k|M)$ be its Fourier transform:
     \begin{equation}
@@ -119,9 +119,9 @@
       &P^{2h}_{UV}(k)=\langle bU\rangle\,\langle bV\rangle\,P_L(k),\\
       &\langle bU\rangle(k)\equiv\int dM\frac{dn}{dM}\,b_h(M)\,\langle U(k|M)\rangle. \label{eq:hm_bias}
     \end{align}
-    Here, $P_L(k)$ is the linear matter power spectrum, $dn/dM$ is the halo mass function and $b_h(M)$ is the halo bias \TODO{cites}. %Further details are discussed in Appendix \ref{app:hm}.
+    Here, $P_L(k)$ is the linear matter power spectrum, $dn/dM$ is the halo mass function and $b_h(M)$ is the halo bias \cites. %Further details are discussed in Appendix \ref{app:hm}.
     
-    \TODO{describe $1h$-$2h$ transition correction.}
+    \todo{describe $1h$-$2h$ transition correction.}
     
     \subsubsection{Galaxies and the halo occupation distribution}\label{sssec:theory.hm.hod}
       To model the galaxy overdensity $\Delta_g$ we will use a Halo Occupation Distribution (HOD) model \cite{2002ApJ...575..587B,2005ApJ...633..791Z,2013MNRAS.430..725V}, as prescribed by \cite{2011ApJ...736...59Z}. The HOD models the galaxy content of dark matter halos as being made up of central and satellite galaxies. Centrals lie at the center of the halo, while satellites are distributed according to a profile $u_s(r|M)$. Halos can have zero or one central, and the mean number of centrals for a halo of mass $M$ is modelled as a smoothed step function
@@ -171,7 +171,7 @@
       \end{equation}
       with $(\alpha,\beta,\gamma,c_P)=(1.33,4.13,0.31,1.81)$.
       
-      \TODO{Blah about $(1-b_H)$}. Other pressure profiles have been proposed in the literature (e.g. \cite{2012ApJ...758...75B}), but we choose this parametrisation in order to be able to relate our measurement of $(1-b_H)$ to the results of \cite{2016A&A...594A..24P}.
+      \todo{Blah about $(1-b_H)$}. Other pressure profiles have been proposed in the literature (e.g. \cite{2012ApJ...758...75B}), but we choose this parametrisation in order to be able to relate our measurement of $(1-b_H)$ to the results of \cite{2016A&A...594A..24P}.
       
       Within the halo model description, and assuming a log-normal $y$-mass relation, the pressure profile cumulants are given by:
       \begin{align}
@@ -196,7 +196,7 @@
       \begin{equation}
         M_\Delta = \frac{4\pi}{3}\rho_*(z)\Delta r^3_\Delta.
       \end{equation}
-      Common choices for $\rho_*$ are the critical density $\rho_c=3H^2(z)/4\pi G$ and the matter density $\rho_M(z)$. The spherical overdensity parameter $\Delta$ is usually chosen within the range $\sim(200,500)$ and sometimes defined as the quantity yielding the virial radius in the spherical top-hat collapse model $\Delta_v$ \cite{1998ApJ...495...80B} \TODO{more refs?}.
+      Common choices for $\rho_*$ are the critical density $\rho_c=3H^2(z)/4\pi G$ and the matter density $\rho_M(z)$. The spherical overdensity parameter $\Delta$ is usually chosen within the range $\sim(200,500)$ and sometimes defined as the quantity yielding the virial radius in the spherical top-hat collapse model $\Delta_v$ \cite{1998ApJ...495...80B} \todo{more refs?}.
 
       Ideally we would like to use the same mass definition (i.e. choice of $\Delta$ and $\rho_*$) for the mass function, the mass-concentration relation $c_\Delta(M)$ and the calibrated pressure profile. Unfortunately while the GNFW profile is calibrated to $\Delta_{500c}$ (where $c$ denotes critical density), the mass functions of \cite{2008ApJ...688..709T,2010ApJ...724..878T} are only provided for $\rho_M$-based mass definitions, and the concentration-mass relation of \cite{2008MNRAS.390L..64D} was only estimated for $\Delta=200$ (for critical and matter densities) and for $\Delta=\Delta_v$. To overcome this issue, we follow the procedure used by \cite{2016A&A...594A..24P} and \cite{2018MNRAS.477.4957B}: our baseline mass definition is $\rho_c$-based with $\Delta=500$, as used by \cite{2010A&A...517A..92A}. At each redshift, we translate this into a $\Delta$ value for a $\rho_M$-based definition, which we use to compute the mass function from the parametrizations of \cite{2008ApJ...688..709T,2010ApJ...724..878T}. We also rederive the concentration-mass relation of \cite{2008MNRAS.390L..64D} for a $\rho_c$-based $\Delta=500$ from their $\Delta=200$ parametrization by integrating the NFW profile to the corresponding halo radius. Within the redshifts covered by our analysis we find that this is well fit by:
       \begin{equation}
@@ -255,7 +255,7 @@
 
 \section{Methods}\label{sec:methods}
   \subsection{Estimating power spectra}\label{ssec:methods.cls}
-    We measure all auto- and cross-power spectra between the different redshift bins and the $y$ maps using the pseudo-$C_\ell$ estimator \TODO{cites} as implemented in \TODO{cite}. Details about the method can be found in \TODO{cite}, but we provide a brief description here for completeness. For an incomplete sky coverage, a given field observed on the sphere, $\tilde{u}(\nv)$, can be modelled as a product of the true underlying field $u$, and a sky mask $w$
+    We measure all auto- and cross-power spectra between the different redshift bins and the $y$ maps using the pseudo-$C_\ell$ estimator \cites as implemented in \cites. Details about the method can be found in \cites, but we provide a brief description here for completeness. For an incomplete sky coverage, a given field observed on the sphere, $\tilde{u}(\nv)$, can be modelled as a product of the true underlying field $u$, and a sky mask $w$
     \begin{equation}
       \tilde{u}^{\rm obs}(\nv) = w(\nv)\,u(\nv).
     \end{equation}
@@ -278,13 +278,13 @@
 
     Although the jackknife method is able to provide an estimate of the size of the power spectrum uncertainties in a model independent way, it also has its drawbacks. There are only so many jackknife regions that can be selected with a reasonable size, and therefore the estimated covariance is noisy at some level. Furthermore, since the footprint associated with the removal of each jackknife region is different from the overall footprint, the method is also not able to recover the mode-coupling associated with the map geometry by construction. In order to verify and improve our estimate of the covariance matrix, we make use of a second analytical estimator.
 
-    We compute the analytical covariance matrix following the methods outlined in \TODO{cite}. The covariance receives two main additive contributions, from the so-called {\sl disconnected} and {\sl connected} trispectra. The disconnected part is essentially the covariance matrix estimated under the assumption that all fields are Gaussianly distributed. In the absence of sky masks, it is given by
+    We compute the analytical covariance matrix following the methods outlined in \cites. The covariance receives two main additive contributions, from the so-called {\sl disconnected} and {\sl connected} trispectra. The disconnected part is essentially the covariance matrix estimated under the assumption that all fields are Gaussianly distributed. In the absence of sky masks, it is given by
     \begin{equation}
       {\rm Cov}^{\rm G}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\delta_{\ell\ell'}\frac{C^{uw}_\ell C^{vz}_\ell+C^{uz}_\ell C^{vw}_\ell}{2\ell+1}.
     \end{equation}
-    A sky mask introduces non-zero coupling between different $\ell$ modes. To account for these, we use the  method introduced in \TODO{cite}, which has been shown to be an excellent approximation for large-scale structure data \TODO{cite}.
+    A sky mask introduces non-zero coupling between different $\ell$ modes. To account for these, we use the  method introduced in \cites, which has been shown to be an excellent approximation for large-scale structure data \cites.
 
-    We compute the connected (i.e. non-Gaussian) contribution to the covariance matrix using the halo model as the 1-halo trispectrum \TODO{cite}, given by:
+    We compute the connected (i.e. non-Gaussian) contribution to the covariance matrix using the halo model as the 1-halo trispectrum \cites, given by:
     \begin{align}\nonumber
       {\rm Cov}^{\rm NG}\left(C^{uv}_\ell,C^{wz}_{\ell'}\right)=\int &d\chi\,\frac{W_u(\chi)W_v(\chi)W_w(\chi)W_z(\chi)}{4\pi f_{\rm sky}\,\chi^6}\times\\\label{eq:cov_ng}
       &T^{1h}_{uvwz}\left(k=\frac{\ell+1/2}{\chi}\right),
@@ -293,9 +293,9 @@
     \begin{equation}\nonumber
       T^{1h}_{uvwz}(k)\equiv\int dM\frac{dn}{dM}\langle U(k|M) V(k|M) W(k|M) Z(k|M)\rangle.
     \end{equation}
-    Here we have used the notation introduced in Section \ref{ssec:theory.cls} for the radial kernels ($W_u(\chi)$) and Fourier-space halo profiles ($U(k|M)$) of the different projected fields. The total covariance matrix is simply given by ${\rm Cov}={\rm Cov}^{\rm G}+{\rm Cov}^{\rm NG}$. Note that estimating the connected term requires the use of the best-fit halo model parameters that we do not know a priori. In order to circumvent this issue we proceed as in \TODO{cite} and estimate the covariance matrix in a two-step process, where we first obtain best-fit parameters by minimizing a $\chi^2$ that uses only the Gaussian covariance with power spectra computed directly from the data, and we then use those parameters to calculate the non-Gaussian contribution (as well as to recalculate the Gaussian part using the best-fit prediction for the power spectra).
+    Here we have used the notation introduced in Section \ref{ssec:theory.cls} for the radial kernels ($W_u(\chi)$) and Fourier-space halo profiles ($U(k|M)$) of the different projected fields. The total covariance matrix is simply given by ${\rm Cov}={\rm Cov}^{\rm G}+{\rm Cov}^{\rm NG}$. Note that estimating the connected term requires the use of the best-fit halo model parameters that we do not know a priori. In order to circumvent this issue we proceed as in \cites and estimate the covariance matrix in a two-step process, where we first obtain best-fit parameters by minimizing a $\chi^2$ that uses only the Gaussian covariance with power spectra computed directly from the data, and we then use those parameters to calculate the non-Gaussian contribution (as well as to recalculate the Gaussian part using the best-fit prediction for the power spectra).
 
-    Figure  \TODO{make figure} shows the diagonal of the covariance matrix for one of the tSZ-galaxy power spectra estimated using these two methods. We find that both estimators are in good agreement with each other. We construct our final fiducial covariance matrix as a hybrid of both estimators: in order to ensure that we recover realistic error bar sizes, we use the variance estimated from the jackknifes. We then combine this with the correlation matrix estimated with our analytical method. This ensures that our estimator accounts for the coupling between different modes caused by survey geometry and non-Gaussianities while avoiding the the statistical noise in the jackknife estimator. The final covariance is therefore:
+    Figure  \todo{make figure} shows the diagonal of the covariance matrix for one of the tSZ-galaxy power spectra estimated using these two methods. We find that both estimators are in good agreement with each other. We construct our final fiducial covariance matrix as a hybrid of both estimators: in order to ensure that we recover realistic error bar sizes, we use the variance estimated from the jackknifes. We then combine this with the correlation matrix estimated with our analytical method. This ensures that our estimator accounts for the coupling between different modes caused by survey geometry and non-Gaussianities while avoiding the the statistical noise in the jackknife estimator. The final covariance is therefore:
     \begin{equation}
       {\rm Cov}_{ij} = {\rm Cov}^{\rm ana}_{ij} \sqrt{\frac{{\rm Cov}^{\rm JK}_{ii}\,{\rm Cov}^{\rm JK}_{jj}}{{\rm Cov}^{\rm ana}_{ii}\,{\rm Cov}^{\rm ana}_{jj}}},
     \end{equation}
@@ -374,9 +374,9 @@
     \end{equation}
     where ${\bf d}$ is a vector of power spectrum measurements, ${\bf t}(\vec{\theta})$ is the theory prediction for ${\bf d}$ with parameters $\vec{\theta}$ and ${\sf Cov}$ is the covariance matrix described in the previous section.
 
-    We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \TODO{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
+    We explore the likelihood of each redshift bin separately. For each redshift bin, our data vector ${\bf d}$ includes two sets of power spectrum measurements, corresponding to the auto-correlation of the galaxy overdensity and to its cross-correlation with the Compton-$y$ map, ${\bf d}=(C^{gg}_\ell,C^{gy}_\ell)$. We compute all power spectra in the range of multipoles $2<\ell<1024$, binned into the bandpowers described in Table \todo{make table}. For a given redshift bin $b$ with mean redshift $\bar{z}_b$, we use only multipoles $\ell<\ell^b_{\rm max}\equiv k_{\rm max}\,\chi(\bar{z}_b)-1/2$, where $k_{\rm max}=1\,{\rm Mpc}^{-1}$. As described in Section \ref{ssec:results.syst}, we also remove the first bandpower $(\ell\lesssim10)$ from all the galaxy auto-spectra for the WI$\times$SC redshift bins.
 
-    For each redshift bin, our theory model has five free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $1-b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \TODO{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following top-hat priors on the free parameters:
+    For each redshift bin, our theory model has five free parameters: $\log_{10}M_{\rm min}/M_\odot$, $\log_{10}M_1'/M_\odot$, $1-b_{\rm H}$, $\rho_{yg}$, and a nuisance width parameter $w_z$. The first two parameters effectively fit the galaxy bias and small-scale amplitude in the galaxy auto-correlation, while $1-b_{\rm H}$ and $\rho_{yg}$ are then constrained by including the tSZ cross-correlation. We fix all cosmological parameters to the best-fit values in \todo{check with Nick where the parameters were obtained}: $(\Omega_c h^2,\Omega_bh^2,h,\sigma_8,n_s)=(0.119,0.0224,0.6766,0.8102,0.9556)$. We impose the following top-hat priors on the free parameters:
     \begin{align}
       &10\le\log_{10}M_{\rm min}/M_\odot\le16,\\
       &10\le\log_{10}M_1'/M_\odot\le16,\\
@@ -459,17 +459,8 @@
 
       We derive constraints on $\langle bP_e\rangle$ from our data by reprocessing our Monte-Carlo chains, computing $\langle bP_e\rangle$ at each sample to find its marginalized posterior distribution. The results are shown in Figure \ref{fig:by}, together with the measurements of \citep{2016A&A...594A..27P} and \cite{2019arXiv190413347P}. Our results are in good qualitative agreement with the trend of these previous measurements, as well as with the predictions of the shock heating models of \todo{cite}. In these models, the thermal energy entering Eq. \ref{eq:by} is estimated by integrating the pressure profile of \todo{cite} up to a radius $r_{\rm max}=N\,r_{200c}$. As a visual aid to evaluate the agreement of our results with these models, the predictions for $N=2,\,3,\,5$ and $\infty$ are shown as solid, dashed, dot-dashed and dotted grey lines in Figure \ref{fig:by}.
 
-  \begin{enumerate}
-    \item Systematics:
-    \begin{itemize}
-      \item CIB
-      \item NILC
-      \item 
-    \end{itemize}
-  \end{enumerate}
-
   \subsection{Systematics analysis}\label{ssec:results.syst}
-    \subsubsection{tSZ contamination}\label{sssec:results.syst.y}
+    \subsubsection{tSZ systematics}\label{sssec:results.syst.y}
       No component separation method is perfect, and the MILCA Compton-$y$ map used in our fiducial analysis is known to suffer from small levels of contamination from various other astrophysical components. The most relevant for this analysis is the presence fo Galactic and extra-Galactic dust. As described in Section \ref{sssec:methods.syst.deproj}, we remove contamination from Galactic dust at the map level in both $y$ and $\delta_g$. The extra-Galactic component, the so-called Cosmic Infrared Background (CIB), is however a more relevant concern, given that it traces the large-scale structure and is therefore statistically correlated with both of our observables. Since the CIB is most relevant near the peak of star formation ($z\sim2$), we expect this contamination to be small, but it must however be quantified carefully.
       
       To do so, we follow the same method used in \todo{cites}. We model the CIB contamination in the $y$ map as:
@@ -479,28 +470,26 @@
       where $y_{\rm obs}$ and $y_{\rm true}$ are the observed and true Compton-$y$ maps, $\epsilon$ is a free parameter, and $c(\nv)$ is a template for the CIB emission. For our analysis we used the 545 GHz map released by Planck as a proxy for CIB emission. The different cross-correlation between $y_{\rm obs}$ and both $\delta_g$ and $c$ are then given by:
       \begin{align}\label{eq:cl_yc}
         &C^{yc,{\rm obs}}_\ell= C^{yc}_\ell+\epsilon\,C^{cc}_\ell,\\
-        &C^{yg,{\rm obs}}_\ell= C^{yg}_\ell+\epsilon\,C^{cg}_\ell,
+        &C^{yg,{\rm obs}}_\ell= C^{yg}_\ell+\epsilon\,C^{gc}_\ell,
       \end{align}
-      where $C^{cc}_\ell$, $C^{yc}_\ell$,  and  $C^{cg}_\ell$ are the auto-correlation of the CIB, and its intrinsic cross-correlations with $y$ and $\delta_g$ respectively. Since $C^{cg}_\ell$ can be estimated directly by cross-correlating our galaxy overdensity maps with the 545 GHz map, the only remaining step to quantify the contamination to the $y$-$\delta_g$ correlation is to estimate $\epsilon$. To do so, we measure the cross-correlation between the MILCA $y$ map and the 545 GHz map and fit a model of the form of Eq. \ref{eq:cl_yc}, with a single free parameter $\epsilon$, and $C^{yc}_\ell$ and $C^{cc}_\ell$ given by the best-fit models for the CIB auto- and cross-correlation provided by \todo{cite}. As reported in \todo{cites}, this procedure yields an estimate of the CIB contamination
+      where $C^{cc}_\ell$, $C^{yc}_\ell$,  and  $C^{gc}_\ell$ are the auto-correlation of the CIB, and its intrinsic cross-correlations with $y$ and $\delta_g$ respectively. Since $C^{gc}_\ell$ can be estimated directly by cross-correlating our galaxy overdensity maps with the 545 GHz map, the only remaining step to quantify the contamination to the $y$-$\delta_g$ correlation is to estimate $\epsilon$. To do so, we measure the cross-correlation between the MILCA $y$ map and the 545 GHz map and fit a model of the form of Eq. \ref{eq:cl_yc}, with a single free parameter $\epsilon$, and $C^{yc}_\ell$ and $C^{cc}_\ell$ given by the best-fit models for the CIB auto- and cross-correlation provided by \todo{cite}. As reported in \todo{cites}, this procedure yields an estimate of the CIB contamination
       \begin{equation}
         \epsilon=(2.3\pm6.6)\times10^{-7}\,({\rm MJy}/{\rm sr})^{-1}.
       \end{equation}
-      In order to reduce the noise variance from the Galactic component of the 545 GHz map, all cross-correlations computed here ($C^{yc,{\rm obs}}_\ell$ and $C^{cg}_\ell$) were estimated using Planck's 20\% Galactic mask.
+      For this exercise, in order to reduce the noise variance from the Galactic component of the 545 GHz map, the cross-correlations $C^{yc,{\rm obs}}_\ell$ and $C^{gc}_\ell$ were estimated using Planck's 20\% Galactic mask. Additionally, all uncertainties were estimated using the jackknife method described in Section \ref{ssec:methods.cov}.
       
-      Using this measurement of $\epsilon$ and the estimate of $C^{cg}_\ell$ from the cross-correlation with the 545 GHz map, Figure \ref{fig:cls} shows, in the right panels, the estimated level of contamination from the CIB in our $y$-$\delta_g$ cross-correlation. In all cases the level of contamination is small, at the level of $\sim1\%$ of the signal, and therefore can be neglected in our analysis.
+      Using this measurement of $\epsilon$ and the estimate of $C^{gc}_\ell$ from the cross-correlation with the 545 GHz map, Figure \ref{fig:cls} shows, in the right panels, the estimated level of contamination from the CIB in our $y$-$\delta_g$ cross-correlation. In all cases the level of contamination is small, at the level of $\sim1\%$ of the signal, and therefore can be neglected in our analysis.
 
+      We have also repeated our full analysis replacing the MILCA $y$ map with the NILC map released by Planck. Different component-separation methods are sensitive to different types of contamination, and this exercise is therefore both a necessary consistency check and a way to reinforce our conclusion that the level of CIB contamination is negligible. The resulting measurements of $1-b_H$ are shown in Figure \ref{fig:bh} as red triangles with error bars. The results are in very good agreement with our fiducial analysis.
 
       
-
-      \TODO{Quantify CIB contamination}
-
-    \subsubsection{Mass function sensitivity}\label{ssec:results.syst.massfunc}
-    \subsubsection{Large-scale galaxy clustering systematics}\label{sssec:results.syst.gg}
-      \TODO{Describe different efforts to understand/mitigate/remove systematics in WISC (removing first point, fitting for $C_\ell$ template, template deprojection of stars and other stuff).}
-      \TODO{Compare with SDSS results if available}
-
-    \subsubsection{Photometric redshift systematics}\label{sssec:results.syst.pz}
-      \TODO{Compare results with different $N(z)$ choices.}
+      \todo{Other possible points to discuss:
+      \begin{itemize}
+       \item Sensitivity to choice of mass function.
+       \item More on photo-$z$ systematics.
+       \item More on the galaxy clustering systematics.
+      \end{itemize}
+      }
 
 
 
