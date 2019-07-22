@@ -208,8 +208,8 @@
   \subsection{The Compton-$y$ map}\label{ssec:data.y}
     \begin{figure}
       \centering
-      \includegraphics[width=0.5\textwidth]{./figures/mask_y.pdf}
-      \includegraphics[width=0.5\textwidth]{./figures/mask_g.pdf}
+      \includegraphics[width=0.5\textwidth]{mask_y.pdf}
+      \includegraphics[width=0.5\textwidth]{mask_g.pdf}
       \caption{Sky masks used for the Compton-$y$ map (top) and for the 2MPZ and \wisc galaxy surveys (bottom). The top panel shows, in turquoise, the regions masked additionally when removing sky patches around the position of the tSZ sources detected by Planck above 6$\sigma$.}
       \label{fig:msk}
     \end{figure}
@@ -224,7 +224,7 @@
   \subsection{2MPZ and \wisc}\label{ssec:data.g1}
     \begin{figure}
       \centering
-      \includegraphics[width=0.5\textwidth]{./figures/nzs.pdf}
+      \includegraphics[width=0.5\textwidth]{nzs.pdf}
       \caption{Fiducial redshift distributions of the different galaxy samples used in this analysis. See Table \ref{tab:z_bins} for further details.}
       \label{fig:dndz}
     \end{figure}
@@ -265,7 +265,7 @@
     \end{equation}
     where $C^{uv}_\ell$ is the true underlying power spectrum. $M^{uv}_{\ell \ell'}$ is the so-called mode-coupling matrix, which depends solely on the masks of both fields, and which can be computed analytically. Roughly speaking, the pseudo-$C_\ell$ approach is then based on estimating $M^{uv}$ and inverting it to yield an unbiased estimate of the power spectrum.
     
-    For the galaxy auto-correlation, the pseudo-$C_\ell$ method requires an additional step of subtracting the shot noise bias. We do so analytically following the approach described in Section 2.4.2 of \TODO{cite} with a local noise variance given by $\sigma_n^2=1/\bar{n}_\Omega$, where $\bar{n}_\Omega$ is the mean surface number density in units of ${\rm sr}^{-2}$.
+    For the galaxy auto-correlation, the pseudo-$C_\ell$ method requires an additional step of subtracting the shot noise bias. We do so analytically following the approach described in Section 2.4.2 of \todo{cite} with a local noise variance given by $\sigma_n^2=1/\bar{n}_\Omega$, where $\bar{n}_\Omega$ is the mean surface number density in units of ${\rm sr}^{-2}$.
 
   \subsection{Covariance matrices}\label{ssec:methods.cov}
     We combine two different methods to estimate the power spectrum covariance matrix. 
@@ -304,7 +304,7 @@
   \subsection{Systematics treatment}\label{ssec:methods.syst}
     \begin{figure}
       \centering
-      \includegraphics[width=0.48\textwidth]{./figures/cl_syst_summary.pdf}
+      \includegraphics[width=0.48\textwidth]{cl_syst_summary.pdf}
       \caption{Fiducial redshift distributions of the different galaxy samples used in this analysis. See Table \ref{tab:z_bins} for further details.}
       \label{fig:clsyst}
     \end{figure}
@@ -351,18 +351,18 @@
       where the proportionality constant is fixed by making sure that $p(z)$ integrates to unity. We make $w_z$ a free parameter that we marginalize over with a top-hat prior $0.8<w_z<1.2$, which is broader than the actual uncertainty on the distribution widths from photo-$z$ calibration \todo{It would be really good to make this statement more quantitative}.
   \begin{figure*}
     \centering
-    \includegraphics[width=0.8\textwidth]{./figures/fits.pdf}
+    \includegraphics[width=0.8\textwidth]{fits.pdf}
     \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
     \label{fig:cls}
   \end{figure*}
   \begin{figure*}
     \centering
-    \includegraphics[width=0.3\textwidth]{./figures/cov_2mpz.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc1.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc2.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc3.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc4.pdf}
-    \includegraphics[width=0.3\textwidth]{./figures/cov_wisc5.pdf}
+    \includegraphics[width=0.3\textwidth]{cov_2mpz.pdf}
+    \includegraphics[width=0.3\textwidth]{cov_wisc1.pdf}
+    \includegraphics[width=0.3\textwidth]{cov_wisc2.pdf}
+    \includegraphics[width=0.3\textwidth]{cov_wisc3.pdf}
+    \includegraphics[width=0.3\textwidth]{cov_wisc4.pdf}
+    \includegraphics[width=0.3\textwidth]{cov_wisc5.pdf}
     \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
     \label{fig:covs}
   \end{figure*}
@@ -399,7 +399,7 @@
     \subsubsection{Tomographic measurement of the mass bias}\label{ssec:results.fid.1mb}
       \begin{figure}
         \centering
-        \includegraphics[width=0.47\textwidth]{./figures/fiducial_wisc3.pdf}
+        \includegraphics[width=0.47\textwidth]{fiducial_wisc3.pdf}
         \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
         \label{fig:triangle}
       \end{figure}
@@ -423,13 +423,13 @@
       We use the measured power spectra to constrain the free parameters of the model described in Section \ref{sec:theory}, with the main aim of providing an alternative measurement of the mass bias $(1-b)$ as a function of redshift. Figure \ref{fig:triangle} shows an example of the posterior parameter contours for our 5 free parameters, $\{M_{\rm min},M_1,b_H,\rho_{gy},w_z\}$, in the \wisc-3 sample ($z\sim0.23$). As the figure shows, there are strong degeneracies between $M_{\rm min}$, $M_1$ and $w_z$. This is easy to understand, given that all of these parameters affect the overall amplitude of the galaxy auto-correlation: since we do not go to scales that are sufficiently small to fully resolve the 1-halo term and break the degeneracy between $M_{\rm min}$ and $M_1$, which regulate the abundance of centrals and satellites, and therefore the constraint on these parameters mostly comes from the 2-halo amplitude (i.e. the galaxy bias), and the halo shot-noise level. On the other hand, the width of the redshift distribution also has a strong impact on the amplitude of the angular power spectrum at all scales due to projection effects. Since a measurement of the galaxy bias from the galaxy auto-correlation is effectively used to constrain $b_H$ from the galaxy-$y$ cross-correlation, the mass bias also shows some degeneracy with the HOD parameters and $w_z$, albeit at a much milder level. More interestingly, the mass-bias parameter $b_H$ shows a visible degeneracy with $\rho_{gy}$. This is also expected: the effects of $\rho_{gy}$ and $b_H$ on the 1-halo term of the galaxy-$y$ power spectrum are completely degenerate, and thus a free $\rho_{gy}$ ensures that any information obtained on $b_H$ comes entirely from the 2-halo contribution. The corresponding constraints on $1-b_H$ are shown in the bottom panel of Figure \ref{fig:bh} as black circles with error bars. The values shown in the figure and given explicity in column 4 of Table \ref{tab:results} correspond to the peak of the 1-dimensional distribution of $1-b_H$ and to the equal-probability values encompassing a total probability of 0.68. The overall best-fit value of $1-b_H$ is provided in column 3 of the same Table. Columns 6 and 7 of the same table list the reduced $\chi^2$ values for each sample and its associated probability-to-exceed (PTE) respectively. In all cases we find that the model described in Section \ref{sec:theory} is able to describe the data with no evidence for a significant statistical tension. The upper panel of Figure \ref{fig:bh} shows the redshift distributions of the different bins used in this analysis, and can be used to visually assess the level of correlation between the different measurements.
       \begin{figure*}
         \centering
-        \includegraphics[width=0.7\textwidth]{./figures/bhydro.pdf}
+        \includegraphics[width=0.7\textwidth]{bhydro.pdf}
         \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
         \label{fig:bh}
       \end{figure*}
       \begin{figure*}
         \centering
-        \includegraphics[width=0.7\textwidth]{./figures/by.pdf}
+        \includegraphics[width=0.7\textwidth]{by.pdf}
         \caption{Redshift distributions assumed for the Gaussian simulations used in this analysis.}
         \label{fig:by}
       \end{figure*}
@@ -485,9 +485,10 @@
       
       \todo{Other possible points to discuss:
       \begin{itemize}
-       \item Sensitivity to choice of mass function.
-       \item More on photo-$z$ systematics.
-       \item More on the galaxy clustering systematics.
+        \item Study mass dependence by masking SZ sources.
+        \item Sensitivity to choice of mass function.
+        \item More on photo-$z$ systematics.
+        \item More on the galaxy clustering systematics.
       \end{itemize}
       }
 
