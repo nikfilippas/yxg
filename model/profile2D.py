@@ -37,7 +37,9 @@ class Arnaud(object):
 
     def kernel(self, cosmo, a, **kwargs):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
-        prefac = 4.017100792437957e-06  # avoid recomputing every time
+        prefac = 4.017100792437957e-06
+        # avoid recomputing every time
+        # Units of eV * Mpc / cm^3 
         return prefac*a
 
     def profnorm(self, cosmo, a, squeeze=True, **kwargs):
