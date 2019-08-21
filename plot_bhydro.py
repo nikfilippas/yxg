@@ -48,12 +48,17 @@ def get_dndz(fname, width):
     return zd, Nd_new
 
 
-param_yml = ["params_dam_wnarrow.yml",
-             "params_dam_tinker10.yml",
-             "params_dam_wfixed.yml",
-             "params_dam_ynilc.yml",
-#             "params_dam_masked.yml"
-]
+#param_yml = ["params_dam_wnarrow.yml",
+#             "params_dam_tinker10.yml",
+#             "params_dam_wfixed.yml",
+#             "params_dam_ynilc.yml",
+##             "params_dam_masked.yml"
+#]
+
+param_yml = ["params_default.yml",
+             "params_tinker.yml",
+             "params_wfixed.yml",
+             "params_ynilc.yml"]
 
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
@@ -125,7 +130,7 @@ hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
     plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True, offset=i)
 ax.errorbar([0.37],[0.59],yerr=[0.03],fmt='D',c='r',label='Constant fit')
-    
+
 handles, labels = ax.get_legend_handles_labels()
 ax.legend([object]+handles, ["Planck15"]+labels,
           handler_map={object: AnyObjectHandler()},
@@ -139,6 +144,6 @@ ax.legend([object]+handles, ["Planck15"]+labels,
 hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.15],
             ncol=len(sci), fontsize=9.5, frameon=False)
 
-plt.savefig("notes/paper/bhydro.pdf", bbox_inches="tight")
+#plt.savefig("notes/paper/bhydro.pdf", bbox_inches="tight")
 plt.show()
 #os.chdir("images/b_hydro/")

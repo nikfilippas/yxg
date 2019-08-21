@@ -86,5 +86,5 @@ for v in p.get('data_vectors'):
 if len(par) > 0:
     is_jk = str(jk_region) if bool(jk_region) else ""
     fname = p.get_outdir() + "/" + p.get("mcmc")["save_par"] + \
-            "_" + p.get("mcmc")["run_name"] + is_jk
+            "_" + p.get("mcmc")["run_name"] + "_" + is_jk
     np.save(fname, np.array(par))

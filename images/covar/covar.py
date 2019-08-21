@@ -1,5 +1,7 @@
 import os
-#os.chdir("../../")
+import subprocess
+if "covar" in str(subprocess.check_output(["pwd"])):
+    os.chdir("../../")
 import numpy as np
 from likelihood.chanal import chan
 import matplotlib.pyplot as plt
@@ -31,8 +33,8 @@ def covplot(cov, save=None):
         os.chdir("../../")
 
 
-bh = np.vstack([np.load("output_default/b_hydro_jackknife%d.npy" % jk)
-                 for jk in np.arange(1, 461)])
+bh = np.vstack([np.load("output_default/b_hydro_jackknife_%d.npy" % jk)
+                 for jk in np.arange(1, 3)])
 
 bh_cov = (len(bh)-1)*np.cov(bh.T, bias=True)
 np.save("output_default/bhydro_covar.npy", bh_cov)

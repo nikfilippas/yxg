@@ -1,5 +1,7 @@
 import os
-#os.chdir("../../")
+import subprocess
+if "b_hydro" in str(subprocess.check_output(["pwd"])):
+    os.chdir("../../")
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
@@ -54,14 +56,11 @@ param_yml = ["params_default.yml",
              "params_tinker.yml",
              "params_kmax.yml",
              "params_masked.yml"]
-#param_yml = ["params_wfixed.yml",
-#             "params_wnarrow.yml",
-#             "params_wbroad.yml"]
+
 
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
 lbls = ["fiducial", "$y$-NILC", "Tinker10", r"$k_{max}$", "high mass mask"]
-#lbls = ["$w = 1$", r"$w \in [0.8, 1.2]$", r"$w \in [0.2, 2.0]$"]
 colours = ["k", "brown", "darkorange", "orangered", "y"]
 col = [copper(i) for i in np.linspace(0, 1, len(sci))]
 fmts = ["o"]*len(param_yml)

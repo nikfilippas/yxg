@@ -117,9 +117,10 @@ class ParamRun(object):
             str: file prefix.
         """
         fname = self.get_prefix_cls(f1, f2)
-        if jk_region is not None:
+        if bool(jk_region):
             fname += "_jk%d" % jk_region
         fname += ".npz"
+        print(fname)
         return fname
 
     def get_fname_cmcm(self, f1, f2, f3, f4):

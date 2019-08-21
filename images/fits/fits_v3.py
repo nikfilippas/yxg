@@ -1,5 +1,7 @@
 import os
-#os.chdir("../..")
+import subprocess
+if "fits" in str(subprocess.check_output(["pwd"])):
+    os.chdir("../../")
 import numpy as np
 import pyccl as ccl
 from analysis.params import ParamRun

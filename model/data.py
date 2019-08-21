@@ -212,7 +212,6 @@ class DataManager(object):
                 tr2 = [tracers[n] for n in tp2['tracers']]
                 nd2_here = np.sum(m2)  # Number of points for vector 2
                 # Read covariance block
-                if jk_region: v["covar_type"] = "jk"  # jackknives
                 fname_cov, trans = choose_cov_file(p, tr1, tr2,
                                                    v['covar_type'])
                 with np.load(fname_cov) as f:
