@@ -24,7 +24,7 @@ def modgaus(z, nz, w):
 
 def convolve(z, a1, a2):
     """Convolves and normalises two arrays."""
-    nz = np.convolve(a1, a2, "full")[::2]
+    nz = np.correlate(a1, a2, "full")[::2]
     nz /= simps(nz, x=z)
     return nz
 
@@ -72,7 +72,7 @@ plt.figure()
 plt.plot(soff[:-1], woff[:-1], "k", lw=3)
 plt.xlabel("percentage offset in $\sigma$")
 plt.ylabel("percentage offset in $w$")
-#plt.savefig("error_test1.pdf")
+plt.savefig("error_test1.pdf")
 
 plt.figure()
 plt.plot(z, top, "k:", label="$p(z_{photo})$")
@@ -81,4 +81,4 @@ plt.plot(z, nz_fid, "k-", lw=4, label="$p_{fid} = N(z|0, \sigma_{fid})$")
 plt.plot(z, nz[-1], "r-", lw=2, label="$N(z|0, %.1f\sigma_{fid})$" % s_ext)
 plt.plot(z, nz_fit, "b--", lw=1, label="best fit")
 plt.legend()
-#plt.savefig("error_test2.pdf")
+plt.savefig("error_test2.pdf")

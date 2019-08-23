@@ -232,7 +232,7 @@ for s, v in enumerate(p.get("data_vectors")):
             if i == 1:
                 ax1.text(0.45, 1.1, r"$y \times g$", fontsize=15,
                          transform=ax1.transAxes)
-                ax1.legend(loc="lower right", ncol=4, fontsize=8)
+                ax1.legend(loc="lower center", ncol=4, fontsize=8)
 
         if s != len(surveys)-1:
             ax2.get_xaxis().set_visible(False)
