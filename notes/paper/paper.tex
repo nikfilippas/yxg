@@ -359,7 +359,7 @@
       
     \subsubsection{Redshift distribution uncertainties}\label{sssec:methods.syst.photoz}
       For each redshift bin we estimate fiducial redshift distributions using the method described in \cite{2018MNRAS.481.1133P}. In short, a true-redshift distribution is estimated from the distribution of photometric redshifts for a given bin using a model for the conditional photo-$z$ distribution:
-      \begin{equation}
+      \begin{equation}\label{eq:nz_calc}
         p(z)=\int dz_{\rm photo}\,p(z|z_{\rm photo})\,p(z_{\rm photo}),
       \end{equation}
       where the model for $p(z|z_{\rm photo})$ was calibrated using overlapping spectroscopic data. Although the spectroscopic coverage of 2MPZ and \wisc\ is high compared to other photometric redshift surveys, the resulting redshift distributions are not infinitely precise, and therefore we need to account for any uncertainty in them that could affect our measurement.
@@ -368,9 +368,7 @@
       \begin{equation}
         p(z)\propto p_{\rm fid}\left(\bar{z}+\frac{z-\bar{z}}{w_z}\right),
       \end{equation}
-      where the proportionality constant is fixed by making sure that $p(z)$ integrates to unity. We make $w_z$ a free parameter that we marginalize over with a top-hat prior $0.8<w_z<1.2$, which is broader than the actual uncertainty on the distribution widths from photo-$z$ calibration. Introducing $w_z$ as a nuisance parameter widens the error bars on average by $20 \%$.
-      
-      To be precise, for our choice of uniform priors on $w_z$, we account for an uncertainty of $1 \%$ in the uninformed conditional model for $p(z|z_{\rm photo})$. Propagation of this error estimate results to an uncertainty of the same order ($0.9 \%$) in the width parameter, $w_z$. Thus, the margins of the assumed top-hat priors are wide enough to encompass any lack of precision in the number density distribution.
+      where the proportionality constant is fixed by making sure that $p(z)$ integrates to unity. We make $w_z$ a free parameter that we marginalize over with a top-hat prior $0.8<w_z<1.2$. This prior is significantly larger than the actual expected uncertainty in the width of the redshift distributions. To be precise, we estimate that the parameters (e.g. Gaussian mean and variance) of the conditional photo-$z$ distribution $p(z|z_{\rm photo})$ used to calculate the true redshift distributions (Eq. \ref{eq:nz_calc}), are known to the level of $1\%$. When propagated into an uncertainty on the width $w_z$ of $p(z)$, this corresponds to an uncertainty of the same order ($\sim1.6\%$). Thus, the margins of the assumed top-hat priors are wide enough to encompass any lack of precision in the number density distribution.
 
   \subsection{Likelihood}\label{ssec:methods.like}
     \begin{table}
@@ -535,7 +533,7 @@
       \begin{itemize}
         \item Study mass dependence by masking SZ sources. \todo{N: why did we remove this?}
         \item Sensitivity to choice of mass function.
-        \item More on photo-$z$ systematics.
+        \item More on photo-$z$ systematics.  Introducing $w_z$ as a nuisance parameter widens the error bars on average by $20 \%$.
         \item More on the galaxy clustering systematics.
       \end{itemize}
       }
