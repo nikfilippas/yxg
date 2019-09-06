@@ -129,7 +129,7 @@ hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 
 for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
     plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True, offset=i)
-ax.errorbar([0.208],[0.59],yerr=[0.03],fmt='D',c='r',label='Constant fit')
+ax.errorbar([0.208],[0.59],yerr=[0.03],fmt='D',c='r',label='$z$-independent')
 
 handles, labels = ax.get_legend_handles_labels()
 ax.legend([object]+handles, ["Planck15"]+labels,

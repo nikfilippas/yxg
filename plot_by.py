@@ -86,7 +86,7 @@ ax.errorbar(z, 1e3*by[0], 1e3*by[1:],
             fmt="o", c="royalblue", elinewidth=2, label="This work")
 
 ax.errorbar(black[0], black[1], black[2], fmt="ko", elinewidth=2,
-            label="V16")
+            label="V17")
 ax.errorbar(green[0], green[1], green[2], fmt="o", c="mediumseagreen", elinewidth=2,
             label="P19: fiducial $y$ map")
 ax.errorbar(orang[0], orang[1], orang[2], fmt="o", c="orangered", elinewidth=2,
