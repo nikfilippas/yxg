@@ -68,7 +68,7 @@ lbls = ["Fiducial",
         "NILC",
         "tSZ-masked"]
 #lbls = ["$w = 1$", r"$w \in [0.8, 1.2]$", r"$w \in [0.2, 2.0]$"]
-colours = ["k", "brown", "darkorange", "orangered", "y"]
+colours = ["k", "brown", "darkorange", "#009900", "y"]
 col = [copper(i) for i in np.linspace(0, 1, len(sci))]
 fmts = ["o","s","v","^","x","d"]
 
@@ -144,6 +144,6 @@ ax.legend([object]+handles, ["Planck15"]+labels,
 hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.15],
             ncol=len(sci), fontsize=9.5, frameon=False)
 
-#plt.savefig("notes/paper/bhydro.pdf", bbox_inches="tight")
+plt.savefig("notes/paper/bhydro.pdf", bbox_inches="tight")
 plt.show()
 #os.chdir("images/b_hydro/")
