@@ -48,17 +48,12 @@ def get_dndz(fname, width):
     return zd, Nd_new
 
 
-#param_yml = ["params_dam_wnarrow.yml",
-#             "params_dam_tinker10.yml",
-#             "params_dam_wfixed.yml",
-#             "params_dam_ynilc.yml",
-##             "params_dam_masked.yml"
-#]
-
-param_yml = ["params_default.yml",
-             "params_tinker.yml",
-             "params_wfixed.yml",
-             "params_ynilc.yml"]
+param_yml = ["params_dam_wnarrow.yml",
+             "params_dam_tinker10.yml",
+             "params_dam_wfixed.yml",
+             "params_dam_ynilc.yml",
+#             "params_dam_masked.yml"
+]
 
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
@@ -144,6 +139,6 @@ ax.legend([object]+handles, ["Planck15"]+labels,
 hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.15],
             ncol=len(sci), fontsize=9.5, frameon=False)
 
-#plt.savefig("notes/paper/bhydro.pdf", bbox_inches="tight")
+plt.savefig("notes/paper/bhydro.pdf", bbox_inches="tight")
 plt.show()
 #os.chdir("images/b_hydro/")

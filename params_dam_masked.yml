@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: 'output_dam_mask'
+    output_dir: 'output_mask'
 
 jk:
     # Do you want to do jackknives?
