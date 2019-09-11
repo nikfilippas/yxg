@@ -42,7 +42,7 @@ mfr = np.array(mfr)
 cmap = truncate_colormap(cm.Reds, 0.2, 1.0)
 col = [cmap(i) for i in np.linspace(0, 1, len(a))]
 
-fig, ax = plt.subplots(figsize=(9, 7))
+fig, ax = plt.subplots()
 ax.set_xlim(M.min(), M.max())
 ax.axhline(y=1, ls="--", color="k")
 [ax.loglog(M, R, c=c, label="%s" % red) for R, c, red in zip(mfr, col, z)]
@@ -58,8 +58,8 @@ ticks = cbar.get_ticks()
 cbar.ax.invert_yaxis()
 cbar.set_ticks(ticks[::-1])
 
-ax.set_xlabel(r"$M \mathrm{/ M_{\odot}}$", fontsize=17)
-ax.set_ylabel(r"$\xi_{\mathrm{T}08} / \xi_{\mathrm{T}10}$", fontsize=17)
+ax.set_xlabel(r"$M_{500c} \mathrm{/ M_{\odot}}$", fontsize=17)
+ax.set_ylabel(r"$n_{\mathrm{T}08}(M) / n_{\mathrm{T}10}(M)$", fontsize=17)
 ax.tick_params(which="both", labelsize="large")
 
 cbar.set_label("$z$", rotation=0, labelpad=15, fontsize=17)
