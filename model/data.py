@@ -21,7 +21,7 @@ def get_profile(m):
         return Arnaud(name=m['name'])
     elif m['type'] == 'g':
         return HOD(name=m['name'], nz_file=m['dndz'],
-                   ns_indepent=m.get('ns_independent'))
+                   ns_independent=m.get('ns_independent'))
 
 
 class Tracer(object):
