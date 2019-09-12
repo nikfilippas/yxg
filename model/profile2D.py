@@ -189,7 +189,7 @@ class NFW(object):
 
 class HOD(object):
     """Calculates a Halo Occupation Distribution profile quantity of a halo."""
-    def __init__(self, name='HOD', nz_file=None):
+    def __init__(self, name='HOD', nz_file=None, ns_independent=False):
 
         self.Delta = 500  # reference overdensity (Arnaud et al.)
         self.z, nz = np.loadtxt(nz_file, unpack=True)
@@ -197,6 +197,7 @@ class HOD(object):
                             bounds_error=False, fill_value=0)
         self.z_avg = np.average(self.z, weights=nz)
         self.name = name
+        self.ns_independent = ns_independent
 
     def kernel(self, cosmo, a, **kwargs):
         """The galaxy number overdensity window function."""
@@ -249,7 +250,10 @@ class HOD(object):
         Nc = self.n_cent(M, **kwargs)   # centrals
         Ns = self.n_sat(M, **kwargs)    # satellites
 
-        dng = mfunc*Nc*(fc+Ns)  # integrand
+        if self.ns_independent:
+            dng = mfunc*(Nc*fc+Ns)  # integrand
+        else:
+            dng = mfunc*Nc*(fc+Ns)  # integrand
 
         ng = simps(dng, x=np.log10(M))
         return ng.squeeze() if squeeze else ng
@@ -272,5 +276,8 @@ class HOD(object):
         H, _ = NFW().fourier_profiles(cosmo, k, M, a, squeeze=False,
                                       **kwargs)
 
-        F, F2 = Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)
+        if self.ns_independent:
+            F, F2 = (Nc*fc + Ns*H), (2*Nc*fc*Ns*H + (Ns*H)**2)
+        else:
+            F, F2 = Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)
         return (F.squeeze(), F2.squeeze()) if squeeze else F, F2
