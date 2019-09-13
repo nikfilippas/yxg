@@ -26,13 +26,23 @@ class AnyObjectHandler(HandlerBase):
         return [l1, l2]
 
 
+class constantfit(HandlerBase):
+# Adapted from:
+# https://matplotlib.org/users/legend_guide.html#legend-handlers
+    def create_artists(self, legend, orig_handle,
+                       x0, y0, width, height, fontsize, trans):
+        ll = plt.Line2D([x0,y0+width], [0.7*height,0.7*height],
+                        lw=3, linestyle="-", color="limegreen")
+        return ll
+
+
 def plotfunc(ax, zz, dd, inverted=False,
              fmt=None, color=None, label=None, offset=0):
     """Plots b_hydro data with error bars."""
     yerr = dd[1:] if not inverted else np.flip(dd[1:], axis=0)
     bh = dd[0] if not inverted else 1-dd[0]
 
-    ax.errorbar(zz+0.004*offset, bh, yerr=yerr, fmt=fmt, c=color, label=label)
+    ax.errorbar(zz+0.004*offset, bh, yerr=yerr, fmt=fmt, ms=7, c=color, label=label)
 
 
 
@@ -52,6 +62,7 @@ param_yml = ["params_dam_wnarrow.yml",
              "params_dam_tinker10.yml",
              "params_dam_wfixed.yml",
              "params_dam_ynilc.yml",
+             "params_dam_wnarrow_ns.yml",
 #             "params_dam_masked.yml"
 ]
 
@@ -61,11 +72,12 @@ lbls = ["Fiducial",
         "Tinker 2010",
         "Fixed $w_z$",
         "NILC",
-        "tSZ-masked"]
-#lbls = ["$w = 1$", r"$w \in [0.8, 1.2]$", r"$w \in [0.2, 2.0]$"]
-colours = ["k", "brown", "darkorange", "#009900", "y"]
+        r"$\langle N_s \rangle$ independent"
+#        "tSZ-masked"
+]
+colours = ["k", "brown", "r", "orange", "y"]
 col = [copper(i) for i in np.linspace(0, 1, len(sci))]
-fmts = ["o","s","v","^","x","d"]
+fmts = ["o","s","v","^","*","d"]
 
 
 
@@ -107,24 +119,32 @@ ax.tick_params(labelsize="large")
 hist.set_ylim(0, np.ceil(np.max(dN)))
 hist.tick_params(labelsize="large")
 
-ax.axhline(0.58, ls=":", color="grey")
-ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
 ax.axhline(0.72, ls=":", color="cadetblue")
 ax.axhspan(0.72-0.10, 0.72+0.10, color="cadetblue", alpha=0.3)
+ax.axhline(0.58, ls=":", color="grey")
+ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
+# OUR DATA
+#ax.axhline(0.59, ls=":", color="limegreen")
+#ax.axhspan(0.59-0.03, 0.59+0.03, color="limegreen", alpha=0.15, hatch="/")
 
-props = dict(boxstyle="round", facecolor="w", alpha=0.2)
+props = dict(boxstyle="round", facecolor="w", alpha=0.5)
 ax.text(0.005, 0.595, "CMB + N.C.",
         fontsize=12, fontweight="bold", bbox=props)
 ax.text(0.005, 0.735, "CMB $\\kappa$ + N.C.",
         fontsize=12, fontweight="bold", bbox=props)
+#ax.text(0.342, 0.604, "$z$-independent",
+#        fontsize=12, fontweight="bold",
+#        bbox=dict(boxstyle="round", facecolor="g", alpha=0.3))
 
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)
 hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 
 for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
-    plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True, offset=i)
-ax.errorbar([0.208],[0.59],yerr=[0.03],fmt='D',c='r',label='$z$-independent')
+    plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True,
+             offset=i)
+ax.errorbar([0.208], [0.59], yerr=[0.03], fmt='D', c='limegreen',
+            label='$z$-independent')
 
 handles, labels = ax.get_legend_handles_labels()
 ax.legend([object]+handles, ["Planck15"]+labels,

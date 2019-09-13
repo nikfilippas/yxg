@@ -40,6 +40,8 @@ maps:
     - name: "2mpz"
       # 'g' for galaxies, 'y' for tSZ
       type: "g"
+      # Do galaxies with satellites necessarily contain a central?
+      ns_independent: false
       # Path to map
       map: "data/maps/2mpz_05_01_512.fits"
       # Name of mask (should correspond to one of the keys in the previous section)
@@ -67,6 +69,7 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc1"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin1.txt"
@@ -89,6 +92,7 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc2"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin2.txt"
@@ -111,6 +115,7 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc3"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin3.txt"
@@ -133,6 +138,7 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc4"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin4.txt"
@@ -155,6 +161,7 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc5"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin5.txt"
