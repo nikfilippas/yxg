@@ -59,25 +59,25 @@ def get_dndz(fname, width):
 
 
 param_yml = ["params_dam_wnarrow.yml",
-             "params_dam_tinker10.yml",
-             "params_dam_wfixed.yml",
              "params_dam_ynilc.yml",
-             "params_dam_wnarrow_ns.yml",
+             "params_dam_wfixed.yml",
+             "params_dam_tinker10.yml",
+#             "params_dam_wnarrow_ns.yml",
 #             "params_dam_masked.yml"
 ]
 
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
 lbls = ["Fiducial",
-        "Tinker 2010",
-        "Fixed $w_z$",
         "NILC",
+        "Fixed $w_z$",
+        "Tinker 2010",
         r"$\langle N_s \rangle$ independent"
-#        "tSZ-masked"
+        "tSZ-masked"
 ]
-colours = ["k", "brown", "r", "orange", "y"]
+colours = ["k", "grey", "r", "brown", "orange"]
 col = [copper(i) for i in np.linspace(0, 1, len(sci))]
-fmts = ["o","s","v","^","*","d"]
+fmts = ["o","o", "v","s","*","d"]
 
 
 
@@ -124,8 +124,8 @@ ax.axhspan(0.72-0.10, 0.72+0.10, color="cadetblue", alpha=0.3)
 ax.axhline(0.58, ls=":", color="grey")
 ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
 # OUR DATA
-#ax.axhline(0.59, ls=":", color="limegreen")
-#ax.axhspan(0.59-0.03, 0.59+0.03, color="limegreen", alpha=0.15, hatch="/")
+ax.axhline(0.59, ls=":", color="orange")
+ax.axhspan(0.59-0.03, 0.59+0.03, color="orange", alpha=0.15, fill=False, hatch="xxx")
 
 props = dict(boxstyle="round", facecolor="w", alpha=0.5)
 ax.text(0.005, 0.595, "CMB + N.C.",
@@ -143,7 +143,7 @@ hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
     plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True,
              offset=i)
-ax.errorbar([0.208], [0.59], yerr=[0.03], fmt='D', c='limegreen',
+ax.errorbar([0.208], [0.59], yerr=[0.03], fmt='D', c='orange',
             label='$z$-independent')
 
 handles, labels = ax.get_legend_handles_labels()
