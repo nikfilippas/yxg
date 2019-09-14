@@ -48,7 +48,7 @@
 \def\planck{{\it Planck\/}}
 \def\citejap#1{\citeauthor{#1}\ \citeyear{#1}}
 
-\title[Tomographic measurement of the intergalactic gas pressure through galaxy-tSZ cross-correlations]{Wide-angle tomographic measurement of the intergalactic gas pressure through galaxy-tSZ cross-correlations}
+\title[Tomographic measurement of the intergalactic gas pressure through galaxy-tSZ cross-correlations]{Wide-angle tomographic measurement of the intergalactic gas pressure through galaxy-tSZ Fcross-correlations}
 \author[David Alonso]{Nick Koukoufilippas$^1$, David Alonso$^1$, Maciej Bilicki$^2$, John A. Peacock$^3$\\
                       $^{1}$Department of Physics, University of Oxford, Keble Road, Oxford, OX1 3RH, UK\\
                       $^{2}$Center for Theoretical Physics, Polish Academy of Sciences, al. Lotnik\'ow 32/46, 02-668, Warsaw, Poland\\
@@ -170,11 +170,13 @@
       \begin{equation}
         \langle N_c(M)\rangle=\frac{1}{2}\left[1+{\rm erf}\left(\frac{\log(M/M_{\rm min})}{\sigma_{\rm lnM}}\right)\right].
       \end{equation}
-      We then assume that satellites can only be formed if a halo has a central and has a mass larger than some threshold $M_0$. In that case, the average number of satellites follows a power law of the form:
+      In our fiducial scenario we assume that satellites can only be formed if a halo has a central and has a mass larger than some threshold $M_0$. In that case, the average number of satellites follows a power law of the form:
       \begin{equation}
         \langle N_s(M)\rangle=N_c(M)\,\Theta(M-M_0)\,\left(\frac{M-M_0}{M_1'}\right)^{\alpha_s}.
       \end{equation}
       For simplicity, we fix $M_0$ to $M_{\rm min}$, $\sigma_{\rm lnM}=0.15$ and $\alpha_s$=1, as in \cite{2018MNRAS.473.4318A}, leaving only two free parameters: $M_{\rm min}$ and $M_1'$.
+      
+      Coupling $M_0$ and $M_{\rm min}$ allows for all haloes containing a central to also contain satellites, and conversely, for all haloes containing satellites to necessarily contain a central. This assumption breaks down in cases such as mergers, where centrals have not been established yet. Nevertheless, we have confirmed that decoupling $M_0$ and $M_{\rm min}$, and allowing haloes to contain solely satellites, does not yield any statistically significant offset from our fiducial scenario. We have also tested the effect of freeing-up $\sigma_{\rm lnM}$, and confirmed that the measurements we obtain are almost identical to our fiducial results.
       
       Besides their mean values, we also need to specify the statistics of $N_c$ and $N_s$. Following the standard practice \citep{2013MNRAS.430..725V}, we assume $N_c$ to have a binomial distribution with probability $p=\langle N_c\rangle$, and $N_s$ to be Poisson-distributed.
 
