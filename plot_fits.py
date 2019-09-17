@@ -183,6 +183,7 @@ for s, v in enumerate(p.get("data_vectors")):
         ax1.set_xlim(lsg[i][0]/1.1, lsg[i][-1]*1.1)
         ax2.set_xlim(ax1.get_xlim())
         ax2.set_ylim(res[mask].min()-1, res[mask].max()+1)
+        ax2.set_ylim(-2.7, 2.7)        
 
         # flip one data point start & end to draw line
         if not mask[0]: mask[np.where(mask == True)[0][0]] = False
@@ -219,7 +220,7 @@ for s, v in enumerate(p.get("data_vectors")):
         ax2.axvspan(lmax, ax1.get_xlim()[1], color="grey", alpha=0.2)
 
         if i == 0:
-            ax1.text(0.02, 0.06, sci[s]+"\n"+"$\\chi^2/N_{d}=%.2lf/%d$" %
+            ax1.text(0.02, 0.06, sci[s]+"\n"+"$\\chi^2/N_{\\rm{d}}=%.2lf/%d$" %
                      (chi2, dof), transform=ax1.transAxes)
 
             ax1.set_ylabel('$C_\\ell$', fontsize=15)
@@ -232,7 +233,8 @@ for s, v in enumerate(p.get("data_vectors")):
             if i == 1:
                 ax1.text(0.45, 1.1, r"$y \times g$", fontsize=15,
                          transform=ax1.transAxes)
-                ax1.legend(loc="lower center", ncol=4, fontsize=8)
+                ax1.legend(loc="lower center", ncol=4, fontsize=8,
+                           borderaxespad=0.1, columnspacing=1.9)
 
         if s != len(surveys)-1:
             ax2.get_xaxis().set_visible(False)
