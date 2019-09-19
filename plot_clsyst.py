@@ -20,11 +20,6 @@ dgg_wodpj=np.load("output_dam_nodpj/cls_"+sample+"_"+sample+".npz")
 cov_gg=np.load("output_dam/cov_comb_m_"+sample+"_"+sample+
                "_"+sample+"_"+sample+".npz")['cov']
 ls=dgg_wdpj['ls']
-plate_template=window_plates(ls,5.)
-ic=np.linalg.inv(cov_gg)
-ict=np.dot(ic,plate_template)
-sigma=1./np.sqrt(np.dot(plate_template,ict))
-template_amp = np.dot(dgg_wdpj['cls'],ict) * sigma**2
 
 fname_params = "params_dam_wnarrow.yml"
 p = ParamRun(fname_params)
@@ -66,16 +61,28 @@ chi = ccl.comoving_radial_distance(cosmo, 1/(1+zmean))
 kmax = p.get("mcmc")["kmax"]
 lmax = kmax*chi - 0.5
 
+plate_template=window_plates(ls,5.)
+plate_template_hi=window_plates(l,5.)
+ic=np.linalg.inv(cov_gg)
+ict=np.dot(ic,plate_template)
+sigma=1./np.sqrt(np.dot(plate_template,ict))
+#template_amp = np.dot(dgg_wdpj['cls'],ict) * sigma**2
+#print(template_amp)
+template_amp = np.dot(dgg_wdpj['cls']-dgg_wdpj['nls']-clth,ict) * sigma**2
+print(template_amp)
+#print((dgg_wdpj['cls']-dgg_wdpj['nls']).shape,clthp.shape,clth.shape)
 plt.errorbar(ls,
              dgg_wdpj['cls']-dgg_wdpj['nls'],
              yerr=np.sqrt(np.diag(cov_gg)),fmt='r.',label='w. deprojection')
 plt.errorbar(ls,
              dgg_wodpj['cls']-dgg_wodpj['nls'],
              yerr=np.sqrt(np.diag(cov_gg)),fmt='b.',label='w.o. deprojection')
-plt.plot(ls,
-         template_amp*plate_template,
-         '--',c='#666666',label='SuperCOSMOS plates')
-plt.plot(l,clthp,'k-',label='Best-fit prediction')
+plt.plot(l,
+         template_amp*plate_template_hi,
+         'k-.',label='SC plates')
+plt.plot(l,clthp,'k--',label='Clustering-only')
+plt.plot(l,clthp+template_amp*plate_template_hi,'k-',label='Clustering + SC plates')
+
 plt.loglog()
 plt.ylim([5E-7,5E-4])
 plt.xlim([5.7,1300])
