@@ -3,6 +3,8 @@ sys.path.append("../../")
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
+from scipy.stats import gaussian_kde
+from scipy.optimize import minimize_scalar, root_scalar
 from analysis.params import ParamRun
 from model.data import DataManager
 from likelihood.like import Likelihood
@@ -12,93 +14,79 @@ from model.power_spectrum import HalomodCorrection, hm_bias
 from model.utils import selection_planck_erf, selection_planck_tophat
 
 
-def halmodcor(p, cosmo):
-    # Include halo model correction if needed
-    if p.get('mcmc').get('hm_correct'):
-        hm_correction = HalomodCorrection(cosmo)
-    else:
-        hm_correction = None
-    return hm_correction
 
-def selfunc(p):
-    # Include selection function if needed
-    sel = p.get('mcmc').get('selection_function')
-    if sel is not None:
-        if sel == 'erf':
-            sel = selection_planck_erf
-        elif sel == 'tophat':
-            sel = selection_planck_tophat
-        elif sel == 'none':
-            sel = None
-    return sel
+def vpercentile(chain):
+    """Best fit and errors using manual watershed method."""
+    percentile = 68
+    pdf, x = np.histogram(chain, bins=100, density=True)
+    x = (x[:-1] + x[1:])/2
 
-
-def get_dndz(fname, width):
-    """Get the modified galaxy number counts."""
-    zd, Nd = np.loadtxt(fname, unpack=True)
-    Nd /= simps(Nd, x=zd)
-    zavg = np.average(zd, weights=Nd)
-    nzf = interp1d(zd, Nd, kind="cubic", bounds_error=False, fill_value=0)
-
-    Nd_new = nzf(zavg + (1/width)*(zd-zavg))
-    return zd, Nd_new
-
-
-def vpercentile(chain, percentile=68, bins=100, eps=0.005):
-    """Finds the parameter errors using a Markov chain."""
-    pdf, x = np.histogram(chain, bins, density=True)
-
-    cut = pdf.max()*np.flip(np.arange(eps, 1, eps))
+    par_bf = x[np.argmax(pdf)]
+    eps = 0.005
+    cut = pdf.max()*np.arange(1-eps, 0, -eps)
     for cc in cut:
 
         bb = np.where(pdf-cc > 0)[0]
-        if bb.size < 2: continue
+        if bb.size < 2:
+            continue
         par_min, par_max = x[bb[0]], x[bb[-1]]
         N_enclosed = (par_min < chain) & (chain < par_max)
         perc = 100*N_enclosed.sum()/chain.size
-        if perc > percentile: break
+        if perc > percentile:
+            break
 
-    return (par_min, par_max)
+    return par_bf, par_min, par_max
 
 
-def sampler2kwargs(sam, lik, diff=False, error_type=None):
-    """Builds kwargs given a sampler."""
+def gauss_kde(chain):
+    """Best fit and erros using Gaussian-KDE."""
+    def get_prob(a,b):
+        xr=np.linspace(a, b, 128)
+        return simps(d(xr), x=xr)
 
-    if error_type == "probability":
-        sam.update_p0(sam.chain[np.argmax(sam.probs)])
-        P_cut = np.percentile(sam.probs, 68)
-        chain_cut = sam.chain[sam.probs > P_cut]
-        vmin = np.min(chain_cut, axis=0)
-        vmax = np.max(chain_cut, axis=0)
-        if diff:
-            Q = np.column_stack((sam.p0, sam.p0-vmin, vmax-sam.p0)).T
-        else:
-            Q = np.column_stack((sam.p0, vmin, vmax)).T
-    elif error_type == "hpercentile":
-        Q = [np.percentile(par, [50, 16, 84]) for par in sam.chain.T]
-        Q = np.vstack(Q).T
-        if diff:
-            Q[1] = Q[0] - Q[1]
-            Q[2] = Q[2] - Q[0]
-    elif error_type == "vpercentile":
-        Q = np.vstack([vpercentile(chain) for chain in sam.chain.T]).T
-        Q = np.vstack((sam.p0, Q))
-        # fix maxima/minima
+    def cutfunc(pthr):
+        r_lo = root_scalar(limfunc, args=(pthr), bracket=(x_min,x_bf)).root
+        r_hi = root_scalar(limfunc, args=(pthr), bracket=(x_bf,x_max)).root
+        pr = get_prob(r_lo, r_hi)
+        return pr-0.68
+
+    minfunc = lambda x: -d(x)
+    limfunc = lambda x, thr: d(x)[0]-thr
+
+    x_min = np.amin(chain)
+    x_max = np.amax(chain)
+    d = gaussian_kde(chain)
+    x_bf = minimize_scalar(minfunc, bracket=[x_min, x_max]).x[0]
+    p_bf = d(x_bf)[0]
+    p_thr = root_scalar(cutfunc, bracket=(0.05*p_bf,0.95*p_bf)).root
+    x_lo = root_scalar(limfunc, args=(p_thr), bracket=(x_min,x_bf)).root
+    x_hi = root_scalar(limfunc, args=(p_thr), bracket=(x_bf,x_max)).root
+
+    return x_bf, x_lo, x_hi
+
+
+def get_summary_numbers(pars, chains, diff=True):
+    """Builds a best-fit dictionary, given a chain dictionary."""
+    def diff_func(Q):  # (-/+) instead of (vmin, vmax)
+        Q[1] = Q[0] - Q[1]
+        Q[2] = Q[2] - Q[0]
+        return Q
+
+    try:
+        Q = np.vstack([gauss_kde(chains[par]) for par in pars]).T
+    except ValueError as err:
+        print(err, "\nApproximating chain elements as delta-functions.")
+        Q = np.vstack([vpercentile(chains[par]) for par in pars]).T
+        # force data point to error boundary if outside
         Q[1] = np.min([Q[0], Q[1]], axis=0)
         Q[2] = np.max([Q[0], Q[2]], axis=0)
-        if diff:
-            Q[1] = Q[0] - Q[1]
-            Q[2] = Q[2] - Q[0]
-    else:
-        raise ValueError("Provide an error type!")
 
-    kwargs = lik.build_kwargs(Q.T)
-
-    return kwargs
+    Q = Q if not diff else diff_func(Q)
+    Q = dict.fromkeys(pars, Q.T)
+    return Q
 
 
-def chan(fname_params, diff=False, error_type=None, b_hydro=None,
-         chains=True, by_subsample=100):
+class chan(object):
     """
     Given a parameter file, looks up corresponding sampler and calculates
     best-fit parameters, and min & max values.
@@ -108,75 +96,181 @@ def chan(fname_params, diff=False, error_type=None, b_hydro=None,
         fname_params (str): Name of parameter file.
         diff (bool): If True, return differences `vv-vmin`, `vmax-vv`.
                      If False, return min and max values.
-        error_type (str): How to estimate errors:
-                        - `probability`: 68% of highest probability samples
-                        - `hpercentile`: 68% using 16-84 percentiles
-                        - `vpercentile`: 68% using watershed method
-        b_hydro (float): Custom `b_hydro` value. If `None`, use `p0`.
-        chains (bool): Whether to return chains.
+        pars (str): Which parameters to output.
+        **specargs: Special keyword-arguments used in conjunction with
+                    user-defined parameters to output.
 
     Returns:
-        params (dict): Dictionary of values. "name" : [50, 16, 84] probability-
-                       wise percentiles.
+        params (dict): Dictionary of values. "name" : [50, -sigma, +sigma]
+                       probability-wise percentiles.
         chi2, dof (float): Chi-squared of best-fit and degrees of freedom.
         chains: The chains of the fitted parameters.
     """
-    def th(pars):
-        return get_theory(p, d, cosmo, hm_correction=hm_correction,
-                          selection=sel, **pars)
+    def __init__(self, fname_params):
+        self.p = ParamRun(fname_params)
+        self.cosmo = self.p.get_cosmo()
+        self.sel = self._selfunc(self.p)
+        self.hm_correction = self._halmodcor(self.p, self.cosmo)
 
-    p = ParamRun(fname_params)
-    cosmo = p.get_cosmo()
-    sel = selfunc(p)
-    hm_correction = halmodcor(p, cosmo)
 
-    params, chi2, dof, bf = [[] for i in range(4)]
-    chains = [[],[]]
-    for s, v in enumerate(p.get("data_vectors")):
-
-        # Construct data vector and covariance
-        d = DataManager(p, v, cosmo, all_data=False)
-        lik = Likelihood(p.get('params'), d.data_vector, d.covar, th, template=d.templates)
-        sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
-                      p.get_sampler_prefix(v['name']), p.get('mcmc'))
-
-        # Read chains and best-fit
-        sam.get_chain()
-        sam.update_p0(sam.chain[np.argmax(sam.probs)])
-
-        kwargs = sampler2kwargs(sam, lik, diff=diff, error_type=error_type)
-
-        # calculate b_y
-        w = kwargs["width"]
-        w = w if type(w) is float else w[0]  # for fixed w
-        zz, NN = get_dndz(d.tracers[0][0].dndz, w)
-        zmean = np.average(zz, weights=NN)
-        sigz = np.sqrt(np.sum(NN * (zz - zmean)**2) / np.sum(NN))
-        zarr = np.linspace(zmean - sigz, zmean + sigz, 10)
-
-        # p0 or user-input b_hydro
-        if b_hydro is None:
-            bys = np.mean(np.array([hm_bias(cosmo, 1/(1 + zarr),
-                                            d.tracers[1][1].profile,
-                                            **(lik.build_kwargs(p0)))
-                                    for p0 in sam.chain[::by_subsample]]),axis=1)
-            bymin, by, bymax = np.percentile(bys, [16, 50, 84])
-            if diff: bymin=by-bymin; bymax=bymax-by
-            kwargs["by"] = [by, bymin, bymax]
+    def _halmodcor(self, p, cosmo):
+        # Include halo model correction if needed
+        if p.get('mcmc').get('hm_correct'):
+            hm_correction = HalomodCorrection(cosmo)
         else:
-            bys = np.array([hm_bias(cosmo, 1/(1 + zarr),
-                            d.tracers[1][1].profile,
-                            **{"b_hydro": bh}) for bh in b_hydro[:, s]])
-            kwargs["by"] = [by.mean() for by in bys]
+            hm_correction = None
+        return hm_correction
 
-        kwargs["z"] = zmean
 
-        params.append(kwargs)
-        chi2.append(lik.chi2(sam.p0))
-        dof.append(len(lik.dv))
-        bf.append(sam.p0)
-        if chains:
-            chains[0].append(sam.chain)
-            chains[1].append(bys.flatten())
+    def _selfunc(self, p):
+        # Include selection function if needed
+        sel = p.get('mcmc').get('selection_function')
+        if sel is not None:
+            if sel == 'erf':
+                sel = selection_planck_erf
+            elif sel == 'tophat':
+                sel = selection_planck_tophat
+            elif sel == 'none':
+                sel = None
+        return sel
 
-    return (params, (chi2, dof, bf), chains) if chains else (params, (chi2, dof))
+
+    def _get_dndz(self, fname, width):
+        """Get the modified galaxy number counts."""
+        zd, Nd = np.loadtxt(fname, unpack=True)
+        Nd /= simps(Nd, x=zd)
+        zavg = np.average(zd, weights=Nd)
+        nzf = interp1d(zd, Nd, kind="cubic", bounds_error=False, fill_value=0)
+
+        Nd_new = nzf(zavg + (1/width)*(zd-zavg))
+        return zd, Nd_new
+
+
+    def _th(self, pars):
+        return get_theory(self.p, self.d, self.cosmo,
+                          hm_correction=self.hm_correction,
+                          selection=self.sel, **pars)
+
+
+    def get_chains(self, pars, **specargs):
+        """Returns a dictionary containing the chains of `pars`. """
+        if type(pars) == str: pars = [pars]
+
+        if "by" in pars:
+            # skip every (for computationally expensive hm_bias)
+            by_skip = specargs.get("reduce_by_factor")
+            if by_skip is None:
+                print("'reduce_by_factor' not given. Defaulting to 100.")
+                by_skip = 100
+
+        for s, v in enumerate(self.p.get("data_vectors")):
+
+            d = DataManager(self.p, v, self.cosmo, all_data=False)
+            self.d = d
+            lik = Likelihood(self.p.get('params'),
+                             d.data_vector, d.covar,
+                             self._th, template=d.templates)
+            sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
+                          self.p.get_sampler_prefix(v['name']),
+                          self.p.get('mcmc'))
+
+            sam.get_chain()
+            chains = lik.build_kwargs(sam.chain.T)
+
+            sam.update_p0(sam.chain[np.argmax(sam.probs)])
+            kwargs = lik.build_kwargs(sam.p0)
+            w = kwargs["width"]
+            zz, NN = self._get_dndz(d.tracers[0][0].dndz, w)
+            zmean = np.average(zz, weights=NN)
+            chains["z"] = zmean
+
+
+            if "probs" in pars:
+                chains["probs"] = sam.probs
+
+            if "by" or "bg" in pars:
+                sigz = np.sqrt(np.sum(NN * (zz - zmean)**2) / np.sum(NN))
+                zarr = np.linspace(zmean-sigz, zmean+sigz, 10)
+                if "by" in pars:
+                    bys = np.mean(np.array([hm_bias(self.cosmo, 1/(1 + zarr),
+                                                    d.tracers[1][1].profile,
+                                                    **(lik.build_kwargs(p0)))
+                                    for p0 in sam.chain[::by_skip]]), axis=1)
+                    chains["by"] = bys
+                if "bg" in pars:
+                    bgs = np.mean(np.array([hm_bias(self.cosmo, 1/(1 + zarr),
+                                                    d.tracers[0][1].profile,
+                                                    **(lik.build_kwargs(p0)))
+                                    for p0 in sam.chain[::by_skip]]), axis=1)
+                    chains["bg"] = bgs
+
+            # Construct tomographic dictionary
+            if s == 0:
+                keys = ["z"] + pars
+                CHAINS = {k: chains[k] for k in keys}
+            else:
+                for k in keys:
+                    CHAINS[k] = np.vstack((CHAINS[k], chains[k]))
+
+        return CHAINS
+
+
+    def get_best_fit(self, pars, diff=True, **specargs):
+        """Returns a dictionary containing the best-fit values & errors."""
+        if type(pars) == str: pars = [pars]
+
+        CHAINS = self.get_chains(pars, **specargs)
+
+        for s, _ in enumerate(CHAINS["z"]):  # loop over all bins
+            print("Calculating best-fit for z-bin %d/%d..." %
+                  (s+1, len(CHAINS["z"])))
+            chains = {k: CHAINS[k][s] for k in CHAINS.keys() if k != "z"}
+            bf = get_summary_numbers(pars, chains, diff=diff)
+
+            if s == 0:
+                BEST_FIT = bf
+                BEST_FIT["z"] = CHAINS["z"]
+            else:
+                for k in pars:
+                    BEST_FIT[k] = np.vstack((BEST_FIT[k], bf[k]))
+
+        return BEST_FIT
+
+
+    def get_overall_best_fit(self, pars, **specargs):
+        """Returns the overall best-fit, the chi-square and the N.d.o.f."""
+        if type(pars) == str: pars = [pars]
+
+        for s, v in enumerate(self.p.get("data_vectors")):
+
+            d = DataManager(self.p, v, self.cosmo, all_data=False)
+            self.d = d
+            lik = Likelihood(self.p.get('params'),
+                             d.data_vector, d.covar,
+                             self._th, template=d.templates)
+            sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
+                          self.p.get_sampler_prefix(v['name']),
+                          self.p.get('mcmc'))
+
+            sam.get_chain()
+            sam.update_p0(sam.chain[np.argmax(sam.probs)])
+            kwargs = lik.build_kwargs(sam.p0)
+
+            w = kwargs["width"]
+            zz, NN = self._get_dndz(d.tracers[0][0].dndz, w)
+            zmean = np.average(zz, weights=NN)
+            kwargs["z"] = zmean
+            kwargs["chi2"] = lik.chi2(sam.p0)
+            all_pars = self.p.p.get("params")
+            dof = np.sum([param["vary"] for param in all_pars if "vary" in param])
+            kwargs["dof"] = len(lik.dv) - dof
+
+            if s == 0:
+                keys = ["z", "chi2", "dof"] + pars
+                OV_BF = {k: kwargs[k] for k in keys}
+            else:
+                for k in keys:
+                    OV_BF[k] = np.vstack((OV_BF[k], kwargs[k]))
+
+        return OV_BF
+
