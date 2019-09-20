@@ -18,7 +18,7 @@ This repository contains the analysis pipeline used in https://arxiv.org/abs/190
 - `plot_stuff.py` contains a few plotting routines.
 
 ## Theory notes
-Theory notes can be found in `notes`
+Theory notes can be found in `notes`, where you can also find the `.tex` source of the paper.
 
 ## Credit
 We ask that you cite https://arxiv.org/abs/1909.09102 if you use this pipeline for any of your work.
