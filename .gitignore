@@ -6,6 +6,7 @@ images/fits/legacy/
 other/
 
 # File extensions
+out*/*.h5
 out*/*.npy
 !out*/b_hydro*.npy
 *.npz
