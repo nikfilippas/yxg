@@ -45,7 +45,6 @@ def plotfunc(ax, zz, dd, inverted=False,
     ax.errorbar(zz+0.004*offset, bh, yerr=yerr, fmt=fmt, ms=7, c=color, label=label)
 
 
-
 def get_dndz(fname, width):
     """Get the modified galaxy number counts."""
     zd, Nd = np.loadtxt(fname, unpack=True)
@@ -82,29 +81,32 @@ fmts = ["o","o", "v","s","*","d"]
 
 
 p = ParamRun(param_yml[0])
-temp = [chan(paryml, diff=True, error_type="hpercentile", chains=False, b_hydro=0.5*np.ones([1,6]))
-        for paryml in param_yml]
-pars = [t[0] for t in temp]
-data = np.array([[p["b_hydro"] for p in par] for par in pars])
-data = [d.T for d in data]
-data = [[[0.21, 0.62, 0.62, 0.64, 0.58, 0.61],
-         [0.05, 0.08, 0.07, 0.08, 0.07, 0.07],
-         [0.31, 0.14, 0.10, 0.07, 0.07, 0.09]],
+#temp = [chan(paryml, diff=True, error_type="hpercentile", chains=False, b_hydro=0.5*np.ones([1,6]))
+#        for paryml in param_yml]
+#pars = [t[0] for t in temp]
+#data = np.array([[p["b_hydro"] for p in par] for par in pars])
+#data = [d.T for d in data]
+
+BF = [chan(fname).get_best_fit("b_hydro") for fname in param_yml]
 
 
 
+
+widths = chan(param_yml[0]).get_best_fit("width")
+widths = np.hstack((widths["width"][:, 0]))
 dz, dN = [[] for i in range(2)]
 i = 0
 for g in p.get("maps"):
     if g["type"] == "g":
-        w = pars[0][i]["width"]  # [default][z-bins]["width"]
-        w = w if type(w) is float else w[0]  # for fixed w
+        w = widths[i]
+        w = w if type(w) is np.float64 else w[0]  # for fixed w
         zz, NN = get_dndz(g["dndz"], w)
         dz.append(zz)
         dN.append(NN)
         i += 1  # g-counter
 
-z = np.array([np.average(zz, weights=NN) for zz, NN in zip(dz, dN)])
+z = np.hstack((BF[0]["z"]))
+#z = np.array([np.average(zz, weights=NN) for zz, NN in zip(dz, dN)])  # (eqv)
 
 # find where probability of next bin > probability of previous bin,
 # past the mode of the previous bin
@@ -144,9 +146,9 @@ ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel("$1-b_H$", fontsize=17)
 hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 
-for i, (dd, cc, fmt, lbl) in enumerate(zip(data, colours, fmts, lbls)):
-    plotfunc(ax, z, dd, fmt=fmt, color=cc, label=lbl, inverted=True,
-             offset=i)
+for i, (dd, cc, fmt, lbl) in enumerate(zip(BF, colours, fmts, lbls)):
+    plotfunc(ax, z, dd["b_hydro"].T, fmt=fmt, color=cc, label=lbl,
+             inverted=True, offset=i)
 ax.errorbar([0.208], [0.59], yerr=[0.03], fmt='D', c='orange',
             label='$z$-independent')
 
