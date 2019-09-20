@@ -3,7 +3,7 @@ sys.path.append("../../")
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, chi2
 from scipy.optimize import minimize_scalar, root_scalar
 from analysis.params import ParamRun
 from model.data import DataManager
@@ -264,9 +264,10 @@ class chan(object):
             all_pars = self.p.p.get("params")
             dof = np.sum([param["vary"] for param in all_pars if "vary" in param])
             kwargs["dof"] = len(lik.dv) - dof
+            kwargs["PTE"] = 1 - chi2.cdf(kwargs["chi2"], kwargs["dof"])
 
             if s == 0:
-                keys = ["z", "chi2", "dof"] + pars
+                keys = ["z", "chi2", "dof", "PTE"] + pars
                 OV_BF = {k: kwargs[k] for k in keys}
             else:
                 for k in keys:
