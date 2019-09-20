@@ -12,3 +12,6 @@ out*/*.npy
 *.npz
 *.mcm
 *.cmcm
+
+# Files
+notes/paper/paper.pdf
