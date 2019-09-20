@@ -1,5 +1,7 @@
 import os
-#os.chdir("../..")
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import numpy as np
 import pyccl as ccl
 from analysis.params import ParamRun
@@ -183,7 +185,7 @@ for s, v in enumerate(p.get("data_vectors")):
         ax1.set_xlim(lsg[i][0]/1.1, lsg[i][-1]*1.1)
         ax2.set_xlim(ax1.get_xlim())
         ax2.set_ylim(res[mask].min()-1, res[mask].max()+1)
-        ax2.set_ylim(-2.7, 2.7)        
+        ax2.set_ylim(-2.7, 2.7)
 
         # flip one data point start & end to draw line
         if not mask[0]: mask[np.where(mask == True)[0][0]] = False

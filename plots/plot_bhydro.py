@@ -1,5 +1,7 @@
 import os
-#os.chdir("../../")
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d

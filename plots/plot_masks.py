@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -17,5 +21,5 @@ plt.savefig('notes/paper/mask_g.pdf',bbox_inches='tight')
 hp.mollview(msk_y,cbar=False,title='')
 #hp.mollview(msk_y+msk_y_m,cbar=False,title='')
 hp.graticule()
-plt.savefig('notes/paper/mask_y.pdf',bbox_inches='tight')
+#plt.savefig('notes/paper/mask_y.pdf',bbox_inches='tight')
 plt.show()

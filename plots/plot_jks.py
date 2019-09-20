@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,11 +14,11 @@ exps=['2mpz']+['wisc%d'%(n+1) for n in range(5)]
 nexp=len(exps)
 npars=len(pars)
 njk=461
-ds=[np.load("output_dam/sampler_lmin10_"+kmax+"_tinker08_ymilca_wnarrow_"+x+"_jkall.npz") for x in exps]
-ps=[np.load("output_dam/sampler_lmin10_"+kmax+"_tinker08_ymilca_wnarrow_"+x+"_properties.npz") for x in exps]
+ds=[np.load("output_default/sampler_lmin10_"+kmax+"_tinker08_ymilca_wnarrow_"+x+"_jkall.npz") for x in exps]
+ps=[np.load("output_default/sampler_lmin10_"+kmax+"_tinker08_ymilca_wnarrow_"+x+"_properties.npz") for x in exps]
 ms=[]
 for x in exps:
-    reader = emcee.backends.HDFBackend("output_dam/sampler_lmin10_"+kmax+"_tinker08_ymilca_wnarrow_"+x+"_chain.h5", read_only=True)
+    reader = emcee.backends.HDFBackend("output_default/sampler_lmin10_"+kmax+"_tinker08_ymilca_wnarrow_"+x+"_chain.h5", read_only=True)
     chain = reader.get_chain(flat=True)
     ms.append(np.mean(chain,axis=0))
 

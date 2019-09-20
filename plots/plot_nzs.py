@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import numpy as np
 import matplotlib.pyplot as plt
 import healpy as hp
@@ -27,7 +31,7 @@ cols=['r']
 cm_wisc=cm.get_cmap('Blues')
 for i in np.arange(5) :
     cols.append(cm_wisc(0.2+((i+1.)/5.)*0.8))
-                        
+
 nzs=[]
 nzs.append(Nz("data/dndz/2MPZ_bin1.txt","data/maps/2mpz_05_01_512.fits","data/maps/mask_v3.fits","2MPZ"))
 nzs.append(Nz("data/dndz/WISC_bin1.txt","data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits","data/maps/mask_v3.fits","WI$\\times$SC-1"))

@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import pyccl as ccl
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,9 +19,9 @@ rc('text', usetex=True)
 
 sample='wisc3'
 
-dgg_wdpj=np.load("output_dam/cls_"+sample+"_"+sample+".npz")
-dgg_wodpj=np.load("output_dam_nodpj/cls_"+sample+"_"+sample+".npz")
-cov_gg=np.load("output_dam/cov_comb_m_"+sample+"_"+sample+
+dgg_wdpj=np.load("output_default/cls_"+sample+"_"+sample+".npz")
+dgg_wodpj=np.load("output_default_nodpj/cls_"+sample+"_"+sample+".npz")
+cov_gg=np.load("output_default/cov_comb_m_"+sample+"_"+sample+
                "_"+sample+"_"+sample+".npz")['cov']
 ls=dgg_wdpj['ls']
 

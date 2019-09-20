@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -27,7 +31,7 @@ def plot_covar(predir,sample,bn,sample_label,kmax=1.,lmin=0.):
         gsample=sample+'%d'%bn
     else:
         gsample=sample
-    l = np.load("output_dam/cls_"+gsample+'_'+gsample+".npz")['ls']
+    l = np.load("output_default/cls_"+gsample+'_'+gsample+".npz")['ls']
     msk_gg=(l<=lmax) & (l>=lmin)
     msk_gy=(l<=lmax)
     ngg=np.sum(msk_gg)
@@ -64,7 +68,7 @@ def plot_covar(predir,sample,bn,sample_label,kmax=1.,lmin=0.):
     plt.savefig('notes/paper/cov_'+gsample+'.pdf',
                 bbox_inches='tight')
 
-plot_covar("output_dam","2mpz",1,'2MPZ',lmin=0.)
+plot_covar("output_default","2mpz",1,'2MPZ',lmin=0.)
 for b in range(5):
-    plot_covar("output_dam","wisc",b+1,'WI$\\times$SC-%d'%(b+1),lmin=10.)
+    plot_covar("output_default","wisc",b+1,'WI$\\times$SC-%d'%(b+1),lmin=10.)
 plt.show()

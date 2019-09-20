@@ -1,4 +1,7 @@
 import os
+import sys
+sys.path.insert(0, os.getcwd())
+#os.chdir("../")
 import numpy as np
 import pyccl as ccl
 from analysis.params import ParamRun
