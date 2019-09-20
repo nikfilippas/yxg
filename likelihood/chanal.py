@@ -154,6 +154,24 @@ class chan(object):
 
     def get_chains(self, pars, **specargs):
         """Returns a dictionary containing the chains of `pars`. """
+        def bias_one(p0, num):
+            """Calculates the halo model bias for a set of parameters."""
+            bb = hm_bias(self.cosmo, 1/(1+zarr),
+                         d.tracers[num][1].profile,
+                         **lik.build_kwargs(p0))
+            return bb
+
+
+        def bias_avg(num):
+            """Calculates the halo model bias of a profile, from a chain."""
+            import pathos.multiprocessing as mpc
+            pool = mpc.ProcessingPool(mpc.cpu_count())
+            bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::by_skip]))
+#            bb = pool.map(lambda p0: bias_one(p0, num), sam.chain[::by_skip])
+            bb = np.mean(np.array(bb), axis=1)
+            return bb
+
+
         if type(pars) == str: pars = [pars]
 
         if "by" in pars:
@@ -191,18 +209,11 @@ class chan(object):
             if "by" or "bg" in pars:
                 sigz = np.sqrt(np.sum(NN * (zz - zmean)**2) / np.sum(NN))
                 zarr = np.linspace(zmean-sigz, zmean+sigz, 10)
-                if "by" in pars:
-                    bys = np.mean(np.array([hm_bias(self.cosmo, 1/(1 + zarr),
-                                                    d.tracers[1][1].profile,
-                                                    **(lik.build_kwargs(p0)))
-                                    for p0 in sam.chain[::by_skip]]), axis=1)
-                    chains["by"] = bys
                 if "bg" in pars:
-                    bgs = np.mean(np.array([hm_bias(self.cosmo, 1/(1 + zarr),
-                                                    d.tracers[0][1].profile,
-                                                    **(lik.build_kwargs(p0)))
-                                    for p0 in sam.chain[::by_skip]]), axis=1)
-                    chains["bg"] = bgs
+                    chains["bg"] = bias_avg(num=0)
+                if "by" in pars:
+                    chains["by"] = bias_avg(num=1)
+
 
             # Construct tomographic dictionary
             if s == 0:
@@ -215,11 +226,14 @@ class chan(object):
         return CHAINS
 
 
-    def get_best_fit(self, pars, diff=True, **specargs):
+    def get_best_fit(self, pars, diff=True, chains=None, **specargs):
         """Returns a dictionary containing the best-fit values & errors."""
         if type(pars) == str: pars = [pars]
 
-        CHAINS = self.get_chains(pars, **specargs)
+        if chains is None:  # pass chains to save time
+            CHAINS = self.get_chains(pars, **specargs)
+        else:
+            CHAINS = chains
 
         for s, _ in enumerate(CHAINS["z"]):  # loop over all bins
             print("Calculating best-fit for z-bin %d/%d..." %
@@ -274,4 +288,3 @@ class chan(object):
                     OV_BF[k] = np.vstack((OV_BF[k], kwargs[k]))
 
         return OV_BF
-
