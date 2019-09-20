@@ -8,7 +8,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 
-fname_params = "params_dam_wnarrow.yml"
+fname_params = "params_dam_tinker10.yml"
 pars, (chi2s,ndofs,bfs), chains = chan(fname_params, diff=True, error_type="hpercentile",
                                    by_subsample=10)
 ns=len(chains[0][0])

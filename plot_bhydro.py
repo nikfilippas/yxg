@@ -87,6 +87,10 @@ temp = [chan(paryml, diff=True, error_type="hpercentile", chains=False, b_hydro=
 pars = [t[0] for t in temp]
 data = np.array([[p["b_hydro"] for p in par] for par in pars])
 data = [d.T for d in data]
+data = [[[0.21, 0.62, 0.62, 0.64, 0.58, 0.61],
+         [0.05, 0.08, 0.07, 0.08, 0.07, 0.07],
+         [0.31, 0.14, 0.10, 0.07, 0.07, 0.09]],
+
 
 
 dz, dN = [[] for i in range(2)]
