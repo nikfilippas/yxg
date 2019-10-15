@@ -1,7 +1,9 @@
+# move to parent dir
 import os
-import sys
-sys.path.insert(0, os.getcwd())
-#os.chdir("../")
+THIS_PATH = os.path.dirname(os.path.realpath(__file__))
+NEW_PATH = "/".join(THIS_PATH.split("/")[:-1])
+os.chdir("NEW_PATH")
+####
 import pyccl as ccl
 import numpy as np
 import matplotlib.pyplot as plt
@@ -25,7 +27,7 @@ cov_gg=np.load("output_default/cov_comb_m_"+sample+"_"+sample+
                "_"+sample+"_"+sample+".npz")['cov']
 ls=dgg_wdpj['ls']
 
-fname_params = "params_dam_wnarrow.yml"
+fname_params = "params_wnarrow.yml"
 p = ParamRun(fname_params)
 cosmo = p.get_cosmo()
 hm_correction = HalomodCorrection(cosmo)

@@ -1,14 +1,16 @@
+# move to parent dir
 import os
-import sys
-sys.path.insert(0, os.getcwd())
-#os.chdir("../")
+THIS_PATH = os.path.dirname(os.path.realpath(__file__))
+NEW_PATH = "/".join(THIS_PATH.split("/")[:-1])
+os.chdir("NEW_PATH")
+####
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import healpy as hp
 import yaml
 
-with open('params_dam_wnarrow.yml') as f:
+with open('params_wnarrow.yml') as f:
     p = yaml.safe_load(f)
 
 msk_g=hp.read_map(p['masks']['mask_lowz'],verbose=False)

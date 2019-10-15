@@ -1,7 +1,9 @@
+# move to parent dir
 import os
-import sys
-sys.path.insert(0, os.getcwd())
-#os.chdir("../")
+THIS_PATH = os.path.dirname(os.path.realpath(__file__))
+NEW_PATH = "/".join(THIS_PATH.split("/")[:-1])
+os.chdir("NEW_PATH")
+####
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
@@ -59,12 +61,12 @@ def get_dndz(fname, width):
     return zd, Nd_new
 
 
-param_yml = ["params_dam_wnarrow.yml",
-             "params_dam_ynilc.yml",
-             "params_dam_wfixed.yml",
-             "params_dam_tinker10.yml",
-#             "params_dam_wnarrow_ns.yml",
-#             "params_dam_masked.yml"
+param_yml = ["params_wnarrow.yml",
+             "params_ynilc.yml",
+             "params_wfixed.yml",
+             "params_tinker10.yml",
+#             "params_wnarrow_ns.yml",
+#             "params_masked.yml"
 ]
 
 sci = [r"$\mathrm{2MPZ}$"] + \
@@ -169,4 +171,3 @@ hist.legend(loc="lower center", bbox_to_anchor=[0.5, -0.15],
 
 plt.savefig("notes/paper/bhydro.pdf", bbox_inches="tight")
 plt.show()
-#os.chdir("images/b_hydro/")
