@@ -276,7 +276,7 @@
     
     For the galaxy auto-correlation, the pseudo-$C_\ell$ method requires an additional step of subtracting the shot noise bias. We do so analytically following the approach described in Section 2.4.2 of \cite{2019MNRAS.484.4127A} with a local noise variance given by $\sigma_n^2=1/\bar{n}_\Omega$, where $\bar{n}_\Omega$ is the mean surface number density in units of inverse steradians.
     
-    All maps were generated and operated on using the {\tt HEALPix} pixelisation scheme \citep{2005ApJ...622..759G} with resolution parameter $N_{\rm side}=512$, corresponding to a pixel size $\theta_{\rm pix}\sim7'$.
+    All maps were generated and operated on using the {\tt HEALPix} pixelisation scheme \citep{2005ApJ...622..759G} with resolution parameter $N_{\rm side}=512$, corresponding to a pixel size $\theta_{\rm pix}\sim7'$ ($\ell \sim 1570$).
 
   \subsection{Covariance matrices}\label{ssec:methods.cov}
     We combine two different methods to estimate the power spectrum covariance matrix. 
@@ -321,9 +321,9 @@
   \subsection{Systematics treatment}\label{ssec:methods.syst}
     \subsubsection{Map-level deprojection}\label{sssec:methods.syst.deproj}
       For small levels of contamination, the impact of a given systematic on an observed sky map can be modelled at the linear level:
-      \begin{equation}
+      \begin{equation}\label{eq:deproj}
         {\bf m}_{\rm obs}={\bf m}_{\rm true} + \epsilon\,{\bf t}.
-      \end{equation}\label{eq:deproj}
+      \end{equation}
       Here ${\bf m}_{\rm obs}$ and ${\bf m}_{\rm true}$ are vectors corresponding to the observed sky map and the true underlying quantity we wish to map respectively, ${\bf t}$ is a template map describing the contaminant (e.g. a map of the Galactic dust fluctuations), and $\epsilon$ is an unknown amplitude. In order to fully account for the effects of this contaminant one has to build a likelihood for ${\bf m}_{\rm obs}$ using the Eq. \ref{eq:deproj} as a model (together with a model for ${\rm m}_{\rm true}$) and marginalise over $\epsilon$. As shown in \cite{2017MNRAS.465.1847E} and \cite{2019MNRAS.484.4127A}, within the pseudo-$C_\ell$ framework, this can be done exactly by projecting ${\bf m}_{\rm obs}$ onto the subspace perpendicular to ${\bf t}$ or, in other words, by `deprojecting' ${\bf t}$. The loss of modes due to deprojection then needs to be taken into account when estimating the power spectrum, which can be done analytically.
 
       For our analysis, we deproject two systematic templates from the galaxy and $y$ maps. We create a reddening template using the dust map of \cite{1998ApJ...500..525S}, and remove its associated contamination from the $y$ maps and from all the galaxy overdensity maps. We also generate a star density template from the WISE data, and remove its associated fluctuations from all the galaxy overdensity maps. The effects of this deprojection are illustrated in Fig.\!~\ref{fig:clsyst}.
@@ -364,7 +364,7 @@
       \end{equation}
       where the model for $p(z|z_{\rm photo})$ was calibrated using overlapping spectroscopic data. Although the spectroscopic coverage of 2MPZ and \wisc~ is high compared to other photometric redshift surveys, the resulting redshift distributions are not infinitely precise, and therefore we need to account for any uncertainty in them that could affect our measurement.
 
-      In particular, our model of the $y\times \delta_g$ cross-correlation is particularly sensitive to the width of the redshift distributions. This is because, while the amplitude to the galaxy auto-correlation is strongly affected by the width of the distribution (wider $p(z)$'s reduce the clustering amplitude), the cross-correlation with $y$ is almost insensitive to it. We therefore introduce an additional parameter, $w_z$, that stretches the support of the redshift distribution while preserving unit total probability. Concretely, given a fiducial distribution $p_{\rm fid}(z)$ with mean redshift $\bar{z}$, $w_z$ is implemented as
+      In particular, our model of the $y\times \delta_g$ cross-correlation is very sensitive to the width of the redshift distributions. This is because wider redshift distributions, which imply lower clustering amplitude, affect the amplitude of the galaxy auto-correlation, $\delta_g\times \delta_g$. At the same time, the $y$ auto-spectrum is almost insensitive to clustering; therefore the width only affects the $y\ times \delta_g$ cross-correlation in our analysis. We introduce an additional parameter, $w_z$, that stretches the support of the redshift distribution while preserving unit total probability. Concretely, given a fiducial distribution $p_{\rm fid}(z)$ with mean redshift $\bar{z}$, $w_z$ is implemented as
       \begin{equation}
         p(z)\propto p_{\rm fid}\left(\bar{z}+\frac{z-\bar{z}}{w_z}\right),
       \end{equation}
