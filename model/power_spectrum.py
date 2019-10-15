@@ -30,7 +30,7 @@ class HalomodCorrection(object):
                           for a in 1. / (1 + zarr)])
         ratio = pk_hf / pk_hm
 
-        self.rk_func = interp2d(lkarr, zarr, ratio,
+        self.rk_func = interp2d(lkarr, 1/(1+zarr), ratio,
                                 bounds_error=False, fill_value=1)
 
     def rk_interp(self, k, a):
