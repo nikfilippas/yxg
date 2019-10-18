@@ -5,8 +5,8 @@ legacy/
 .spyproject/
 
 # File extensions
-out*/*.h5    # chains
-out*/*.npy   # partial results
-out*/*.npz   # partial results
-out*/*.mcm   # mode coupling matrices
-out*/*.cmcm  # cmcm's
+*.h5    # chains
+*.npy   # partial results
+*.npz   # partial results
+*.mcm   # mode coupling matrices
+*.cmcm  # cmcm's
