@@ -2,17 +2,11 @@
 __pycache__/
 data/
 legacy/
-images/fits/legacy/
-other/
 .spyproject/
 
 # File extensions
-out*/*.h5
-out*/*.npy
-!out*/b_hydro*.npy
-*.npz
-*.mcm
-*.cmcm
-
-# Files
-notes/paper/paper.pdf
+out*/*.h5    # chains
+out*/*.npy   # partial results
+out*/*.npz   # partial results
+out*/*.mcm   # mode coupling matrices
+out*/*.cmcm  # cmcm's
