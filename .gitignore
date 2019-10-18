@@ -4,6 +4,7 @@ data/
 legacy/
 images/fits/legacy/
 other/
+.spyproject/
 
 # File extensions
 out*/*.h5
