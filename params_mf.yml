@@ -40,6 +40,8 @@ maps:
     - name: "2mpz"
       # 'g' for galaxies, 'y' for tSZ
       type: "g"
+      # Do galaxies with satellites necessarily contain a central?
+      ns_independent: false
       # Path to map
       map: "data/maps/2mpz_05_01_512.fits"
       # Name of mask (should correspond to one of the keys in the previous section)
@@ -51,15 +53,15 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  11.19
-          M1:  12.47
-          Mmin:  11.19
+          M0:  12.01
+          M1:  13.44
+          Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.6270
+          b_hydro:  0.6842
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -1.084
+          r_corr:  -0.3287
           sigma_lnM:  0.15
           width: 0.8305
       # List of systematics
@@ -67,20 +69,21 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc1"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  11.62
-          M1:  12.93
-          Mmin:  11.62
+          M0:  12.01
+          M1:  13.44
+          Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.3963
+          b_hydro:  0.3274
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5539
+          r_corr:  -0.5759
           sigma_lnM:  0.15
           width: 1.031
       systematics:
@@ -89,20 +92,21 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc2"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.58
-          M1:  12.82
-          Mmin:  11.58
+          M0:  11.99
+          M1:  13.35
+          Mmin:  11.99
           alpha:  1.0
-          b_hydro:  0.4207
+          b_hydro:  0.3445
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5434
+          r_corr:  -0.5263
           sigma_lnM:  0.15
           width: 1.060
       systematics:
@@ -111,20 +115,21 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc3"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.46
-          M1:  12.65
-          Mmin:  11.46
+          M0:  11.97
+          M1:  13.27
+          Mmin:  11.97
           alpha:  1.0
-          b_hydro:  0.3911
+          b_hydro:  0.3061
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5860
+          r_corr:  -0.5975
           sigma_lnM:  0.15
           width: 1.097
       systematics:
@@ -133,20 +138,21 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc4"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.58
-          M1:  12.73
-          Mmin:  11.58
+          M0:  11.98
+          M1:  13.23
+          Mmin:  11.98
           alpha:  1.0
-          b_hydro:  0.4313
+          b_hydro:  0.3664
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5684
+          r_corr:  -0.5788
           sigma_lnM:  0.15
           width: 1.085
       systematics:
@@ -155,20 +161,21 @@ maps:
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc5"
       type: "g"
+      ns_independent: false
       map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
       mask: "mask_lowz"
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  12.16
-          M1:  12.95
-          Mmin:  12.16
+          M0:  11.98
+          M1:  12.78
+          Mmin:  11.98
           alpha:  1.0
-          b_hydro:  0.4123
+          b_hydro:  0.4399
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6692
+          r_corr:  -0.6920
           sigma_lnM:  0.15
           width: 0.8969
       systematics:
@@ -198,7 +205,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lmin10_kmax1_tinker08_ymilca_wfixed'
+    run_name: 'lmin10_kmax1_massfunc_ymilca_wnarrow'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -211,7 +218,7 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 200
-    n_steps: 2000
+    n_steps: 0
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Save parameters (separated by whitespace)
@@ -300,7 +307,7 @@ params:
           values: [-1.,1.]
     - name: "width"
       label: "w_{N(z)}"
-      vary: False
+      vary: True
       value: 1.
       prior:
           type: "TopHat"

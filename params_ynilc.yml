@@ -51,17 +51,17 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  12.01
-          M1:  13.44
-          Mmin:  12.01
+          M0:  11.89
+          M1:  13.29
+          Mmin:  11.89
           alpha:  1.0
-          b_hydro:  0.6842
+          b_hydro:  0.2215
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.3287
+          r_corr:  -0.4022
           sigma_lnM:  0.15
-          width: 0.8305
+          width: 1.200
       # List of systematics
       systematics:
         - 'data/maps/lambda_sfd_ebv.fits'
@@ -73,16 +73,16 @@ maps:
       beam: False
       model:
           M0:  12.01
-          M1:  13.44
+          M1:  13.36
           Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.3274
+          b_hydro:  0.5050
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5759
+          r_corr:  -0.4730
           sigma_lnM:  0.15
-          width: 1.031
+          width: 1.142
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
@@ -94,17 +94,17 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.99
-          M1:  13.35
-          Mmin:  11.99
+          M0:  12.01
+          M1:  13.30
+          Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.3445
+          b_hydro:  0.5265
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5263
+          r_corr:  -0.4657
           sigma_lnM:  0.15
-          width: 1.060
+          width: 1.157
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
@@ -116,17 +116,17 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.97
-          M1:  13.27
-          Mmin:  11.97
+          M0:  11.99
+          M1:  13.23
+          Mmin:  11.99
           alpha:  1.0
-          b_hydro:  0.3061
+          b_hydro:  0.5004
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5975
+          r_corr:  -0.5168
           sigma_lnM:  0.15
-          width: 1.097
+          width: 1.196
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
@@ -138,17 +138,17 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.98
-          M1:  13.23
-          Mmin:  11.98
+          M0:  11.99
+          M1:  13.18
+          Mmin:  11.99
           alpha:  1.0
-          b_hydro:  0.3664
+          b_hydro:  0.5023
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5788
+          r_corr:  -0.5263
           sigma_lnM:  0.15
-          width: 1.085
+          width: 1.158
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
@@ -160,17 +160,17 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  11.98
-          M1:  12.78
-          Mmin:  11.98
+          M0:  12.01
+          M1:  12.77
+          Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.4399
+          b_hydro:  0.4105
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6920
+          r_corr:  -0.6637
           sigma_lnM:  0.15
-          width: 0.8969
+          width: 0.9542
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
