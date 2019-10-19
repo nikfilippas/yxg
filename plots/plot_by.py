@@ -60,7 +60,7 @@ def get_bpe(z, n_r, delta, nmass=256):
 
 fname_params = ["params_wnarrow.yml",
                 "params_ynilc.yml"]
-p = ParamRun(fname_params)
+p = ParamRun(fname_params[0])
 cosmo = p.get_cosmo()
 
 def by_pts(filename):
