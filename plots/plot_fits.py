@@ -199,8 +199,8 @@ for s, v in enumerate(p.get("data_vectors")):
 
 
         # plot data & theory
-        ax1.plot(ll, t1, ls=":", c="darkgreen", alpha=0.3)
-        ax1.plot(lsd[i], tv1hd[i], ls="-", c="darkgreen", alpha=0.3,
+        ax1.plot(ll, t1, ls=":", c="darkred", alpha=0.3)
+        ax1.plot(lsd[i], tv1hd[i], ls="-", c="darkred", alpha=0.3,
                  label=r"$\mathrm{1}$-$\mathrm{halo}$")
 
         ax1.plot(ll, t2, ls=":", c="navy", alpha=0.3)
