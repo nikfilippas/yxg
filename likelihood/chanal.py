@@ -12,14 +12,21 @@ from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import HalomodCorrection, hm_bias
 from model.utils import selection_planck_erf, selection_planck_tophat
+from scipy.stats import norm
+_PP = norm.sf(-1)-norm.sf(1)
 
 
 
 def vpercentile(chain):
-    """Best fit and errors using manual watershed method."""
-    percentile = 68
+    """Best fit and errors using manual watershed."""
+    from scipy.signal import savgol_filter
+    percentile = 100*_PP
     pdf, x = np.histogram(chain, bins=100, density=True)
     x = (x[:-1] + x[1:])/2
+
+    # smooth posterior
+    window = int(np.ceil(np.sqrt(pdf.size)) // 2 * 2 + 1)
+    pdf = savgol_filter(pdf, window, 3)
 
     par_bf = x[np.argmax(pdf)]
     eps = 0.005
@@ -39,37 +46,55 @@ def vpercentile(chain):
 
 
 def gauss_kde(chain):
-    """Best fit and erros using Gaussian-KDE."""
-    def get_prob(a,b):
+    """Best fit and erros using Gaussian-KDE watershed."""
+    def get_prob(a, b, f):
         xr=np.linspace(a, b, 128)
-        return simps(d(xr), x=xr)
+        return simps(f(xr), x=xr)
 
-    def cutfunc(pthr):
-        r_lo = root_scalar(limfunc, args=(pthr), bracket=(x_min,x_bf)).root
-        r_hi = root_scalar(limfunc, args=(pthr), bracket=(x_bf,x_max)).root
-        pr = get_prob(r_lo, r_hi)
-        return pr-0.68
+    def cutfunc(pthr, f, x_lim=None):
+        if x_lim is None:
+            x1, x2 = x_min, x_max
+        else:
+            x1, x2 = x_lim
+        r_lo = root_scalar(limfunc, args=(pthr, f), bracket=(x1, x_bf)).root
+        r_hi = root_scalar(limfunc, args=(pthr, f), bracket=(x_bf, x2)).root
+        pr = get_prob(r_lo, r_hi, f)
+        return pr-_PP
 
-    minfunc = lambda x: -d(x)
-    limfunc = lambda x, thr: d(x)[0]-thr
+    def extend_kde(f, X=20):
+        """Extend kde boundaries by X% in case of boundary inconsistency."""
+        import warnings
+        warnings.warn(("Posterior boundaries in some parameter(s) do not behave correctly. "
+                       "Extending boundaries by %d%%." % X), RuntimeWarning)
+        from scipy.interpolate import interp1d
+        X /= 100
+        xmin = (1-X)*x_min
+        xmax = (1+X)*x_max
+        xx = np.linspace(xmin, xmax, 256)
+        yy = f(xx)
+        f_new = interp1d(xx, yy, kind="cubic",
+                         bounds_error=False, fill_value=0)
+        return f_new, (xmin, xmax)
+
+    minfunc = lambda x, f: -f(x)
+    limfunc = lambda x, thr, f: np.atleast_1d(f(x))[0]-thr
 
     x_min = np.amin(chain)
     x_max = np.amax(chain)
-    d = gaussian_kde(chain)
-    x_bf = minimize_scalar(minfunc, bracket=[x_min, x_max]).x[0]
-    p_bf = d(x_bf)[0]
-    # If f(a) and f(b) have identical signs, then decrease lookup range iteratively
-    n = 1
-    while True:
-        lim = 0.05
-        bracket =(n*lim*p_bf, (1-n*lim)*p_bf)
-        try:
-            p_thr = root_scalar(cutfunc, bracket=bracket).root
-            break
-        except ValueError:
-            n += 1
-    x_lo = root_scalar(limfunc, args=(p_thr), bracket=(x_min,x_bf)).root
-    x_hi = root_scalar(limfunc, args=(p_thr), bracket=(x_bf,x_max)).root
+    F = gaussian_kde(chain)
+    x_bf = minimize_scalar(minfunc, args=(F), bracket=[x_min, x_max]).x[0]
+    p_bf = F(x_bf)[0]
+
+    # check robustness at the boundaries
+    bracket = (0.05*p_bf, 0.95*p_bf)
+    try:
+        p_thr = root_scalar(cutfunc, args=(F), bracket=bracket).root
+    except ValueError:
+        F, (x_min, x_max) = extend_kde(F)
+        p_thr = root_scalar(cutfunc, args=(F, (x_min, x_max)), bracket=bracket).root
+
+    x_lo = root_scalar(limfunc, args=(p_thr, F), bracket=(x_min, x_bf)).root
+    x_hi = root_scalar(limfunc, args=(p_thr, F), bracket=(x_bf, x_max)).root
 
     return x_bf, x_lo, x_hi
 
@@ -192,7 +217,6 @@ class chan(object):
                 by_skip = 100
 
         for s, v in enumerate(self.p.get("data_vectors")):
-
             d = DataManager(self.p, v, self.cosmo, all_data=False)
             self.d = d
             lik = Likelihood(self.p.get('params'),
