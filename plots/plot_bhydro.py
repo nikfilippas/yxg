@@ -93,6 +93,7 @@ p = ParamRun(param_yml[0])
 #data = [d.T for d in data]
 
 BF = [chan(fname).get_best_fit("b_hydro") for fname in param_yml]
+print("Best fits OK")
 
 
 
