@@ -58,17 +58,23 @@ def get_bpe(z, n_r, delta, nmass=256):
     return itg.simps(et*bh*mfunc,x=lmarr)
 
 
-fname_params = "params_wnarrow.yml"
+fname_params = ["params_wnarrow.yml",
+                "params_ynilc.yml"]
 p = ParamRun(fname_params)
 cosmo = p.get_cosmo()
 
-q = chan(fname_params)
-red = {"reduce_by_factor": 10}
-CHAINS = q.get_chains("by", **red)  # dictionary of chains and redshifts
-chains = 1e3*CHAINS["by"]           # values only
-bf = q.get_best_fit("by", chains=CHAINS, **red)
-z, by = np.hstack((bf["z"])), 1e3*bf["by"].T
+def by_pts(filename):
+    """Returns by points to be plotted."""
+    q = chan(filename)
+    red = {"reduce_by_factor": 10}
+    CHAINS = q.get_chains("by", **red)  # dictionary of chains and redshifts
+    chains = 1e3*CHAINS["by"]           # values only
+    bf = q.get_best_fit("by", chains=CHAINS, **red)
+    z, by = np.hstack((bf["z"])), 1e3*bf["by"].T
+    return z, by, chains
 
+zm, bym, chainsm = by_pts(fname_params[0])  # m for y_milca
+zn, byn, chainsn = by_pts(fname_params[1])  # n for y_nilc
 
 # DES data
 DESx = np.array([0.15, 0.24, 0.2495, 0.383, 0.393, 0.526, 0.536, 0.678, 0.688])
@@ -89,9 +95,11 @@ et5 = np.array([get_bpe(z, 5, 200) for z in zarr])*1e6
 etinf = np.array([get_bpe(z, 20, 200) for z in zarr])*1e6
 
 fig, ax = plt.subplots(figsize=(9,7))
-ax.violinplot(chains.T, z, widths=0.03, showextrema=False)
-ax.errorbar(z, by[0], by[1:],
-            fmt="o", c="royalblue", elinewidth=2, label="This work")
+ax.violinplot(chainsm.T, zm, widths=0.03, showextrema=False)
+ax.errorbar(zm, bym[0], bym[1:],
+            fmt="o", c="navy", elinewidth=2, label="This work, $y$ MILCA map")
+ax.errorbar(zn, byn[0], byn[1:],
+            fmt="o", c="royalblue", elinewidth=2, label="This work, $y$ NILC map")
 
 ax.errorbar(black[0], black[1], black[2], fmt="ko", elinewidth=2,
             label="V17")
