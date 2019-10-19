@@ -173,12 +173,11 @@ class chan(object):
 
         def bias_avg(num):
             """Calculates the halo model bias of a profile, from a chain."""
-            # from pathos.multiprocessing import ProcessingPool as Pool
-            # if __name__ == "__main__":
-            #     with Pool() as pool:
-            #         bb = pool.map(lambda p0: bias_one(p0, num),
-            #                                  sam.chain[::by_skip])
-            bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::by_skip]))
+            from pathos.multiprocessing import ProcessingPool as Pool
+            with Pool() as pool:
+                bb = pool.map(lambda p0: bias_one(p0, num),
+                                         sam.chain[::by_skip])
+            # bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::by_skip]))
             bb = np.mean(np.array(bb), axis=1)
             return bb
 
