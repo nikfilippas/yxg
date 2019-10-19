@@ -58,7 +58,16 @@ def gauss_kde(chain):
     d = gaussian_kde(chain)
     x_bf = minimize_scalar(minfunc, bracket=[x_min, x_max]).x[0]
     p_bf = d(x_bf)[0]
-    p_thr = root_scalar(cutfunc, bracket=(0.05*p_bf,0.95*p_bf)).root
+    # If f(a) and f(b) have identical signs, then decrease lookup range iteratively
+    n = 1
+    while True:
+        lim = 0.05
+        bracket =(n*lim*p_bf, (1-n*lim)*p_bf)
+        try:
+            p_thr = root_scalar(cutfunc, bracket=bracket).root
+            break
+        except ValueError:
+            n += 1
     x_lo = root_scalar(limfunc, args=(p_thr), bracket=(x_min,x_bf)).root
     x_hi = root_scalar(limfunc, args=(p_thr), bracket=(x_bf,x_max)).root
 
@@ -164,10 +173,12 @@ class chan(object):
 
         def bias_avg(num):
             """Calculates the halo model bias of a profile, from a chain."""
-            import pathos.multiprocessing as mpc
-            pool = mpc.ProcessingPool(mpc.cpu_count())
+            # from pathos.multiprocessing import ProcessingPool as Pool
+            # if __name__ == "__main__":
+            #     with Pool() as pool:
+            #         bb = pool.map(lambda p0: bias_one(p0, num),
+            #                                  sam.chain[::by_skip])
             bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::by_skip]))
-#            bb = pool.map(lambda p0: bias_one(p0, num), sam.chain[::by_skip])
             bb = np.mean(np.array(bb), axis=1)
             return bb
 
