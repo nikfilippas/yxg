@@ -75,6 +75,7 @@ def by_pts(filename):
 
 zm, bym, chainsm = by_pts(fname_params[0])  # m for y_milca
 zn, byn, chainsn = by_pts(fname_params[1])  # n for y_nilc
+zn += 0.1
 
 # DES data
 DESx = np.array([0.15, 0.24, 0.2495, 0.383, 0.393, 0.526, 0.536, 0.678, 0.688])
