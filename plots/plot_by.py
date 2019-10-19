@@ -75,7 +75,7 @@ def by_pts(filename):
 
 zm, bym, chainsm = by_pts(fname_params[0])  # m for y_milca
 zn, byn, chainsn = by_pts(fname_params[1])  # n for y_nilc
-zn += 0.1
+zn += 0.01
 
 # DES data
 DESx = np.array([0.15, 0.24, 0.2495, 0.383, 0.393, 0.526, 0.536, 0.678, 0.688])
@@ -98,9 +98,9 @@ etinf = np.array([get_bpe(z, 20, 200) for z in zarr])*1e6
 fig, ax = plt.subplots(figsize=(9,7))
 ax.violinplot(chainsm.T, zm, widths=0.03, showextrema=False)
 ax.errorbar(zm, bym[0], bym[1:],
-            fmt="o", c="navy", elinewidth=2, label="This work, $y$ MILCA map")
+            fmt="o", c="royalblue", elinewidth=2, label="This work, Planck MILCA $y$ map")
 ax.errorbar(zn, byn[0], byn[1:],
-            fmt="o", c="royalblue", elinewidth=2, label="This work, $y$ NILC map")
+            fmt="o", c="mediumorchid", elinewidth=2, label="This work, Planck NILC $y$ map")
 
 ax.errorbar(black[0], black[1], black[2], fmt="ko", elinewidth=2,
             label="V17")
@@ -119,7 +119,10 @@ ax.plot(zarr,etinf,':',label='$r_{\\rm max}=\\infty$',c='#AAAAAA')
 ax.tick_params(labelsize="large")
 ax.set_xlabel("$z$", fontsize=17)
 ax.set_ylabel(r"$\mathrm{\langle bP_e \rangle \ \big[ meV \ cm^{-3} \big] }$", fontsize=17)
-ax.legend(loc="upper left", frameon=False, ncol=2, fontsize=14)
+
+handles, labels = ax.get_legend_handles_labels()
+handles, labels = map(lambda x: list(np.roll(x, 5)), [handles, labels])
+ax.legend(handles, labels, loc="upper left", frameon=False, ncol=2, fontsize=13)
 
 fig.savefig("notes/paper/by.pdf", bbox_inches="tight")
 plt.show()
