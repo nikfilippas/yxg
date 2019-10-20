@@ -46,3 +46,8 @@ Same principle as PUSH-ing changes. Everything has to be done from 'yxg/notes/pa
 $ cd notes/paper
 $ git pull origin master
 
+###############################################################################
+
+Overleaf is set to also automatically sync all its contents to Dropbox. The link is https://www.dropbox.com/sh/du0v4mac7xewgjp/AABBAGbumom11CVUP2VVO_qla.
+
+This is a 2-way sync, meaning, any changes to Dropbox will update the Overleaf remote repo.
