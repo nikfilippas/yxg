@@ -10,3 +10,4 @@ legacy/
 *.npz
 *.mcm
 *.cmcm
+*.fuse_hidden*

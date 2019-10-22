@@ -8,7 +8,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 
-fname_params = "params_dam_tinker10.yml"
+fname_params = "params_wnarrow.yml"
 pars, (chi2s,ndofs,bfs), chains = chan(fname_params, diff=True, error_type="hpercentile",
                                    by_subsample=10)
 ns=len(chains[0][0])
@@ -48,7 +48,7 @@ for i,s in enumerate(['2MPZ_bin1','WISC_bin1','WISC_bin2',
     print("%s :"%s)
     print("   (1-b)_BF = %.2lf"%(1-bfs[i][2]))
     print("   (1-b) = %.2lf - %.2lf + %.2lf"%(mb_bf, mb_bf-mb_lo, mb_hi-mb_bf))
-    #print("   <bPe> = %.3lf - %.3lf + %.3lf"%(by_bf, by_bf-by_lo, by_hi-by_bf))
+    # print("   <bPe> = %.3lf - %.3lf + %.3lf"%(by_bf, by_bf-by_lo, by_hi-by_bf))
     print("   chi2/ndof = %.3lf, PTE=%.5lf"%(chi2s[i]/(ndofs[i]-5),
                                              1-chi2.cdf(chi2s[i],
                                                         ndofs[i]-5)))
