@@ -64,3 +64,9 @@ cv=covars[2,:,2,:]
 corr=cv/np.sqrt(np.diag(cv)[:,None]*np.diag(cv)[None,:])
 plt.imshow(corr,interpolation='nearest',vmin=-1,vmax=1)
 plt.show()
+
+"""
+# results
+1-b = 5.352E-01 +- 3.369E-02, chi^2 = 2.909E+00
+1-b = 5.902E-01 +- 3.369E-02, chi^2 = 5.666E-01
+"""

@@ -4,8 +4,8 @@ import numpy as np
 njk=461
 parnames=['M1', 'Mmin', 'b_hydro', 'r_corr', 'width', 'b_g', 'b_y', 'chi2']
 for exp in ['2mpz']+['wisc%d'%(n+1) for n in range(5)]:
-    #prefix="output_dam/sampler_lmin10_kmax1_tinker08_ymilca_wnarrow_"+exp
-    prefix="output_dam/sampler_lmin10_kmax0p5_tinker08_ymilca_wnarrow_"+exp
+    prefix="output_default/sampler_lmin10_kmax1_tinker08_ymilca_wnarrow_"+exp
+#    prefix="output_default/sampler_lmin10_kmax0p5_tinker08_ymilca_wnarrow_"+exp
     par_arrs={p:np.zeros(njk) for p in parnames}
     for jk in range(njk):
         print(exp,jk)
