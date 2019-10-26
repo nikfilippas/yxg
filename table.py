@@ -23,5 +23,5 @@ PTE = OBF["PTE"].round(2)
 TABLE = np.column_stack((z, bH_bf, bH, bPe, chi2, PTE))
 
 print("Best-fit parameters. Showing quantities (in order):")
-print("z \t (1-bH)_BF \t (1-bH) +/- \t <bPe> +/- \t chi2/ndof \t PTE")
+print("z \t (1-bH)_BF \t (1-bH) -/+ \t <bPe> -/+ \t chi2/ndof \t PTE")
 print(TABLE)
