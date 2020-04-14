@@ -113,6 +113,7 @@ for s, v in enumerate(p.get("data_vectors")):
     sam.update_p0(sam.chain[np.argmax(sam.probs)])
 
     params = likd.build_kwargs(sam.p0)
+    if s == 0: print(params)
 
     # Array of multipoles
     lsd = np.array(d.ells)
@@ -211,6 +212,12 @@ for s, v in enumerate(p.get("data_vectors")):
         ax1.plot(lsd[i], tvd[i], ls="-", c="k", label=r"$\mathrm{1h+2h}$")
 
         ax1.errorbar(lsg[i], dv[i], yerr=ev[i], fmt="r.")
+
+        if s == 0:
+            np.save("/home/koukoufilippasn/Desktop/lst%d.npy" % i, lsd[i])
+            np.save("/home/koukoufilippasn/Desktop/tt%d.npy" % i, tvd[i])
+            np.save("/home/koukoufilippasn/Desktop/lsd%d.npy" % i, lsg[i])
+            np.save("/home/koukoufilippasn/Desktop/dd%d.npy" % i, dv[i])
 
         if i == 1:
             ax1.errorbar(ls[s], cls[s], np.sqrt(3.)*nls[s], fmt="s",
