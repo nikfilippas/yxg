@@ -39,7 +39,7 @@ class Arnaud(object):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
         prefac = 4.017100792437957e-06
         # avoid recomputing every time
-        # Units of eV * Mpc / cm^3 
+        # Units of eV * Mpc / cm^3
         return prefac*a
 
     def profnorm(self, cosmo, a, squeeze=True, **kwargs):
@@ -133,7 +133,7 @@ class Arnaud(object):
         # hydrostatic bias
         b = kwargs["b_hydro"]
         # R_Delta*(1+z)
-        R = R_Delta(cosmo, M, a, self.Delta, squeeze=False) / a
+        R = R_Delta(cosmo, M*(1-b), a, self.Delta, squeeze=False) / a
         # transform axes
         R = R[..., None]
 
