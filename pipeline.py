@@ -401,12 +401,43 @@ print("OK")
 # Do jackknife
 if p.do_jk():
     for jk_id in tqdm(range(jk.npatches), desc="Jackknives"):
-        if os.path.isfile(p.get_fname_cls(fields_sz[-1],
-                                          fields_sz[-1],
-                                          jk_region=jk_id)):
-#            print("Found %d" % (jk_id + 1))
+        def chck_doit(f1, f2):
+            fname = p.get_fname_cls(f1, f2, jk_region=jk_id)
+            if not os.path.isfile(fname):
+                print("Didn't find %s, computing")
+                return True
+            else:
+                return False
+
+        for fg in fields_ng:
+            # gg
+            doit = chck_doit(fg, fg)
+            for fd in fields_dt:
+                # dg
+                doit = chck_doit(fg, fd)
+            for fy in fields_sz:
+                # gy
+                doit = chck_doit(fy, fg)
+        for fy in fields_sz:
+            # yy
+            doit = chck_doit(fy, fy)
+            for fd in fields_dt:
+                # dy
+                doit = chck_doit(fy, fd)
+        for fd in fields_dt:
+            # dd
+            doit = chck_doit(fd, fd)
+
+        if not doit:
             continue
-#        print("%d-th JK sample out of %d" % (jk_id + 1, jk.npatches))
+        #if os.path.isfile(p.get_fname_cls(fields_sz[-1],
+        #                                  fields_sz[-1],
+        #                                  jk_region=jk_id)):
+        #    print("Found %d" % (jk_id + 1))
+        #    print(p.get_fname_cls(fields_sz[-1],
+        #                          fields_sz[-1],
+        #                          jk_region=jk_id))
+        #    continue
         msk = jk.get_jk_mask(jk_id)
         # Update field
         for fg in fields_ng:

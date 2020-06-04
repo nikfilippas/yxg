@@ -58,8 +58,8 @@ def get_bpe(z, n_r, delta, nmass=256):
     return itg.simps(et*bh*mfunc,x=lmarr)
 
 
-fname_params = ["params_wnarrow.yml",
-                "params_ynilc.yml"]
+fname_params = ["params_dam_wnarrow.yml",
+                "params_dam_nilc.yml"]
 p = ParamRun(fname_params[0])
 cosmo = p.get_cosmo()
 

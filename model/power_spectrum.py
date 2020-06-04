@@ -163,14 +163,7 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     if selection is not None:
         select = np.array([selection(M,1./aa-1) for aa in a])
         mfunc *= select
-    try:
-        bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
-    except CCLError:
-        Oc = cosmo["Omega_c"]; Ob = cosmo["Omega_b"]; h = cosmo["h"]
-        s8 = cosmo["sigma8"]; ns = cosmo["n_s"]
-        cosmo_fid = ccl.Cosmology(Omega_c=Oc, Omega_b=Ob, h=h, sigma8=s8, n_s=ns,
-                                  mass_function="tinker10")
-        bh = np.array([ccl.halo_bias(cosmo_fid, M, A1, A2) for A1, A2 in zip(a, Dm)])
+    bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
 
     # shape transformations
     mfunc, bh = mfunc.T[..., None], bh.T[..., None]

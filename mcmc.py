@@ -7,20 +7,30 @@ from model.data import DataManager
 from model.theory import get_theory
 from model.power_spectrum import HalomodCorrection
 from model.utils import selection_planck_erf, selection_planck_tophat
+import argparse
 
-try:
-    fname_params = sys.argv[1]
-except IndexError:
-    raise ValueError("Must provide param file name as command-line argument")
+parser = argparse.ArgumentParser()
+parser.add_argument('--param-file', type=str, default='none',
+                    help='Parameter file name')
+parser.add_argument('--use-mpi', default=False, action='store_true',
+                    help='Use MPI (default: False)')
+parser.add_argument('--jk-region', type=int, default=-1,
+                    help='Jackknife region to use (default: no jackknives)')
+parser.add_argument('--data-name', type=str, default='none',
+                    help='Name of the data vector to analyze')
 
+o = parser.parse_args()
 
-p = ParamRun(fname_params)
+if o.param_file == 'none':
+    raise ValueError("Must provide param file name")
+
+p = ParamRun(o.param_file)
 
 # Jackknives
-try:
-    jk_region = int(sys.argv[2])
-except IndexError:
+if o.jk_region < 0:
     jk_region = None
+else:
+    jk_region = o.jk_region
 
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
@@ -43,6 +53,9 @@ if sel is not None:
 
 par = []
 for v in p.get('data_vectors'):
+    if (v['name'] != o.data_name) and (o.data_name != 'all'):
+        continue
+
     print(v['name'])
 
     # Construct data vector and covariance
@@ -81,7 +94,8 @@ for v in p.get('data_vectors'):
     if sam.nsteps > 0:
         # Monte-carlo
         print(" Sampling:")
-        sam.sample(carry_on=p.get('mcmc')['continue_mcmc'], verbosity=1)
+        sam.sample(carry_on=p.get('mcmc')['continue_mcmc'], verbosity=1,
+                   use_mpi=o.use_mpi)
 
 if len(par) > 0:
     is_jk = str(jk_region) if bool(jk_region) else ""

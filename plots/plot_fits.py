@@ -40,7 +40,7 @@ class thr(object):
                           **pars)
 
 
-fname_params = "params_wnarrow.yml"
+fname_params = "params_dam_wnarrow.yml"
 p = ParamRun(fname_params)
 cosmo = p.get_cosmo()
 
@@ -67,8 +67,8 @@ sci = [r"$\mathrm{2MPZ}$"] + \
 # DUST
 cls, ls, nls = [[] for i in range(3)]
 for s in surveys:
-    fname = "output_default/cls_%s_dust_545.npz" % s
-    sname = "output_default/cov_jk_%s_dust_545_%s_dust_545.npz" % (s, s)
+    fname = "/mnt/extraspace/damonge/yxg_new/output_dam/cls_%s_dust_545.npz" % s
+    sname = "/mnt/extraspace/damonge/yxg_new/output_dam/cov_jk_%s_dust_545_%s_dust_545.npz" % (s, s)
     with np.load(fname) as f:
         cls.append(f["cls.npy"])
         ls.append(f["ls.npy"])
@@ -213,11 +213,11 @@ for s, v in enumerate(p.get("data_vectors")):
 
         ax1.errorbar(lsg[i], dv[i], yerr=ev[i], fmt="r.")
 
-        if s == 0:
-            np.save("/home/koukoufilippasn/Desktop/lst%d.npy" % i, lsd[i])
-            np.save("/home/koukoufilippasn/Desktop/tt%d.npy" % i, tvd[i])
-            np.save("/home/koukoufilippasn/Desktop/lsd%d.npy" % i, lsg[i])
-            np.save("/home/koukoufilippasn/Desktop/dd%d.npy" % i, dv[i])
+        #if s == 0:
+        #    np.save("/home/koukoufilippasn/Desktop/lst%d.npy" % i, lsd[i])
+        #    np.save("/home/koukoufilippasn/Desktop/tt%d.npy" % i, tvd[i])
+        #    np.save("/home/koukoufilippasn/Desktop/lsd%d.npy" % i, lsg[i])
+        #    np.save("/home/koukoufilippasn/Desktop/dd%d.npy" % i, dv[i])
 
         if i == 1:
             ax1.errorbar(ls[s], cls[s], np.sqrt(3.)*nls[s], fmt="s",

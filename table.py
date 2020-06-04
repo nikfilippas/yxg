@@ -2,7 +2,7 @@ import numpy as np
 from likelihood.chanal import chan
 
 
-fname_params = "params_wnarrow.yml"
+fname_params = "params_dam_wnarrow.yml"
 q = chan(fname_params)
 
 
