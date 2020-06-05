@@ -91,6 +91,7 @@ def choose_cl_file(p, tracers, jk_region=None):
             return fname
             break
 
+    print(fname)
     raise ValueError("Can't find Cl file for " +
                      tracers[0].name +
                      " and " + tracers[1].name)

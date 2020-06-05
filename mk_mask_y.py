@@ -82,22 +82,29 @@ for i in np.arange(len(data)) :
     mask_sz[ip]=0
 
 print("Reading official Planck masks")
-mask_gal_80=hp.read_map("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=4)
-mask_gal_60=hp.read_map("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=2)
-mask_gal_40=hp.read_map("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=1)
-mask_gal_20=hp.read_map("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=0)
-mask_p0=hp.read_map("data/maps/LFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,hdu=1);
-mask_p1=hp.read_map("data/maps/LFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,hdu=2);
-mask_p2=hp.read_map("data/maps/LFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,hdu=3);
+def readmp(fname, verbose=False, field=0, hdu=None):
+    print(fname, field, hdu)
+    if hdu is None:
+        return hp.read_map(fname, verbose=verbose, field=field)
+    else:
+        return hp.read_map(fname, verbose=verbose, hdu=hdu)
+
+mask_gal_80=readmp("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=4)
+mask_gal_60=readmp("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=2)
+mask_gal_40=readmp("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=1)
+mask_gal_20=readmp("data/maps/HFI_Mask_GalPlane-apo0_2048_R2.00.fits",verbose=False,field=0)
+mask_p0=readmp("data/maps/LFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,hdu=1);
+mask_p1=readmp("data/maps/LFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,hdu=2);
+mask_p2=readmp("data/maps/LFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,hdu=3);
 mask_pl=mask_p0*mask_p1*mask_p2
-mask_p0=hp.read_map("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=0);
-mask_p1=hp.read_map("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=1);
-mask_p2=hp.read_map("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=2);
-mask_p3=hp.read_map("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=3);
+mask_p0=readmp("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=0);
+mask_p1=readmp("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=1);
+mask_p2=readmp("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=2);
+mask_p3=readmp("data/maps/HFI_Mask_PointSrc_2048_R2.00.fits",verbose=False,field=3);
 mask_ph=mask_p0*mask_p1*mask_p2*mask_p3
 print("Reading galaxy catalog masks")
-mask_sdss=hp.ud_grade(hp.read_map("data/maps/BOSS_dr12_mask256_v2.fits",verbose=False),nside_out=nside)
-mask_lowz=hp.ud_grade(hp.read_map("data/maps/mask_v3.fits",verbose=False),nside_out=nside)
+mask_sdss=hp.ud_grade(readmp("data/maps/BOSS_dr12_mask256_v2.fits",verbose=False),nside_out=nside)
+mask_lowz=hp.ud_grade(readmp("data/maps/mask_v3.fits",verbose=False),nside_out=nside)
 
 print("Writing output masks")
 hp.write_map("data/maps/mask_planck20.fits",mask_gal_20*mask_ph,overwrite=True)

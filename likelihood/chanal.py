@@ -75,15 +75,15 @@ def gauss_kde(chain):
         f_new = interp1d(xx, yy, kind="cubic",
                          bounds_error=False, fill_value=0)
 
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        plt.ion()
-        xold = np.linspace(x_min, x_max, 256)
-        ax.plot(xx, yy, "r:", lw=3, label="new dist")
-        ax.plot(xold, f(xold), "k-", lw=3, label="original dist")
-        ax.legend(loc="best")
-        plt.show()
-        plt.pause(0.001)
+        #import matplotlib.pyplot as plt
+        #fig, ax = plt.subplots()
+        #plt.ion()
+        #xold = np.linspace(x_min, x_max, 256)
+        #ax.plot(xx, yy, "r:", lw=3, label="new dist")
+        #ax.plot(xold, f(xold), "k-", lw=3, label="original dist")
+        #ax.legend(loc="best")
+        #plt.show()
+        #plt.pause(0.001)
         return f_new, (xmin, xmax)
 
     minfunc = lambda x, f: -f(x)
@@ -209,11 +209,11 @@ class chan(object):
 
         def bias_avg(num, skip):
             """Calculates the halo model bias of a profile, from a chain."""
-            from pathos.multiprocessing import ProcessingPool as Pool
-            with Pool() as pool:
-                bb = pool.map(lambda p0: bias_one(p0, num),
-                                         sam.chain[::skip])
-            # bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::skip]))
+            #from pathos.multiprocessing import ProcessingPool as Pool
+            #with Pool() as pool:
+            #    bb = pool.map(lambda p0: bias_one(p0, num),
+            #                             sam.chain[::skip])
+            bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::skip]))
             bb = np.mean(np.array(bb), axis=1)
             return bb
 
