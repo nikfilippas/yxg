@@ -135,8 +135,8 @@ ax.axhspan(0.72-0.10, 0.72+0.10, color="cadetblue", alpha=0.3)
 ax.axhline(0.58, ls=":", color="grey")
 ax.axhspan(0.58-0.04, 0.58+0.06, color="grey", alpha=0.3)
 # OUR DATA
-ax.axhline(0.78, ls=":", color="orange")
-ax.axhspan(0.78-0.03, 0.78+0.03, color="orange", alpha=0.15, fill=False, hatch="xxx")
+ax.axhline(0.75, ls=":", color="orange")
+ax.axhspan(0.75-0.03, 0.75+0.03, color="orange", alpha=0.15, fill=False, hatch="xxx")
 
 props = dict(boxstyle="round", facecolor="w", alpha=0.5)
 ax.text(0.005, 0.595, "CMB + N.C.",
@@ -154,7 +154,7 @@ hist.set_ylabel(r"$\mathrm{d} n \mathrm{/d} z$", fontsize=17)
 for i, (dd, cc, fmt, lbl) in enumerate(zip(BF, colours, fmts, lbls)):
     plotfunc(ax, z, dd["b_hydro"].T, fmt=fmt, color=cc, label=lbl,
              inverted=True, offset=i)
-ax.errorbar([0.208], [0.78], yerr=[0.03], fmt='D', c='orange',
+ax.errorbar([0.208], [0.75], yerr=[0.03], fmt='D', c='orange',
             label='$z$-independent')
 
 handles, labels = ax.get_legend_handles_labels()
