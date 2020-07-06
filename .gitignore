@@ -3,6 +3,7 @@ __pycache__/
 data/
 legacy/
 .spyproject/
+output_dam/
 
 # File extensions
 *.h5
