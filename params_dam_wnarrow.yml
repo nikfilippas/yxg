@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 512
     # Output directory
-    output_dir: '/mnt/extraspace/damonge/yxg_new/output_dam'
+    output_dir: 'output_dam'
 
 jk:
     # Do you want to do jackknives?
@@ -218,8 +218,9 @@ mcmc:
     save_par: False
     # Cosmological mass function
     mfunc: 'tinker'
-    # Selection function
-    selection_function: 'none'
+    # Halo bias model
+    hbias: 'tinker10'
+
 
 # Model parameters
 params:
