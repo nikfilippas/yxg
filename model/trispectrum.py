@@ -24,6 +24,8 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
             a subset of the M-z plane.
         **kwargs: parameter used internally by the profiles.
     """
+    k = np.atleast_1d(k)
+    a = np.atleast_1d(a)
     pau, pav, pbu, pbv = profiles
 
     aUnorm = pau.profnorm(cosmo, a, squeeze=False, **kwargs)
