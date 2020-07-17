@@ -138,7 +138,7 @@ class Arnaud(object):
         R = R[..., None]
 
         ff = self._fourier_interp(np.log10(k*R))
-        nn = self.norm(cosmo, M, a, b)[..., None, None]
+        nn = self.norm(cosmo, M, a, b, squeeze=False)[..., None]
 
         F = 4*np.pi*R**3 * nn * ff
         return (F.squeeze(), (F**2).squeeze()) if squeeze else (F, F**2)
