@@ -4,7 +4,7 @@ from scipy.integrate import simps
 
 
 def hm_1h_trispectrum(cosmo, k, a, profiles,
-                      logMrange=(6, 17), mpoints=128,
+                      logMrange=(8, 16), mpoints=128,
                       selection=None,
                       **kwargs):
     """Computes the halo model prediction for the 1-halo 3D
@@ -56,7 +56,9 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
             r = kwargs['r_corr']
         else:
             r = 0
-        aUV = np.sqrt(aUU*aVV)*(1+r)
+
+        # aUV = np.sqrt(aUU*aVV)*(1+r)
+        aUV = aU*aV*(1+r)
 
     bU, bUU = pbu.fourier_profiles(cosmo, k, M, a,
                                    squeeze=False, **kwargs)
@@ -69,7 +71,9 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
             r = kwargs['r_corr']
         else:
             r = 0
-        bUV = np.sqrt(bUU*bVV)*(1+r)
+
+        # bUV = np.sqrt(bUU*bVV)*(1+r)
+        bUV = bU*bV*(1+r)
 
     t1h = simps((select * mfunc)[:, :, None, None] *
                 aUV[:, :, :, None] *
