@@ -4,7 +4,7 @@ from scipy.integrate import simps
 
 
 def hm_1h_trispectrum(cosmo, k, a, profiles,
-                      logMrange=(6, 17), mpoints=128,
+                      logMrange=(8, 16), mpoints=128,
                       selection=None,
                       **kwargs):
     """Computes the halo model prediction for the 1-halo 3D
@@ -86,9 +86,9 @@ def hm_1h_trispectrum(cosmo, k, a, profiles,
 
 
 def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
-                         zrange_a=(1e-6, 6), zpoints_a=32, zlog_a=True,
-                         zrange_b=(1e-6, 6), zpoints_b=32, zlog_b=True,
-                         logMrange=(6, 17), mpoints=128,
+                         zrange_a=(1e-6, 6), zpoints_a=64, zlog_a=True,
+                         zrange_b=(1e-6, 6), zpoints_b=64, zlog_b=True,
+                         logMrange=(8, 16), mpoints=128,
                          selection=None, **kwargs):
     """Computes the 1-h trispectrum contribution to the covariance of the
     angular cross power spectra involving two pairs of quantities.
