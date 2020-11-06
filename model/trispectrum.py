@@ -169,10 +169,12 @@ def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
     bWv = pbv.kernel(cosmo, a, **kwargs)
     N = H_inv * aWu * aWv * bWu * bWv/chi**6
 
-    k = (l+1/2) / chi[..., None]
-    t1h = hm_1h_trispectrum(cosmo, k, a, (pau, pav, pbu, pbv),
-                            logMrange, mpoints, selection=selection,
-                            **kwargs)
+    t1h = np.zeros([len(a), len(l), len(l)])
+    for ii, (aa, cchi) in enumerate(zip(a, chi)):
+        k = (l+1/2) / cchi
+        t1h[ii] = hm_1h_trispectrum(cosmo, k, aa, (pau, pav, pbu, pbv),
+                                    logMrange, mpoints, selection=selection,
+                                    **kwargs)
 
     tl = simps(N[:, None, None] * t1h, x, axis=0)
 
