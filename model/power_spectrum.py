@@ -24,11 +24,24 @@ class HalomodCorrection(object):
                             nlk)
         karr = 10.**lkarr
         zarr = np.linspace(z_range[0], z_range[1], nz)
+        a_arr = 1/(1+zarr)
 
-        pk_hm = np.array([ccl.halomodel_matter_power(cosmo, karr, a)
-                          for a in 1. / (1 + zarr)])
+        hmd = ccl.halos.MassDef(500, "critical")
+        cM = ccl.halos.halos_extra.ConcentrationDuffy08M500c(hmd)
+        NFW = ccl.halos.profiles.HaloProfileNFW(cM)
+
+        kwargs = {"mass_function": ccl.halos.mass_function_from_name("tinker08"),
+                  "halo_bias": ccl.halos.halo_bias_from_name("tinker10")}
+        nM = kwargs["mass_function"](cosmo, mass_def=hmd)
+        bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
+        hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
+
+        pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc, karr, a_arr, NFW,
+                                                 normprof1=True, normprof2=True)
+
         pk_hf = np.array([ccl.nonlin_matter_power(cosmo, karr, a)
-                          for a in 1. / (1 + zarr)])
+                          for a in a_arr])
+
         ratio = pk_hf / pk_hm
 
         self.rk_func = interp2d(lkarr, 1/(1+zarr), ratio,
@@ -163,7 +176,14 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     if selection is not None:
         select = np.array([selection(M,1./aa-1) for aa in a])
         mfunc *= select
-    bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+
+    csm = ccl.Cosmology(Omega_c=cosmo["Omega_c"],
+                        Omega_b=cosmo["Omega_b"],
+                        h=cosmo["h"],
+                        sigma8=cosmo["sigma8"],
+                        n_s=cosmo["n_s"],
+                        mass_function="tinker10")
+    bh = np.array([ccl.halo_bias(csm, M, A1, A2) for A1, A2 in zip(a, Dm)])
 
     # shape transformations
     mfunc, bh = mfunc.T[..., None], bh.T[..., None]
