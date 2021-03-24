@@ -10,8 +10,7 @@ from model.utils import selection_planck_erf, selection_planck_tophat
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--param-file', type=str, default='none',
-                    help='Parameter file name')
+parser.add_argument("param_file", help="yaml target parameter file")
 parser.add_argument('--use-mpi', default=False, action='store_true',
                     help='Use MPI (default: False)')
 parser.add_argument('--jk-region', type=int, default=-1,
@@ -53,8 +52,8 @@ if sel is not None:
 
 par = []
 for v in p.get('data_vectors'):
-    if (v['name'] != o.data_name) and (o.data_name != 'all'):
-        continue
+    # if (v['name'] != o.data_name) and (o.data_name != 'all'):
+    #     continue
 
     print(v['name'])
 
@@ -76,6 +75,10 @@ for v in p.get('data_vectors'):
     sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
                   p.get('mcmc'))
+
+    print(dict(zip(lik.p_free_names, lik.p0)))
+    print("chisq:", lik.chi2(lik.p0))
+    # exit(1)
 
     # Compute best fit and covariance around it
     if not sam.read_properties():
