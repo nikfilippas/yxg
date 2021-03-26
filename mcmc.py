@@ -76,9 +76,9 @@ for v in p.get('data_vectors'):
                   p.get_sampler_prefix(v['name']),
                   p.get('mcmc'))
 
-    print(dict(zip(lik.p_free_names, lik.p0)))
-    print("chisq:", lik.chi2(lik.p0))
-    # exit(1)
+    # Benchmarks
+    # print(dict(zip(lik.p_free_names, lik.p0)))
+    # print("chisq:", lik.chi2(lik.p0))
 
     # Compute best fit and covariance around it
     if not sam.read_properties():

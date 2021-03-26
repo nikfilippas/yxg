@@ -17,8 +17,8 @@ class HalomodCorrection(object):
         nz (int): number of samples in redshift to use.
     """
     def __init__(self, cosmo,
-                 k_range=[1E-1, 5], nlk=20,
-                 z_range=[0., 1.], nz=16):
+                 k_range=[1E-1, 5], nlk=128,
+                 z_range=[0., 1.], nz=32):
         lkarr = np.linspace(np.log10(k_range[0]),
                             np.log10(k_range[1]),
                             nlk)
@@ -221,10 +221,10 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     b2h_2 += (n0_2h*V[0]).squeeze()
 
     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
-
     if hm_correction is not None:
         for ia, (aa, kk) in enumerate(zip(a, k)):
-            F[ia, :] *= hm_correction.rk_interp(kk, aa)
+            R = hm_correction.rk_interp(kk, aa)
+            F[ia, :] *= R
 
     return F.squeeze() if squeeze else F
 

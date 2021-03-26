@@ -35,6 +35,7 @@ class Likelihood(object):
         else:
             self.ic = np.linalg.inv(covar)
             self.t_bf = None
+
         self.cv = covar
         self.cvhalf = np.linalg.cholesky(self.cv)
         self.debug = debug

@@ -68,4 +68,6 @@ def get_theory(p, dm, cosmo, return_separated=False,
             cls_out.append(cl)
         else:
             cls_out += cl.tolist()
-    return np.array(cls_out)
+
+    cls_out = np.array(cls_out)
+    return cls_out
