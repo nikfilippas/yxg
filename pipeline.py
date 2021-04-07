@@ -281,7 +281,7 @@ for fg in fields_ng:
                                 zrange_a=fg.zrange, zpoints_a=64, zlog_a=True,
                                 zrange_b=fg.zrange, zpoints_b=64, zlog_b=True,
                                 selection=sel, **(models[fg.name]))
-    b_hp = beam_hpix(cls_gg[fg.name], nside)
+    b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
     dcov *= (b_hp**2)[:, None] * (b_hp**2)[None, :]
     dcov_gggg[fg.name] = Covariance(fg.name, fg.name, fg.name, fg.name, dcov)
 
