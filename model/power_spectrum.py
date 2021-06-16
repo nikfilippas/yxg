@@ -3,6 +3,8 @@ from scipy.integrate import simps
 from scipy.interpolate import interp2d
 import pyccl as ccl
 from pyccl import CCLError
+import warnings
+from scipy.interpolate import interpn
 
 
 class HalomodCorrection(object):
@@ -27,17 +29,17 @@ class HalomodCorrection(object):
         a_arr = 1/(1+zarr)
 
         hmd = ccl.halos.MassDef(500, "critical")
-        cM = ccl.halos.halos_extra.ConcentrationDuffy08M500c(hmd)
-        NFW = ccl.halos.profiles.HaloProfileNFW(cM)
+        cM = ccl.halos.ConcentrationDuffy08(mass_def=hmd)
+        NFW = ccl.halos.profiles.HaloProfileNFW(c_m_relation=cM)
 
-        kwargs = {"mass_function": ccl.halos.mass_function_from_name("tinker08"),
-                  "halo_bias": ccl.halos.halo_bias_from_name("tinker10")}
+        kwargs = {"mass_function": ccl.halos.mass_function_from_name("Tinker08"),
+                  "halo_bias": ccl.halos.halo_bias_from_name("Tinker10")}
         nM = kwargs["mass_function"](cosmo, mass_def=hmd)
         bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
-        hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
+        hmc = ccl.halos.HMCalculator(mass_function=nM, halo_bias=bM, mass_def=hmd)
 
         pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc, karr, a_arr, NFW,
-                                                 normprof1=True, normprof2=True)
+                                                 normprof=True, normprof2=True)
 
         pk_hf = np.array([ccl.nonlin_matter_power(cosmo, karr, a)
                           for a in a_arr])
@@ -92,8 +94,10 @@ def hm_bias(cosmo, a, profile,
 
     # Out-of-loop optimisations
     Dm = profile.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
-    mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
-    bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+        bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
     # shape transformations
     mfunc, bh = mfunc.T[..., None], bh.T[..., None]
     if selection is not None:
@@ -172,18 +176,25 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     Pl = np.array([ccl.linear_matter_power(cosmo, k[i], a)
                    for i, a in enumerate(a)])
     Dm = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
-    mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+
     if selection is not None:
         select = np.array([selection(M,1./aa-1) for aa in a])
         mfunc *= select
 
+    # tinker10 halo bias
     csm = ccl.Cosmology(Omega_c=cosmo["Omega_c"],
                         Omega_b=cosmo["Omega_b"],
                         h=cosmo["h"],
                         sigma8=cosmo["sigma8"],
                         n_s=cosmo["n_s"],
                         mass_function="tinker10")
-    bh = np.array([ccl.halo_bias(csm, M, A1, A2) for A1, A2 in zip(a, Dm)])
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        bh = np.array([ccl.halo_bias(csm, M, A1, A2) for A1, A2 in zip(a, Dm)])
 
     # shape transformations
     mfunc, bh = mfunc.T[..., None], bh.T[..., None]
@@ -231,7 +242,7 @@ def hm_power_spectrum(cosmo, k, a, profiles,
 
 def hm_ang_power_spectrum(cosmo, l, profiles,
                           zrange=(1e-6, 6), zpoints=32, zlog=True,
-                          logMrange=(6, 17), mpoints=128,
+                          logMrange=(8, 16), mpoints=128,
                           include_1h=True, include_2h=True,
                           hm_correction=None, selection=None,
                           **kwargs):
@@ -273,6 +284,7 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
     """
     # Integration boundaries
     zmin, zmax = zrange
+
     # Distance measures & out-of-loop optimisations
     if zlog:
         z = np.geomspace(zmin, zmax, zpoints)
@@ -284,7 +296,7 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
         x = z
     a = 1/(1+z)
     chi = ccl.comoving_radial_distance(cosmo, a)
-
+    k = (l+1/2) / chi[..., None]
     H_inv = 2997.92458 * jac/(ccl.h_over_h0(cosmo, a)*cosmo["h"])  # c*z/H(z)
 
     # Window functions
@@ -293,11 +305,11 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
     Wv = Wu if (p1.name == p2.name) else p2.kernel(cosmo, a, **kwargs)
     N = H_inv*Wu*Wv/chi**2  # overall normalisation factor
 
-    k = (l+1/2)/chi[..., None]
     Puv = hm_power_spectrum(cosmo, k, a, profiles, logMrange, mpoints,
                             include_1h, include_2h, squeeze=False,
                             hm_correction=hm_correction, selection=selection,
                             **kwargs)
+
     if Puv is None:
         return None
     integrand = N[..., None] * Puv
