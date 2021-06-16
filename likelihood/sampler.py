@@ -85,7 +85,9 @@ class Sampler(object):
         self.probs = None
 
         def chi2(p):
-            return -2 * self.lnprob(p)
+            c2 = -2 * self.lnprob(p)
+            print(c2)
+            return c2
 
         self.chi2 = chi2
 
