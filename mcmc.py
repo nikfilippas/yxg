@@ -31,6 +31,15 @@ if o.jk_region < 0:
 else:
     jk_region = o.jk_region
 
+def extract_map_p0(p, v, parnames):
+    """Extract the proposal p0 from a specific map."""
+    for m in p.get("maps"):
+        if m["name"] == v["name"]:
+            break
+
+    p0 = [m["model"][k] for k in parnames]
+    return p0
+
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
 
@@ -71,6 +80,11 @@ for v in p.get('data_vectors'):
     lik = Likelihood(p.get('params'), d.data_vector, d.covar, th,
                      template=d.templates, debug=p.get('mcmc')['debug'])
 
+    p0 = extract_map_p0(p, v, lik.p_free_names)  # p0 for particular map
+    # Benchmarks
+    print(dict(zip(lik.p_free_names, p0)))
+    print("chisq:", lik.chi2(p0))
+    exit(1)
     # Set up sampler
     sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
