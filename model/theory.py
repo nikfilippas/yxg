@@ -22,6 +22,11 @@ def get_theory(p, dm, cosmo, return_separated=False,
             a subset of the M-z plane.
         **kwargs: model parameters
     """
+    # q = np.array([1.75099144e-03, 6.52856132e-04, 3.23515507e-04, 1.92588001e-04,
+    #               1.27727957e-04, 9.11227607e-05, 6.70197694e-05, 4.97078576e-05,
+    #               3.72736687e-05, 2.84091847e-05, 2.20225491e-05, 1.74933640e-05,
+    #               1.43154558e-05, 1.19448115e-05, 1.01280765e-05])
+
     nz_default = p.get('mcmc')['nz_points_g']
     use_zlog = p.get('mcmc')['z_log_sampling']
 
@@ -60,6 +65,7 @@ def get_theory(p, dm, cosmo, return_separated=False,
                                    include_2h=include_2h,
                                    selection=selection,
                                    **kwargs)
+        # cl = q
         if cl is None:
             return None
 
